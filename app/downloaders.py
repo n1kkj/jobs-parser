@@ -37,6 +37,6 @@ class YandexLinksDownloader:
             csvwriter = csv.writer(file)
 
             csvwriter.writerow(["url", "name"])
-            print(links)
+
             for link in links:
                 csvwriter.writerow([link[0], link[1]])
