@@ -1,4 +1,4 @@
-class BaseUrlCrouler:
+class BaseUrlCrowler:
     main_ulr = None
     data_get_function = None
     links_params = {}
