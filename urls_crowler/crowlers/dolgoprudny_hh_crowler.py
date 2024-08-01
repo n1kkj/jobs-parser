@@ -3,9 +3,9 @@ from urls_crowler.get_data_class import GetSiteData
 from bs4 import BeautifulSoup
 
 
-class AvitoCrowler(BaseUrlCrowler):
-    main_ulr = 'https://career.avito.com/vacancies/'
-    vacancies_prefix = 'https://career.avito.com'
+class DolgoprudnyHhCrowler(BaseUrlCrowler):
+    main_ulr = 'https://dolgoprudny.hh.ru/search/vacancy/'
+    vacancies_prefix = ''
     data_get_function = GetSiteData.get_html_data
     links_params = {'cities': str, 'professions': list}
 
@@ -14,6 +14,6 @@ class AvitoCrowler(BaseUrlCrowler):
         data = super().get_data()
         soup = BeautifulSoup(data, 'html.parser')
         vacancies_urls = [
-            f'{cls.vacancies_prefix}{x["href"]}' for x in soup.find_all('a', class_='vacancies-section__item-link')
+            f'{cls.vacancies_prefix}{x["href"]}' for x in soup.find_all('a', class_='bloko-link')
         ]
         return vacancies_urls

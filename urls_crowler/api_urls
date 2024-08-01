@@ -1,8 +1,11 @@
-https://rabota.sber.ru/public/app-candidate-public-api-gateway/api/v1/publications
-https://yandex.ru/jobs/vacancies?cities=moscow&professions=analyst-developer&professions=analyst&professions=system-analyst&professions=marketing-analyst
-https://career.avito.com/vacancies/?utm_source=avitotech&utm_medium=vacancies_up
-https://developers.sber.ru/kak-v-sbere/_next/data/RNi89_cvyScPvn8f6m0MM/vacancies.json?slug=vacancies
-https://job-api.ozon.ru/vacancy?query=&level=%D0%A1%D1%82%D0%B0%D0%B6%D0%B5%D1%80&limit=10&page=2&userLocation=%D0%9C%D0%BE%D1%81%D0%BA%D0%B2%D0%B0
-https://dolgoprudny.hh.ru/shards/vacancies_of_the_day
++ https://rabota.sber.ru/public/app-candidate-public-api-gateway/api/v1/publications
++ https://yandex.ru/jobs/vacancies?cities=moscow&professions=analyst-developer&professions=analyst&professions=system-analyst&professions=marketing-analyst
++ https://career.avito.com/vacancies/?utm_source=avitotech&utm_medium=vacancies_up
++ https://developers.sber.ru/kak-v-sbere/_next/data/RNi89_cvyScPvn8f6m0MM/vacancies.json?slug=vacancies
++ https://job-api.ozon.ru/vacancy?query=&level=%D0%A1%D1%82%D0%B0%D0%B6%D0%B5%D1%80&limit=10&page=2&userLocation=%D0%9C%D0%BE%D1%81%D0%BA%D0%B2%D0%B0
+- https://dolgoprudny.hh.ru/search/vacancy
 https://careerspace.app/
-https://changellenge.com/
+https://changellenge.com/vacancy/
+https://it.fut.ru/internship
++/- https://techcrew.start.x5.ru/#track
++ https://job.mts.ru/vacancies
