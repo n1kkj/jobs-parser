@@ -8,6 +8,7 @@ from crowlers import (
     OzonCrowler,
     MtsCrowler,
     DolgoprudnyHhCrowler,
+    CareerspaceCrowler,
 )
 
 
@@ -33,6 +34,9 @@ def run_crowlers():
 
     print('\n7) Dolgoprudny hh links:')
     print(*DolgoprudnyHhCrowler.parse_links(), sep='\n')
+
+    print('\n8) Careerspace links:')
+    print(*CareerspaceCrowler.parse_links(), sep='\n')
 
 
 if __name__ == '__main__':
