@@ -15,7 +15,7 @@ class GetSiteData:
             response = requests.get(url)
             response.raise_for_status()
 
-            if response.headers['Content-Type'] in ('application/json; charset=utf-8', 'application/json'):
+            if 'application/json' in response.headers['Content-Type']:
                 return response.json()
             else:
                 raise Exception(f"Ответ не является JSON: {response.headers['Content-Type']}")
@@ -29,7 +29,7 @@ class GetSiteData:
             response = requests.get(url)
             response.raise_for_status()
 
-            if response.headers['Content-Type'] in ('text/html; charset=utf-8', 'text/html', 'text/html; charset=UTF-8'):
+            if 'text/html' in response.headers['Content-Type']:
                 return response.text
             else:
                 raise Exception(f"Ответ не является HTML: {response.headers['Content-Type']}")

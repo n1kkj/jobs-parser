@@ -17,5 +17,4 @@ class BaseUrlCrowler:
         Custom for every crouler
         :return: List of links to vacancies
         """
-
-        return list()
+        pass

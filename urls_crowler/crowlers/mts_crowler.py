@@ -15,6 +15,6 @@ class MtsCrowler(BaseUrlCrowler):
         data = super().get_data()
         soup = BeautifulSoup(data, 'html.parser')
         vacancies_urls = [
-            f'{self.vacancies_prefix}{x["href"]}' for x in soup.find_all('a', class_='job-list-card card-list__card')
+            f'{cls.vacancies_prefix}{x["href"]}' for x in soup.find_all('a', class_='job-list-card card-list__card')
         ]
         return vacancies_urls
