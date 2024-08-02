@@ -6,4 +6,4 @@ class SberDevCrowler(BaseJSONUrlCrowler):
     vacancies_prefix = 'https://developers.sber.ru/kak-v-sbere/vacancies/'
     json_vacancies_path = 'pageProps/page/MainContent/0/vacancies'
     url_key = 'slug'
-    # links_params = {'skip': int, 'take': int}
+    links_params = {}
