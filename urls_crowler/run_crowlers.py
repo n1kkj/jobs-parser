@@ -1,4 +1,5 @@
 import click
+from datetime import datetime
 
 from crowlers import (
     SberCrowler,
@@ -10,37 +11,38 @@ from crowlers import (
     DolgoprudnyHhCrowler,
     CareerspaceCrowler,
     ChangellengeCrowler,
+    ITFutCrowler,
 )
+
+CROWLERS = [
+    SberCrowler,
+    YandexCrowler,
+    AvitoCrowler,
+    SberDevCrowler,
+    OzonCrowler,
+    MtsCrowler,
+    DolgoprudnyHhCrowler,
+    CareerspaceCrowler,
+    ChangellengeCrowler,
+    ITFutCrowler,
+]
 
 
 @click.command()
 def run_crowlers():
-    print('\n1) Sber links:')
-    print(*SberCrowler.parse_links(), sep='\n')
+    start_time = datetime.now()
 
-    print('\n2) Yandex links:')
-    print(*YandexCrowler.parse_links(), sep='\n')
+    all_links = []
 
-    print('\n3) Avito links:')
-    print(*AvitoCrowler.parse_links(), sep='\n')
+    for crowler in CROWLERS:
+        links = crowler.parse_links()
+        all_links.extend(links)
+        print(*links, sep='\n')
 
-    print('\n4) SberDev links:')
-    print(*SberDevCrowler.parse_links(), sep='\n')
+    end_time = datetime.now() - start_time
 
-    print('\n5) Ozon links:')
-    print(*OzonCrowler.parse_links(), sep='\n')
-
-    print('\n6) MTS links:')
-    print(*MtsCrowler.parse_links(), sep='\n')
-
-    print('\n7) Dolgoprudny hh links:')
-    print(*DolgoprudnyHhCrowler.parse_links(), sep='\n')
-
-    print('\n8) Careerspace links:')
-    print(*CareerspaceCrowler.parse_links(), sep='\n')
-
-    print('\n9) Changellenge links:')
-    print(*ChangellengeCrowler.parse_links(), sep='\n')
+    print(len(all_links))
+    print(end_time)
 
 
 if __name__ == '__main__':
