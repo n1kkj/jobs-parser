@@ -1,5 +1,6 @@
 import time
 
+import dpath.util
 import requests
 from selenium import webdriver
 from selenium.webdriver import ChromeOptions
@@ -20,8 +21,9 @@ class GetSiteData:
             else:
                 raise Exception(f"Ответ не является JSON: {response.headers['Content-Type']}")
 
-        except requests.exceptions.RequestException as e:
-            raise Exception(f"Ошибка при запросе: {e}")
+        except Exception as e:
+            print(f"Ошибка при запросе: {e}")
+            return {}
 
     @staticmethod
     def get_html_data(url, *args, **kwargs):
@@ -34,49 +36,48 @@ class GetSiteData:
             else:
                 raise Exception(f"Ответ не является HTML: {response.headers['Content-Type']}")
 
-        except requests.exceptions.RequestException as e:
-            raise Exception(f"Ошибка при запросе: {e}")
+        except Exception as e:
+            print(f"Ошибка при запросе: {e}")
+            return ''
 
     @staticmethod
     def get_html_data_by_clicking(url, *args, **kwargs):
-        try:
-            options = ChromeOptions()
-            options.add_experimental_option(
-                "prefs",
-                {
-                    "profile.managed_default_content_settings.images": 2,
-                },
-            )
+        finished = False
+        while not finished:
+            try:
+                options = ChromeOptions()
+                options.add_experimental_option(
+                    "prefs",
+                    {
+                        "profile.managed_default_content_settings.images": 2,
+                    },
+                )
 
-            driver = webdriver.Chrome(options=options)
-            driver.get(url)
+                driver = webdriver.Chrome(options=options)
+                driver.get(url)
 
-            button_xpath = kwargs['button_xpath']
-
-            WebDriverWait(driver, 2).until(EC.element_to_be_clickable(
-                (By.XPATH, button_xpath)))
-            button = driver.find_element(By.XPATH, button_xpath)
-
-            while button.is_displayed():
-                driver.execute_script("arguments[0].click();", button)
-
-                try:
-                    button = driver.find_element(By.XPATH, button_xpath)
-                except Exception:
-                    break
+                button_xpath = kwargs['button_xpath']
 
                 WebDriverWait(driver, 2).until(EC.element_to_be_clickable(
                     (By.XPATH, button_xpath)))
+                button = driver.find_element(By.XPATH, button_xpath)
 
-            time.sleep(1)
-            html_content = driver.page_source
+                while button.is_displayed():
+                    try:
+                        driver.execute_script("arguments[0].click();", button)
+                        button = driver.find_element(By.XPATH, button_xpath)
+                        WebDriverWait(driver, 2).until(EC.element_to_be_clickable((By.XPATH, button_xpath)))
+                    except Exception:
+                        break
 
-            driver.quit()
+                time.sleep(1)
+                html_content = driver.page_source
 
-            return html_content
-
-        except Exception as e:
-            raise Exception(f"Ошибка при запросе: {e}")
+                driver.quit()
+                finished = True
+                return html_content
+            except Exception as e:
+                continue
 
     @staticmethod
     def get_html_data_by_scrolling(url, *args, **kwargs):
@@ -96,12 +97,12 @@ class GetSiteData:
 
             while True:
                 driver.execute_script("window.scrollTo(0, document.body.scrollHeight)")
-                time.sleep(0.5)
+                time.sleep(1.5)
                 WebDriverWait(driver, timeout=20).until(
                     EC.presence_of_element_located((By.TAG_NAME, 'body'))
                 )
                 new_height = driver.execute_script("return document.body.scrollHeight")
-
+                time.sleep(1.5)
                 if new_height == last_height:
                     break
 
@@ -115,34 +116,51 @@ class GetSiteData:
             return html_content
 
         except Exception as e:
-            raise Exception(f"Ошибка при запросе: {e}")
+            print(f"Ошибка при запросе: {e}")
+            return ''
 
     @staticmethod
-    def ozon_get_json_data(url, *args, **kwargs):
+    def get_json_data_by_pages(url, *args, **kwargs):
         vacancies = []
         data = {}
 
+        total_pages_path = kwargs['total_pages_path']
+        vacancies_path = kwargs['vacancies_path']
+        vacancy_path = kwargs['vacancy_path']
+
         response = requests.get(url)
-        total_pages = response.json()['meta']['totalPages']
+        total_pages = dpath.util.get(response.json(), total_pages_path)
 
         for page in range(total_pages-1):
-            response = requests.get(f'{url}&page={page+1}')
-            vacancies.extend(response.json()['items'])
+            response = requests.get(f'{url}&page={page}')
+
+            _next_vacancies = response.json()[vacancies_path]
+            next_vacancies = []
+            for item in _next_vacancies:
+                if vacancy_path in item:
+                    next_vacancies.append(item)
+
+            vacancies.extend(next_vacancies)
 
         data['vacancies'] = vacancies
         return data
 
     @staticmethod
     def sber_get_json_data(url, *args, **kwargs):
-        vacancies = []
-        data = {}
+        try:
+            vacancies = []
+            data = {}
 
-        response = requests.get(url)
-        total_pages = response.json()['data']['total']
+            response = requests.get(url)
+            response.raise_for_status()
+            total_pages = response.json()['data']['total']
 
-        for skip in range(0, total_pages, 100):
-            response = requests.get(f'{url}&skip={skip}')
-            vacancies.extend(response.json()['data']['vacancies'])
+            for skip in range(0, total_pages, 100):
+                response = requests.get(f'{url}&skip={skip}')
+                vacancies.extend(response.json()['data']['vacancies'])
 
-        data['vacancies'] = vacancies
-        return data
+            data['vacancies'] = vacancies
+            return data
+        except Exception as e:
+            print(f"Ошибка при запросе: {e}")
+            return ''

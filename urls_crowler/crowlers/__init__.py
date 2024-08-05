@@ -4,7 +4,7 @@ from .avito_crowler import AvitoCrowler
 from .sberdev_crowler import SberDevCrowler
 from .ozon_crowler import OzonCrowler
 from .mts_crowler import MtsCrowler
-from .dolgoprudny_hh_crowler import DolgoprudnyHhCrowler
+from .hh_crowler import HhCrowler
 from .careerspace_crowler import CareerspaceCrowler
 from .changellenge_crowler import ChangellengeCrowler
 from .itfut_crowler import ITFutCrowler

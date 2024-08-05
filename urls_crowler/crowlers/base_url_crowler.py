@@ -31,6 +31,10 @@ class BaseUrlCrowler:
         """
         pass
 
+    @classmethod
+    def __str__(cls):
+        return cls.__name__[:cls.__name__.find('Crowler')]
+
 
 class BaseHTMLUrlCrowler(BaseUrlCrowler):
     data_get_function = GetSiteData.get_html_data

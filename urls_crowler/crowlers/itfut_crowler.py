@@ -12,8 +12,12 @@ class ITFutCrowler(BaseJSONUrlCrowler):
     @classmethod
     def parse_links(cls) -> list:
         data = super().get_data()
-        data = [publication for y in dpath.util.get(data, cls.json_vacancies_path) for publication in y]
-        vacancies_urls = [
-                f"{cls.vacancies_prefix}{x['company']['alias']}/{x[cls.url_key]}" for x in data
-        ]
+        vacancies_urls = []
+        try:
+            data = [publication for y in dpath.util.get(data, cls.json_vacancies_path) for publication in y]
+            vacancies_urls = [
+                    f"{cls.vacancies_prefix}{x['company']['alias']}/{x[cls.url_key]}" for x in data
+            ]
+        except Exception:
+            return vacancies_urls
         return vacancies_urls
