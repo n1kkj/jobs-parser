@@ -132,4 +132,3 @@ def run_test_crowlers_threading():
 
 if __name__ == '__main__':
     run_test_crowlers_threading()
-    run_test_crowlers_multiprocessing()
