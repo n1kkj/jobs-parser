@@ -2,7 +2,7 @@ import abc
 import enum
 import time
 
-from dto import PageData
+from .dto import PageData
 from selenium.webdriver import Chrome, ChromeOptions
 from selenium.webdriver.common.by import By
 

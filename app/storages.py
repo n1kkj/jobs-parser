@@ -2,7 +2,7 @@ import csv
 import logging
 
 import pandas
-from dto import PageData
+from .dto import PageData
 
 
 def extract_dataframe(page_data: PageData) -> pandas.DataFrame:

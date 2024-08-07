@@ -1,6 +1,9 @@
-import click
+import multiprocessing
+import threading
 from datetime import datetime, timedelta
 
+from app.parsers import ParserFactory, SeleniumParserEngine, NoSuchParserError
+from app.storages import PandasXLSXStorage
 from crowlers import (
     SberCrowler,
     YandexCrowler,
@@ -28,8 +31,40 @@ CROWLERS = [
 ]
 
 
-@click.command()
-def run_crowlers():
+def run_crowlers_with_pd():
+    pandas_xlsx_storage = PandasXLSXStorage(
+        "result.xlsx", "unsuccessful_result.xlsx"
+    )
+    parser_factory = ParserFactory()
+    selenium_parser_engine = SeleniumParserEngine()
+
+    all_links = []
+    for crowler in CROWLERS:
+        all_links.append(crowler.parse_links()[0])
+        print(f'Finished {crowler.__str__()}')
+
+    for url in all_links:
+        try:
+            parser = parser_factory.get_parser(
+                url, parser_engine=selenium_parser_engine
+            )
+
+            page_data = parser.parse(url)
+
+            pandas_xlsx_storage.store_one(page_data)
+
+        except NoSuchParserError:
+            pandas_xlsx_storage.store_unsuccessful(url)
+            print(f"No parser provided for this url: {url}")
+
+        except Exception as err:
+            pandas_xlsx_storage.store_unsuccessful(url)
+            print(f"Didn't work for next url: {url}, reason: {err}")
+
+    pandas_xlsx_storage.commit()
+
+
+def run_test_crowlers():
 
     test_total_times = []
     test_crowlers_time = dict([(i.__str__(), []) for i in CROWLERS])
@@ -75,5 +110,26 @@ def run_crowlers():
         print(f'{key}: {value}')
 
 
+def run_test_crowlers_threading():
+    threads = []
+    start_time = datetime.now()
+    all_links = []
+    print('Start threading')
+
+    for crowler in CROWLERS:
+        thread = threading.Thread(target=lambda: all_links.extend(crowler.parse_links()))
+        threads.append(thread)
+        thread.start()
+
+    for thread in threads:
+        thread.join()
+
+    end_time = datetime.now() - start_time
+
+    print(f'Total links: {len(all_links)}')
+    print(f'Total time: {end_time}')
+
+
 if __name__ == '__main__':
-    run_crowlers()
+    run_test_crowlers_threading()
+    run_test_crowlers_multiprocessing()
