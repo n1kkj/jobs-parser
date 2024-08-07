@@ -10,7 +10,7 @@ class ITFutCrowler(BaseJSONUrlCrowler):
     links_params = {}
 
     @classmethod
-    def parse_links(cls) -> list:
+    def get_links(cls) -> list:
         data = super().get_data()
         vacancies_urls = []
         try:

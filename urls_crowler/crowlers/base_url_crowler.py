@@ -14,6 +14,8 @@ class BaseUrlCrowler:
     links_params = {}
     extra_kwargs = {}
 
+    link_parser = None
+
     @classmethod
     def get_data(cls, *args, **kwargs) -> dict | str:
         """
@@ -24,12 +26,18 @@ class BaseUrlCrowler:
         return cls.data_get_function(cls.main_ulr, *args, **kwargs)
 
     @classmethod
-    def parse_links(cls, *args, **kwargs) -> list:
+    def get_links(cls, *args, **kwargs) -> list:
         """
-        Custom for every crouler
+        Custom for every crowler
         :return: List of links to vacancies
         """
         pass
+
+    @classmethod
+    def run_parse_all_links(cls):
+        links = cls.get_links()
+        links_data = cls.link_parser.parse_all_links(links)
+        return links_data
 
     @classmethod
     def __str__(cls):
@@ -41,7 +49,7 @@ class BaseHTMLUrlCrowler(BaseUrlCrowler):
     html_link_class = None
 
     @classmethod
-    def parse_links(cls, *args, **kwargs) -> list:
+    def get_links(cls, *args, **kwargs) -> list:
         data = super().get_data(*args, **kwargs)
         soup = BeautifulSoup(data, 'html.parser')
         vacancies_urls = [
@@ -56,7 +64,7 @@ class BaseJSONUrlCrowler(BaseUrlCrowler):
     url_key = None
 
     @classmethod
-    def parse_links(cls, *args, **kwargs) -> list:
+    def get_links(cls, *args, **kwargs) -> list:
         data = super().get_data(*args, **kwargs)
         vacancies_urls = [
             f'{cls.vacancies_prefix}{x[cls.url_key]}' for x in dpath.util.get(data, cls.json_vacancies_path)

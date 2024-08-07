@@ -1,4 +1,3 @@
-import multiprocessing
 import threading
 from datetime import datetime, timedelta
 
@@ -18,16 +17,16 @@ from crowlers import (
 )
 
 CROWLERS = [
-    AvitoCrowler,
-    SberDevCrowler,
-    CareerspaceCrowler,
-    ChangellengeCrowler,
-    ITFutCrowler,
-    SberCrowler,
-    YandexCrowler,
+    # AvitoCrowler,
+    # SberDevCrowler,
+    # CareerspaceCrowler,
+    # ChangellengeCrowler,
+    # ITFutCrowler,
+    # SberCrowler,
+    # YandexCrowler,
     OzonCrowler,
-    MtsCrowler,
-    HhCrowler,
+    # MtsCrowler,
+    # HhCrowler,
 ]
 
 
@@ -40,7 +39,7 @@ def run_crowlers_with_pd():
 
     all_links = []
     for crowler in CROWLERS:
-        all_links.append(crowler.parse_links()[0])
+        all_links.append(crowler.get_links()[0])
         print(f'Finished {crowler.__str__()}')
 
     for url in all_links:
@@ -64,7 +63,7 @@ def run_crowlers_with_pd():
     pandas_xlsx_storage.commit()
 
 
-def run_test_crowlers():
+def run_test_crowlers_individual():
 
     test_total_times = []
     test_crowlers_time = dict([(i.__str__(), []) for i in CROWLERS])
@@ -78,7 +77,7 @@ def run_test_crowlers():
 
         for crowler in CROWLERS:
             crowler_time = datetime.now()
-            links = crowler.parse_links()
+            links = crowler.get_links()
 
             crowler_end_time = (datetime.now() - crowler_time)
 
@@ -117,7 +116,7 @@ def run_test_crowlers_threading():
     print('Start threading')
 
     for crowler in CROWLERS:
-        thread = threading.Thread(target=lambda: all_links.extend(crowler.parse_links()))
+        thread = threading.Thread(target=lambda: all_links.extend(crowler.run_parse_all_links()))
         threads.append(thread)
         thread.start()
 
@@ -126,7 +125,7 @@ def run_test_crowlers_threading():
 
     end_time = datetime.now() - start_time
 
-    print(f'Total links: {len(all_links)}')
+    print(all_links)
     print(f'Total time: {end_time}')
 
 
