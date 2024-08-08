@@ -1,8 +1,7 @@
 from urls_crowler.crowlers.base_url_crowler import BaseJSONUrlCrowler
-import dpath.util
 
 from urls_crowler.get_data_class import GetSiteData
-from urls_crowler.parsers.itfut_parser import ItFutParser
+from urls_crowler.parsers import ItFutParser
 
 
 class ITFutCrowler(BaseJSONUrlCrowler):
