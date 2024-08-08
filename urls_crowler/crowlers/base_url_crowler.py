@@ -62,6 +62,12 @@ class BaseHTMLUrlCrowler(BaseUrlCrowler):
     html_link_class = None
 
     @classmethod
+    def run_parse_all_links(cls, *args, **kwargs):
+        links = cls.get_links()
+        links_data = cls.link_parser.parse_all_links(links)
+        return links_data
+
+    @classmethod
     def get_links(cls, *args, **kwargs) -> list:
         data = super().get_data(*args, **kwargs)
         soup = BeautifulSoup(data, 'html.parser')

@@ -17,7 +17,7 @@ from crowlers import (
 )
 
 CROWLERS = [
-    # AvitoCrowler,
+    AvitoCrowler,
     # SberDevCrowler,
     # CareerspaceCrowler,
     # ChangellengeCrowler,

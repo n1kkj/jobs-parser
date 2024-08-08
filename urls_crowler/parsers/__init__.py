@@ -1,5 +1,6 @@
-from .base_url_parser import BaseJSONUrlParser
+from .base_url_parser import BaseJSONUrlParser, BaseHTMLUrlParser
 from .ozon_parser import OzonParser
 from .sber_parser import SberParser
 from .itfut_parser import ItFutParser
 from .hh_parser import HhParser
+from .avito_parser import AvitoParser

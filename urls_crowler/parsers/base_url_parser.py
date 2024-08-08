@@ -48,14 +48,14 @@ class BaseUrlParser:
         }
 
     @classmethod
-    def parse_all_links(cls, links) -> List[ParseResultDTO]:
+    def parse_all_links(cls, links) -> List[dict]:
         results = []
         for link in links:
             results.append(cls.parse_link(link))
         return results
 
     @classmethod
-    def parse_all_links_from_one(cls, data) -> List[ParseResultDTO]:
+    def parse_all_links_from_one(cls, data) -> List[dict]:
         """
         Custom for every parser
         :return: Dict of data
@@ -63,7 +63,7 @@ class BaseUrlParser:
         pass
 
     @classmethod
-    def parse_link(cls, *args, **kwargs) -> ParseResultDTO:
+    def parse_link(cls, *args, **kwargs) -> dict:
         """
         Custom for every parser
         :return: Dict of data
@@ -88,7 +88,7 @@ class BaseJSONUrlParser(BaseUrlParser):
     data_get_function = GetSiteData.get_json_data
 
     @classmethod
-    def parse_link(cls, link, *args, **kwargs) -> ParseResultDTO:
+    def parse_link(cls, link, *args, **kwargs) -> dict:
         data = super().get_data(link)
         keys = super().get_keys()
         empty_dict = super().get_empty_dict()
@@ -108,12 +108,12 @@ class BaseJSONUrlParser(BaseUrlParser):
 
         except Exception as e:
             print(f'Error dealing with link {link}, {e}')
-            return ParseResultDTO(**empty_dict)
+            return ParseResultDTO(**empty_dict).dict()
 
-        return ParseResultDTO(**result_values)
+        return ParseResultDTO(**result_values).dict()
 
     @classmethod
-    def parse_all_links_from_one(cls, data, *args, **kwargs) -> List[ParseResultDTO]:
+    def parse_all_links_from_one(cls, data, *args, **kwargs) -> List[dict]:
         keys = super().get_keys()
         empty_dict = super().get_empty_dict()
         result_all_links = []
@@ -132,9 +132,68 @@ class BaseJSONUrlParser(BaseUrlParser):
                             res_value = BeautifulSoup(res_value, 'html.parser').text
 
                     result_values[key] = res_value
-                result_all_links.append(ParseResultDTO(**result_values))
+                result_all_links.append(ParseResultDTO(**result_values).dict())
 
             except Exception as e:
                 print(f'Error dealing with vacancy, {e}')
-                result_all_links.append(ParseResultDTO(**empty_dict))
+                result_all_links.append(ParseResultDTO(**empty_dict).dict())
+        return result_all_links
+
+
+class BaseHTMLUrlParser(BaseUrlParser):
+    data_get_function = GetSiteData.get_html_data
+
+    @classmethod
+    def parse_link(cls, link, *args, **kwargs) -> dict:
+        data = super().get_data(link)
+        keys = super().get_keys()
+        empty_dict = super().get_empty_dict()
+        result_values = {}
+        soup = BeautifulSoup(data, 'html.parser')
+
+        try:
+            for key, value in keys.items():
+                res_value = ''
+
+                if value is not None:
+                    res_value = soup
+                    for v in value.split('/'):
+                        v = v.split('|')
+                        res_value = res_value.find(v[0], class_=v[1])
+
+                res_value = res_value.text if res_value else res_value
+
+                result_values[key] = str(res_value).replace('\xa0', ' ')
+
+        except Exception as e:
+            print(f'Error dealing with link {link}, {e}')
+            return ParseResultDTO(**empty_dict).dict()
+
+        return ParseResultDTO(**result_values).dict()
+
+    @classmethod
+    def parse_all_links_from_one(cls, data, *args, **kwargs) -> List[dict]:
+        keys = super().get_keys()
+        empty_dict = super().get_empty_dict()
+        result_all_links = []
+        vacancies_list = du.get(data, cls.vacancies_list_key)
+
+        for vacancy in vacancies_list:
+            try:
+                result_values = {}
+                for key, value in keys.items():
+                    res_value = ''
+
+                    if value is not None:
+                        res_value = str(du.get(vacancy, value))
+
+                        if cls.use_soup_desc and key == 'desc':
+                            res_value = BeautifulSoup(res_value, 'html.parser').text
+
+                    result_values[key] = res_value
+                result_all_links.append(ParseResultDTO(**result_values).dict())
+
+            except Exception as e:
+                print(f'Error dealing with vacancy, {e}')
+                result_all_links.append(ParseResultDTO(**empty_dict).dict())
         return result_all_links
