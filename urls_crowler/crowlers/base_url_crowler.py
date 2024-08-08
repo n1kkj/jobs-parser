@@ -18,6 +18,12 @@ class BaseUrlCrowler:
     link_parser = BaseUrlParser
 
     @classmethod
+    def run_crowl(cls, *args, **kwargs):
+        """
+        Custom for every crowler
+        """
+
+    @classmethod
     def get_data(cls, *args, **kwargs) -> dict | str:
         """
         Uses self.data_get_function function to parse self.main_ulr

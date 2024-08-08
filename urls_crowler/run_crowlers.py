@@ -124,6 +124,7 @@ def run_test_crowlers_threading():
         thread.join()
 
     end_time = datetime.now() - start_time
+    print(all_links)
     print(len(all_links))
     print(f'Total time: {end_time}')
 

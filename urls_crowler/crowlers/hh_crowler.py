@@ -1,5 +1,6 @@
 from urls_crowler.crowlers.base_url_crowler import BaseJSONUrlCrowler
 from urls_crowler.get_data_class import GetSiteData
+from urls_crowler.parsers import HhParser
 
 
 class HhCrowler(BaseJSONUrlCrowler):
@@ -20,3 +21,9 @@ class HhCrowler(BaseJSONUrlCrowler):
         'vacancies_path': 'items',
         'vacancy_path': url_key
     }
+
+    link_parser = HhParser
+
+    @classmethod
+    def run_crowl(cls, *args, **kwargs):
+        return cls.run_parse_all_links_from_one()
