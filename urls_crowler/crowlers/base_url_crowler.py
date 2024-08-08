@@ -2,6 +2,7 @@ from bs4 import BeautifulSoup
 import dpath.util
 
 from urls_crowler.get_data_class import GetSiteData
+from urls_crowler.parsers.base_url_parser import BaseUrlParser
 
 
 class BaseUrlCrowler:
@@ -14,7 +15,7 @@ class BaseUrlCrowler:
     links_params = {}
     extra_kwargs = {}
 
-    link_parser = None
+    link_parser = BaseUrlParser
 
     @classmethod
     def get_data(cls, *args, **kwargs) -> dict | str:
@@ -40,6 +41,12 @@ class BaseUrlCrowler:
         return links_data
 
     @classmethod
+    def run_parse_all_links_from_one(cls):
+        data = cls.get_data()
+        links_data = cls.link_parser.parse_all_links_from_one(data)
+        return links_data
+
+    @classmethod
     def __str__(cls):
         return cls.__name__[:cls.__name__.find('Crowler')]
 
@@ -62,6 +69,18 @@ class BaseJSONUrlCrowler(BaseUrlCrowler):
     data_get_function = GetSiteData.get_json_data
     json_vacancies_path = None
     url_key = None
+
+    @classmethod
+    def run_parse_all_links(cls, *args, **kwargs):
+        links = cls.get_links()
+        links_data = cls.link_parser.parse_all_links(links)
+        return links_data
+
+    @classmethod
+    def run_parse_all_links_from_one(cls, *args, **kwargs):
+        data = super().get_data(*args, **kwargs)
+        links_data = cls.link_parser.parse_all_links_from_one(data)
+        return links_data
 
     @classmethod
     def get_links(cls, *args, **kwargs) -> list:

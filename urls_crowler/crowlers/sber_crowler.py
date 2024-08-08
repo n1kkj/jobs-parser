@@ -1,5 +1,6 @@
 from urls_crowler.crowlers.base_url_crowler import BaseJSONUrlCrowler
 from urls_crowler.get_data_class import GetSiteData
+from urls_crowler.parsers import SberParser
 
 
 class SberCrowler(BaseJSONUrlCrowler):
@@ -9,3 +10,9 @@ class SberCrowler(BaseJSONUrlCrowler):
     json_vacancies_path = 'vacancies'
     url_key = 'internalId'
     links_params = {'skip': int, 'take': int}
+
+    link_parser = SberParser
+
+    @classmethod
+    def run_crowl(cls):
+        return cls.run_parse_all_links_from_one()

@@ -18,3 +18,7 @@ class OzonCrowler(BaseJSONUrlCrowler):
     }
 
     link_parser = OzonParser
+
+    @classmethod
+    def run_crowl(cls):
+        return cls.run_parse_all_links()

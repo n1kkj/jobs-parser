@@ -164,3 +164,22 @@ class GetSiteData:
         except Exception as e:
             print(f"Ошибка при запросе: {e}")
             return ''
+
+    @staticmethod
+    def itfut_get_json_data(url, *args, **kwargs):
+        try:
+            response = requests.get(url)
+            response.raise_for_status()
+
+            if 'application/json' in response.headers['Content-Type']:
+                data = response.json()
+            else:
+                print(f"Ответ не является JSON: {response.headers['Content-Type']}")
+                data = {}
+
+        except Exception as e:
+            print(f"Ошибка при запросе: {e}")
+            data = {}
+        vacancies = [publication for y in dpath.util.get(data, kwargs['json_vacancies_path']) for publication in y]
+        print(vacancies)
+        return {'vacancies': vacancies}

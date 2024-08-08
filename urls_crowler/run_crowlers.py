@@ -24,7 +24,7 @@ CROWLERS = [
     # ITFutCrowler,
     # SberCrowler,
     # YandexCrowler,
-    OzonCrowler,
+    # OzonCrowler,
     # MtsCrowler,
     # HhCrowler,
 ]
@@ -116,7 +116,7 @@ def run_test_crowlers_threading():
     print('Start threading')
 
     for crowler in CROWLERS:
-        thread = threading.Thread(target=lambda: all_links.extend(crowler.run_parse_all_links()))
+        thread = threading.Thread(target=lambda: all_links.extend(crowler.run_crowl()))
         threads.append(thread)
         thread.start()
 
@@ -124,8 +124,7 @@ def run_test_crowlers_threading():
         thread.join()
 
     end_time = datetime.now() - start_time
-
-    print(all_links)
+    print(len(all_links))
     print(f'Total time: {end_time}')
 
 

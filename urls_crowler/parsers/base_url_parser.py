@@ -16,6 +16,7 @@ class BaseUrlParser:
     salary_key = None
     city_key = None
     employer_key = None
+    vacancies_list_key = None
 
     use_soup_desc = False
 
@@ -52,6 +53,14 @@ class BaseUrlParser:
         for link in links:
             results.append(cls.parse_link(link))
         return results
+
+    @classmethod
+    def parse_all_links_from_one(cls, data) -> List[ParseResultDTO]:
+        """
+        Custom for every parser
+        :return: Dict of data
+        """
+        pass
 
     @classmethod
     def parse_link(cls, *args, **kwargs) -> ParseResultDTO:
@@ -102,3 +111,30 @@ class BaseJSONUrlParser(BaseUrlParser):
             return ParseResultDTO(**empty_dict)
 
         return ParseResultDTO(**result_values)
+
+    @classmethod
+    def parse_all_links_from_one(cls, data, *args, **kwargs) -> List[ParseResultDTO]:
+        keys = super().get_keys()
+        empty_dict = super().get_empty_dict()
+        result_all_links = []
+        vacancies_list = du.get(data, cls.vacancies_list_key)
+
+        for vacancy in vacancies_list:
+            try:
+                result_values = {}
+                for key, value in keys.items():
+                    res_value = ''
+
+                    if value is not None:
+                        res_value = str(du.get(vacancy, value))
+
+                        if cls.use_soup_desc and key == 'desc':
+                            res_value = BeautifulSoup(res_value, 'html.parser').text
+
+                    result_values[key] = res_value
+                result_all_links.append(ParseResultDTO(**result_values))
+
+            except Exception as e:
+                print(f'Error dealing with vacancy, {e}')
+                result_all_links.append(ParseResultDTO(**empty_dict))
+        return result_all_links
