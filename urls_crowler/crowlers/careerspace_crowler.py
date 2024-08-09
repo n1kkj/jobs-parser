@@ -1,4 +1,5 @@
 from urls_crowler.crowlers.base_url_crowler import BaseHTMLUrlCrowler
+from urls_crowler.parsers import CareerspaceParser
 
 
 class CareerspaceCrowler(BaseHTMLUrlCrowler):
@@ -6,3 +7,9 @@ class CareerspaceCrowler(BaseHTMLUrlCrowler):
     vacancies_prefix = 'https://careerspace.app'
     html_link_class = 'job-card__i'
     links_params = {'countryId': str, 'functions': str}
+
+    link_parser = CareerspaceParser
+
+    @classmethod
+    def run_crowl(cls, *args, **kwargs):
+        return cls.run_parse_all_links(*args, **kwargs)

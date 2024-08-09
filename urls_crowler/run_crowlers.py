@@ -19,14 +19,14 @@ from crowlers import (
 CROWLERS = [
     AvitoCrowler,
     # SberDevCrowler,
-    # CareerspaceCrowler,
+    CareerspaceCrowler,
     # ChangellengeCrowler,
-    # ITFutCrowler,
-    # SberCrowler,
+    ITFutCrowler,
+    SberCrowler,
     # YandexCrowler,
-    # OzonCrowler,
+    OzonCrowler,
     # MtsCrowler,
-    # HhCrowler,
+    HhCrowler,
 ]
 
 
@@ -124,9 +124,10 @@ def run_test_crowlers_threading():
         thread.join()
 
     end_time = datetime.now() - start_time
-    print(all_links)
-    print(len(all_links))
+    print(*all_links, sep='\n')
+    print(f'Links count: {len(all_links)}')
     print(f'Total time: {end_time}')
+    print(f'Parsers av speed: {len(all_links)/end_time.total_seconds():.3} v/sec')
 
 
 if __name__ == '__main__':
