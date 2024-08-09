@@ -18,7 +18,7 @@ from crowlers import (
 
 CROWLERS = [
     AvitoCrowler,
-    # SberDevCrowler,
+    SberDevCrowler,
     CareerspaceCrowler,
     # ChangellengeCrowler,
     ITFutCrowler,
