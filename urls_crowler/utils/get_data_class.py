@@ -1,5 +1,4 @@
 import time
-
 import dpath.util
 import requests
 from selenium import webdriver
@@ -9,7 +8,7 @@ from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
 
-class GetSiteData:
+class GetDataClass:
     @staticmethod
     def get_json_data(url, *args, **kwargs):
         try:

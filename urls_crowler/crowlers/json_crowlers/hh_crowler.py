@@ -1,5 +1,5 @@
 from urls_crowler.crowlers.base_url_crowler import BaseJSONUrlCrowler
-from urls_crowler.get_data_class import GetSiteData
+from urls_crowler.utils.get_data_class import GetDataClass
 from urls_crowler.parsers import HhParser
 
 
@@ -11,7 +11,7 @@ class HhCrowler(BaseJSONUrlCrowler):
                 '&professional_role=114&professional_role=116&professional_role=121&professional_role=124'
                 '&professional_role=126')
     vacancies_prefix = 'https://hh.ru/vacancy/'
-    data_get_function = GetSiteData.get_json_data_by_pages
+    data_get_function = GetDataClass.get_json_data_by_pages
     json_vacancies_path = 'vacancies'
     url_key = 'id'
     links_params = {'area': str, 'professional_role': list, 'page': int, 'per_page': int}

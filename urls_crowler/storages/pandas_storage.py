@@ -28,12 +28,12 @@ class PandasXLSXStorage:
         for page_data in pages_data:
             self.store_one(page_data)
 
-    def store_one(self, page_data: ParseResultDTO) -> None:
+    def store_one(self, page_data: ParseResultDTO):
         self.__file_data = pandas.concat(
             [self.__file_data, extract_dataframe(page_data)], ignore_index=True
         )
 
-    def commit(self) -> None:
+    def commit(self):
         self.__file_data.to_excel(
             self.__file_name,
         )

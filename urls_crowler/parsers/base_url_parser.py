@@ -3,7 +3,7 @@ import dpath.util as du
 from bs4 import BeautifulSoup
 
 from urls_crowler.dto import ParseResultDTO
-from urls_crowler.get_data_class import GetSiteData
+from urls_crowler.utils.get_data_class import GetDataClass
 
 
 class BaseUrlParser:
@@ -89,7 +89,7 @@ class BaseUrlParser:
 
 
 class BaseJSONUrlParser(BaseUrlParser):
-    data_get_function = GetSiteData.get_json_data
+    data_get_function = GetDataClass.get_json_data
 
     @classmethod
     def parse_link(cls, link, *args, **kwargs) -> ParseResultDTO:
@@ -114,7 +114,7 @@ class BaseJSONUrlParser(BaseUrlParser):
             print(f'Error dealing with link {link}, {e}')
             return ParseResultDTO(**empty_dict)
 
-        result_values['link'] = link
+        result_values['link'] = link + '\n'
         return ParseResultDTO(**result_values)
 
     @classmethod
@@ -137,7 +137,7 @@ class BaseJSONUrlParser(BaseUrlParser):
                             res_value = BeautifulSoup(res_value, 'html.parser').text
 
                     result_values[key] = res_value
-                result_values['link'] = f'{cls.vacancies_prefix}{du.get(vacancy, cls.url_key)}'
+                result_values['link'] = f'{cls.vacancies_prefix}{du.get(vacancy, cls.url_key)}\n'
                 result_all_links.append(ParseResultDTO(**result_values))
 
             except Exception as e:
@@ -147,7 +147,7 @@ class BaseJSONUrlParser(BaseUrlParser):
 
 
 class BaseHTMLUrlParser(BaseUrlParser):
-    data_get_function = GetSiteData.get_html_data
+    data_get_function = GetDataClass.get_html_data
 
     @classmethod
     def parse_link(cls, link, *args, **kwargs) -> ParseResultDTO:
@@ -179,7 +179,7 @@ class BaseHTMLUrlParser(BaseUrlParser):
         except Exception as e:
             print(f'Error dealing with link {link}, {e}')
             return ParseResultDTO(**empty_dict)
-        result_values['link'] = link
+        result_values['link'] = link + '\n'
         return ParseResultDTO(**result_values)
 
     @classmethod

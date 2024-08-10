@@ -1,10 +1,15 @@
-from .sber_crowler import SberCrowler
-from .yandex_crowler import YandexCrowler
-from .avito_crowler import AvitoCrowler
-from .sberdev_crowler import SberDevCrowler
-from .ozon_crowler import OzonCrowler
-from .mts_crowler import MtsCrowler
-from .hh_crowler import HhCrowler
-from .careerspace_crowler import CareerspaceCrowler
-from .changellenge_crowler import ChangellengeCrowler
-from .itfut_crowler import ITFutCrowler
+from .base_url_crowler import BaseJSONUrlCrowler, BaseHTMLUrlCrowler
+from .html_crowlers import (
+    AvitoCrowler,
+    CareerspaceCrowler,
+    ChangellengeCrowler,
+    MtsCrowler,
+    SberDevCrowler,
+)
+from .json_crowlers import (
+    HhCrowler,
+    ITFutCrowler,
+    OzonCrowler,
+    SberCrowler,
+    YandexCrowler,
+)

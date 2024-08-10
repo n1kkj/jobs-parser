@@ -1,13 +1,13 @@
 from urls_crowler.crowlers.base_url_crowler import BaseJSONUrlCrowler
 
-from urls_crowler.get_data_class import GetSiteData
+from urls_crowler.utils.get_data_class import GetDataClass
 from urls_crowler.parsers import ItFutParser
 
 
 class ITFutCrowler(BaseJSONUrlCrowler):
     main_ulr = 'https://it.fut.ru/_next/data/rlVDKpJCpjJDJkIK7FQrD/internship.json?alias_company_or_type=internship'
     vacancies_prefix = 'https://it.fut.ru/internship/'
-    data_get_function = GetSiteData.itfut_get_json_data
+    data_get_function = GetDataClass.itfut_get_json_data
     json_vacancies_path = 'pageProps/data/publications'
     url_key = 'alias'
     links_params = {}

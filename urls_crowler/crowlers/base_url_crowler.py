@@ -1,7 +1,7 @@
 from bs4 import BeautifulSoup
 import dpath.util
 
-from urls_crowler.get_data_class import GetSiteData
+from urls_crowler.utils.get_data_class import GetDataClass
 from urls_crowler.parsers.base_url_parser import BaseUrlParser
 
 
@@ -58,7 +58,7 @@ class BaseUrlCrowler:
 
 
 class BaseHTMLUrlCrowler(BaseUrlCrowler):
-    data_get_function = GetSiteData.get_html_data
+    data_get_function = GetDataClass.get_html_data
     html_link_class = None
 
     @classmethod
@@ -78,7 +78,7 @@ class BaseHTMLUrlCrowler(BaseUrlCrowler):
 
 
 class BaseJSONUrlCrowler(BaseUrlCrowler):
-    data_get_function = GetSiteData.get_json_data
+    data_get_function = GetDataClass.get_json_data
     json_vacancies_path = None
     url_key = None
 
