@@ -10,3 +10,5 @@ class ItFutParser(BaseJSONUrlParser):
     employer_key = 'company/alias'
 
     vacancies_list_key = 'vacancies'
+    vacancies_prefix = 'https://it.fut.ru/internship/'
+    url_key = 'alias'

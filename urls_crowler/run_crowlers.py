@@ -17,16 +17,16 @@ from crowlers import (
 )
 
 CROWLERS = [
-    # AvitoCrowler,
-    # SberDevCrowler,
-    # CareerspaceCrowler,
-    # ChangellengeCrowler,
-    # ITFutCrowler,
-    # SberCrowler,
-    # YandexCrowler,
-    # OzonCrowler,
-    MtsCrowler,
-    # HhCrowler,
+    AvitoCrowler,
+    SberDevCrowler,
+    CareerspaceCrowler,
+    ChangellengeCrowler,
+    ITFutCrowler,
+    SberCrowler,
+    YandexCrowler,
+    OzonCrowler,
+    # MtsCrowler,
+    HhCrowler,
 ]
 
 

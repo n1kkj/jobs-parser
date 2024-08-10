@@ -17,6 +17,8 @@ class BaseUrlParser:
     city_key = None
     employer_key = None
     vacancies_list_key = None
+    vacancies_prefix = None
+    url_key = None
 
     use_soup_desc = False
 
@@ -110,6 +112,7 @@ class BaseJSONUrlParser(BaseUrlParser):
             print(f'Error dealing with link {link}, {e}')
             return ParseResultDTO(**empty_dict).dict()
 
+        result_values['link'] = link
         return ParseResultDTO(**result_values).dict()
 
     @classmethod
@@ -132,6 +135,7 @@ class BaseJSONUrlParser(BaseUrlParser):
                             res_value = BeautifulSoup(res_value, 'html.parser').text
 
                     result_values[key] = res_value
+                result_values['link'] = f'{cls.vacancies_prefix}{du.get(vacancy, cls.url_key)}'
                 result_all_links.append(ParseResultDTO(**result_values).dict())
 
             except Exception as e:
@@ -160,17 +164,20 @@ class BaseHTMLUrlParser(BaseUrlParser):
                     for v in value.split('/'):
                         v = v.split('|')
                         index = v[-1] if str(v[-1]).isdigit() else 0
-                        res_value = res_value.find_all(v[0], class_=v[1])
-                        res_value = res_value[index]
+                        res_value = res_value.find_all(v[0], class_=v[1])[index]
 
                 res_value = res_value.text if res_value else res_value
 
                 result_values[key] = str(res_value).replace('\xa0', ' ')
 
+        except IndexError:
+            print(f'Element on page not found in link: {link}')
+            return ParseResultDTO(**empty_dict).dict()
+
         except Exception as e:
             print(f'Error dealing with link {link}, {e}')
             return ParseResultDTO(**empty_dict).dict()
-
+        result_values['link'] = link
         return ParseResultDTO(**result_values).dict()
 
     @classmethod

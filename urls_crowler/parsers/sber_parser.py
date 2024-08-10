@@ -10,3 +10,5 @@ class SberParser(BaseJSONUrlParser):
     employer_key = 'company'
 
     vacancies_list_key = 'vacancies'
+    vacancies_prefix = 'https://rabota.sber.ru/search/'
+    url_key = 'internalId'

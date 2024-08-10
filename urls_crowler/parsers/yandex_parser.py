@@ -10,3 +10,5 @@ class YandexParser(BaseJSONUrlParser):
     employer_key = 'public_service/name'
 
     vacancies_list_key = 'results'
+    vacancies_prefix = 'https://yandex.ru/jobs/vacancies/'
+    url_key = 'publication_slug_url'

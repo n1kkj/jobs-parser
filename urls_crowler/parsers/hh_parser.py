@@ -10,3 +10,5 @@ class HhParser(BaseJSONUrlParser):
     employer_key = 'employer/name'
 
     vacancies_list_key = 'vacancies'
+    vacancies_prefix = 'https://hh.ru/vacancy/'
+    url_key = 'id'
