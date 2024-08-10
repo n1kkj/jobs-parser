@@ -22,6 +22,8 @@ class GetSiteData:
                 raise Exception(f"Ответ не является JSON: {response.headers['Content-Type']}")
 
         except Exception as e:
+            if 'ozon' in url:
+                print(f'Скорее всего вакансия скрыта, поэтому у меня не получилось её обработать: {url}')
             print(f"Ошибка при запросе: {e}")
             return {}
 
