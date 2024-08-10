@@ -1,8 +1,6 @@
 import threading
 from datetime import datetime, timedelta
 
-from app.parsers import ParserFactory, SeleniumParserEngine, NoSuchParserError
-from app.storages import PandasXLSXStorage
 from crowlers import (
     SberCrowler,
     YandexCrowler,
@@ -15,6 +13,7 @@ from crowlers import (
     ChangellengeCrowler,
     ITFutCrowler,
 )
+from urls_crowler.storages.pandas_storage import PandasXLSXStorage
 
 CROWLERS = [
     AvitoCrowler,
@@ -28,39 +27,6 @@ CROWLERS = [
     # MtsCrowler,
     HhCrowler,
 ]
-
-
-def run_crowlers_with_pd():
-    pandas_xlsx_storage = PandasXLSXStorage(
-        "result.xlsx", "unsuccessful_result.xlsx"
-    )
-    parser_factory = ParserFactory()
-    selenium_parser_engine = SeleniumParserEngine()
-
-    all_links = []
-    for crowler in CROWLERS:
-        all_links.append(crowler.get_links()[0])
-        print(f'Finished {crowler.__str__()}')
-
-    for url in all_links:
-        try:
-            parser = parser_factory.get_parser(
-                url, parser_engine=selenium_parser_engine
-            )
-
-            page_data = parser.parse(url)
-
-            pandas_xlsx_storage.store_one(page_data)
-
-        except NoSuchParserError:
-            pandas_xlsx_storage.store_unsuccessful(url)
-            print(f"No parser provided for this url: {url}")
-
-        except Exception as err:
-            pandas_xlsx_storage.store_unsuccessful(url)
-            print(f"Didn't work for next url: {url}, reason: {err}")
-
-    pandas_xlsx_storage.commit()
 
 
 def run_test_crowlers_individual():
@@ -113,6 +79,11 @@ def run_test_crowlers_threading():
     threads = []
     start_time = datetime.now()
     all_links = []
+
+    pandas_xlsx_storage = PandasXLSXStorage(
+        "result.xlsx"
+    )
+
     print('Start threading')
 
     for crowler in CROWLERS:
@@ -123,8 +94,9 @@ def run_test_crowlers_threading():
     for thread in threads:
         thread.join()
 
+    pandas_xlsx_storage.store_many(all_links)
+    pandas_xlsx_storage.commit()
     end_time = datetime.now() - start_time
-    print(*all_links, sep='\n')
     print(f'Links count: {len(all_links)}')
     print(f'Total time: {end_time}')
     print(f'Parsers av speed: {len(all_links)/end_time.total_seconds():.3} v/sec')
