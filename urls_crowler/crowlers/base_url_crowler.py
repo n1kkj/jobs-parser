@@ -29,7 +29,7 @@ class BaseUrlCrowler:
         Uses self.data_get_function function to parse self.main_ulr
         :return: dict or str of api data
         """
-        kwargs = cls.extra_kwargs if cls.extra_kwargs else {}
+        kwargs = cls.extra_kwargs
         return cls.data_get_function(cls.main_ulr, *args, **kwargs)
 
     @classmethod
@@ -38,7 +38,6 @@ class BaseUrlCrowler:
         Custom for every crowler
         :return: List of links to vacancies
         """
-        pass
 
     @classmethod
     def run_parse_all_links(cls):
