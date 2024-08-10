@@ -7,3 +7,5 @@ from .avito_parser import AvitoParser
 from .careerspace_parser import CareerspaceParser
 from .sberdev_parser import SberDevParser
 from .changellenge_parser import ChangellengeParser
+from .yandex_parser import YandexParser
+from .mts_parser import MtsParser

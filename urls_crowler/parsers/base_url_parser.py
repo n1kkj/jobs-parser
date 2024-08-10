@@ -159,7 +159,9 @@ class BaseHTMLUrlParser(BaseUrlParser):
                     res_value = soup
                     for v in value.split('/'):
                         v = v.split('|')
-                        res_value = res_value.find(v[0], class_=v[1])
+                        index = v[-1] if str(v[-1]).isdigit() else 0
+                        res_value = res_value.find_all(v[0], class_=v[1])
+                        res_value = res_value[index]
 
                 res_value = res_value.text if res_value else res_value
 

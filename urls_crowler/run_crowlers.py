@@ -23,9 +23,9 @@ CROWLERS = [
     # ChangellengeCrowler,
     # ITFutCrowler,
     # SberCrowler,
-    YandexCrowler,
+    # YandexCrowler,
     # OzonCrowler,
-    # MtsCrowler,
+    MtsCrowler,
     # HhCrowler,
 ]
 
