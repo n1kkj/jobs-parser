@@ -15,4 +15,3 @@ class ChangellengeCrowler(BaseHTMLUrlCrowler):
     @classmethod
     def run_crowl(cls, *args, **kwargs):
         return cls.run_parse_all_links(*args, **kwargs)
-
