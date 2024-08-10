@@ -1,3 +1,5 @@
+import json
+import re
 from typing import List
 import dpath.util as du
 from bs4 import BeautifulSoup
@@ -12,14 +14,12 @@ class BaseUrlParser:
     """
     title_key = None
     desc_key = None
-    skills_key = None
     salary_key = None
     city_key = None
     employer_key = None
 
     fixed_title = None
     fixed_desc = None
-    fixed_skills = None
     fixed_salary = None
     fixed_city = None
     fixed_employer = None
@@ -35,12 +35,19 @@ class BaseUrlParser:
     extra_kwargs = {}
     result_dto = ParseResultDTO
 
+    skills_list = ['python', 'c++', 'c#', 'redis', 'linux', 'unix', 'php', 'c']
+
+    @classmethod
+    def find_skills(cls, text):
+        skills_set = set(cls.skills_list)
+        skills = re.findall(r"\b(" + "|".join(skills_set) + r")\b", text, re.IGNORECASE)
+        return skills
+
     @classmethod
     def get_keys(cls) -> dict:
         return {
             'title': cls.title_key,
             'desc': cls.desc_key,
-            'skills': cls.skills_key,
             'salary': cls.salary_key,
             'city': cls.city_key,
             'employer': cls.employer_key,
@@ -51,7 +58,6 @@ class BaseUrlParser:
         fixed = FixedValuesDTO(
             title=cls.fixed_title,
             desc=cls.fixed_desc,
-            skills=cls.fixed_skills,
             salary=cls.fixed_salary,
             city=cls.fixed_city,
             employer=cls.fixed_employer,
@@ -115,13 +121,20 @@ class BaseJSONUrlParser(BaseUrlParser):
     @classmethod
     def parse_link(cls, link, keys, empty_dict, fixed, *args, **kwargs) -> ParseResultDTO:
         data = super().get_data(link)
+        fixed_keys = fixed.keys()
         result_values = {}
+
+        skills = cls.find_skills(json.dumps(data))
+        result_values['skills'] = skills
 
         try:
             for key, value in keys.items():
                 res_value = ''
 
-                if value is not None:
+                if key in fixed_keys:
+                    res_value = fixed[key]
+
+                elif value is not None:
                     res_value = str(du.get(data, value))
 
                     if cls.use_soup_desc and key == 'desc':
@@ -146,6 +159,10 @@ class BaseJSONUrlParser(BaseUrlParser):
         for vacancy in vacancies_list:
             try:
                 result_values = {}
+
+                skills = cls.find_skills(json.dumps(data))
+                result_values['skills'] = skills
+
                 for key, value in keys.items():
                     res_value = ''
 
@@ -173,6 +190,10 @@ class BaseHTMLUrlParser(BaseUrlParser):
         data = super().get_data(link)
         fixed_keys = fixed.keys()
         result_values = {}
+
+        skills = cls.find_skills(data)
+        result_values['skills'] = skills
+
         soup = BeautifulSoup(data, 'html.parser')
 
         try:
