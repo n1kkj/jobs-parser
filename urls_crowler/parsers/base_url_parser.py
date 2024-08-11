@@ -181,7 +181,7 @@ class BaseJSONUrlParser(BaseUrlParser):
                     print(f'Ошибка при обработке ссылки {link}{e}')
                     result_values[key] = ''
 
-                result_all_links.append(ParseResultDTO(**result_values))
+            result_all_links.append(ParseResultDTO(**result_values))
 
         return result_all_links
 
