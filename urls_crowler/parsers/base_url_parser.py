@@ -119,10 +119,6 @@ class BaseUrlParser:
         kwargs = cls.extra_kwargs
         return cls.data_get_function(link, *args, **kwargs)
 
-    @classmethod
-    def __str__(cls) -> str:
-        return cls.__name__[:cls.__name__.find('Parser')]
-
 
 class BaseJSONUrlParser(BaseUrlParser):
     data_get_function = GetDataClass.get_json_data
@@ -152,7 +148,7 @@ class BaseJSONUrlParser(BaseUrlParser):
                 result_values[key] = res_value
 
         except Exception as e:
-            print(f'Error dealing with link {link}, {e}')
+            print(f'Не удалось обработать ссылку {link}, {e}')
             return ParseResultDTO(**empty_dict)
 
         result_values['link'] = link + '\n'
@@ -169,7 +165,7 @@ class BaseJSONUrlParser(BaseUrlParser):
         try:
             vacancies_list = du.get(data, cls.vacancies_list_key)
         except KeyError:
-            print(f'Error dealing with {cls.__str__()}, wrong vacancies_list_key: {cls.vacancies_list_key}')
+            print(f'Произошла ошибка с {cls.__str__}, неверный ключ вакансий: {cls.vacancies_list_key}')
             return []
 
         for vacancy in vacancies_list:
@@ -178,7 +174,11 @@ class BaseJSONUrlParser(BaseUrlParser):
             skills = cls.find_skills(json.dumps(vacancy))
             result_values['skills'] = skills
 
+            link = f'{cls.vacancies_prefix}{du.get(vacancy, cls.url_key)}\n'
+            result_values['link'] = link
+
             try:
+
                 for key, value in keys.items():
                     res_value = ''
 
@@ -193,11 +193,10 @@ class BaseJSONUrlParser(BaseUrlParser):
 
                     result_values[key] = res_value
 
-                result_values['link'] = f'{cls.vacancies_prefix}{du.get(vacancy, cls.url_key)}\n'
                 result_all_links.append(ParseResultDTO(**result_values))
 
             except Exception as e:
-                print(f'Error dealing with vacancy, {e}')
+                print(f'Не удалось обработать ссылку {link}, {e}')
                 result_all_links.append(ParseResultDTO(**empty_dict))
         return result_all_links
 
@@ -234,10 +233,10 @@ class BaseHTMLUrlParser(BaseUrlParser):
                 result_values[key] = str(res_value).replace('\xa0', ' ')
 
         except IndexError:
-            print(f'Element on page not found in link: {link}')
+            print(f'Не найдем элемент на странице: {link}')
             return ParseResultDTO(**empty_dict)
         except Exception as e:
-            print(f'Error dealing with link {link}, {e}')
+            print(f'Не удалось обработать ссылку {link}, {e}')
             return ParseResultDTO(**empty_dict)
 
         result_values['link'] = link + '\n'

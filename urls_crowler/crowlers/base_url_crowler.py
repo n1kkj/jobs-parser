@@ -51,10 +51,6 @@ class BaseUrlCrowler:
         links_data = cls.link_parser.parse_all_links_from_one(data)
         return links_data
 
-    @classmethod
-    def __str__(cls):
-        return cls.__name__[:cls.__name__.find('Crowler')]
-
 
 class BaseHTMLUrlCrowler(BaseUrlCrowler):
     data_get_function = GetDataClass.get_html_data
