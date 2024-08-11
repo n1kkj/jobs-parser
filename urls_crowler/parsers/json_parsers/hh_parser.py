@@ -4,7 +4,6 @@ from urls_crowler.parsers import BaseJSONUrlParser
 class HhParser(BaseJSONUrlParser):
     title_key = 'name'
     desc_key = 'snippet/requirement'
-    skills_key = None
     salary_key = None
     exp_key = 'experience/name'
     city_key = 'area/name'
