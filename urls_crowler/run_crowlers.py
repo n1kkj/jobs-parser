@@ -15,15 +15,15 @@ from crowlers import (
 from urls_crowler.storages.pandas_storage import PandasXLSXStorage
 
 CROWLERS = [
-    AvitoCrowler,
-    SberDevCrowler,
-    CareerspaceCrowler,
-    ChangellengeCrowler,
-    ITFutCrowler,
+    # AvitoCrowler,
+    # SberDevCrowler,
+    # CareerspaceCrowler,
+    # ChangellengeCrowler,
+    # ITFutCrowler,
     SberCrowler,
-    YandexCrowler,
-    OzonCrowler,
-    HhCrowler,
+    # YandexCrowler,
+    # OzonCrowler,
+    # HhCrowler,
 ]
 
 
@@ -36,7 +36,7 @@ def run_test_crowlers_threading():
         "result.xlsx"
     )
 
-    print('Start threading')
+    print('Начал работу')
 
     for crowler in CROWLERS:
         thread = threading.Thread(target=lambda: all_links.extend(crowler.run_crowl()))
@@ -49,9 +49,9 @@ def run_test_crowlers_threading():
     pandas_xlsx_storage.store_many(all_links)
     pandas_xlsx_storage.commit()
     end_time = datetime.now() - start_time
-    print(f'Links count: {len(all_links)}')
-    print(f'Total time: {end_time}')
-    print(f'Parsers av speed: {len(all_links)/end_time.total_seconds():.3} v/sec')
+    print(f'Всего ссылок: {len(all_links)}')
+    print(f'Всего времени: {end_time}')
+    print(f'Средняя скорость: {len(all_links)/end_time.total_seconds():.3} вакансий/сек')
 
 
 if __name__ == '__main__':

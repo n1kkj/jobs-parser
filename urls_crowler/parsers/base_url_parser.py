@@ -73,27 +73,13 @@ class BaseUrlParser:
         fixed = FixedValuesDTO(**prepare_fixed)
         return fixed.dict(exclude_unset=True)
 
-    @staticmethod
-    def get_empty_dict() -> dict:
-        return {
-            'title': '',
-            'desc': '',
-            'skills': '',
-            'salary': '',
-            'exp': '',
-            'city': '',
-            'employer': '',
-            'link': ''
-        }
-
     @classmethod
     def parse_all_links(cls, links) -> List[ParseResultDTO]:
         keys = cls.get_keys()
         fixed = cls.get_fixed()
-        empty_dict = cls.get_empty_dict()
         results = []
         for link in links:
-            results.append(cls.parse_link(link, keys, empty_dict, fixed))
+            results.append(cls.parse_link(link, keys, fixed))
         return results
 
     @classmethod
@@ -104,7 +90,7 @@ class BaseUrlParser:
         """
 
     @classmethod
-    def parse_link(cls, link, keys, empty_dict, fixed, *args, **kwargs) -> ParseResultDTO:
+    def parse_link(cls, link, keys, fixed, *args, **kwargs) -> ParseResultDTO:
         """
         Custom for every parser
         :return: Dict of data
@@ -124,7 +110,7 @@ class BaseJSONUrlParser(BaseUrlParser):
     data_get_function = GetDataClass.get_json_data
 
     @classmethod
-    def parse_link(cls, link, keys, empty_dict, fixed, *args, **kwargs) -> ParseResultDTO:
+    def parse_link(cls, link, keys, fixed, *args, **kwargs) -> ParseResultDTO:
         data = super().get_data(link)
         fixed_keys = fixed.keys()
         result_values = {}
@@ -132,10 +118,10 @@ class BaseJSONUrlParser(BaseUrlParser):
         skills = cls.find_skills(json.dumps(data))
         result_values['skills'] = skills
 
-        try:
-            for key, value in keys.items():
-                res_value = ''
+        for key, value in keys.items():
+            res_value = ''
 
+            try:
                 if key in fixed_keys:
                     res_value = fixed[key]
 
@@ -147,9 +133,9 @@ class BaseJSONUrlParser(BaseUrlParser):
 
                 result_values[key] = res_value
 
-        except Exception as e:
-            print(f'Не удалось обработать ссылку {link}, {e}')
-            return ParseResultDTO(**empty_dict)
+            except Exception as e:
+                print(f'Ошибка при обработке ссылки {link}{e}')
+                result_values[key] = ''
 
         result_values['link'] = link + '\n'
         return ParseResultDTO(**result_values)
@@ -157,7 +143,6 @@ class BaseJSONUrlParser(BaseUrlParser):
     @classmethod
     def parse_all_links_from_one(cls, data, *args, **kwargs) -> List[ParseResultDTO]:
         keys = super().get_keys()
-        empty_dict = super().get_empty_dict()
         result_all_links = []
         fixed = super().get_fixed()
         fixed_keys = fixed.keys()
@@ -177,11 +162,10 @@ class BaseJSONUrlParser(BaseUrlParser):
             link = f'{cls.vacancies_prefix}{du.get(vacancy, cls.url_key)}\n'
             result_values['link'] = link
 
-            try:
+            for key, value in keys.items():
+                res_value = ''
 
-                for key, value in keys.items():
-                    res_value = ''
-
+                try:
                     if key in fixed_keys:
                         res_value = fixed[key]
 
@@ -193,11 +177,12 @@ class BaseJSONUrlParser(BaseUrlParser):
 
                     result_values[key] = res_value
 
+                except Exception as e:
+                    print(f'Ошибка при обработке ссылки {link}{e}')
+                    result_values[key] = ''
+
                 result_all_links.append(ParseResultDTO(**result_values))
 
-            except Exception as e:
-                print(f'Не удалось обработать ссылку {link}, {e}')
-                result_all_links.append(ParseResultDTO(**empty_dict))
         return result_all_links
 
 
@@ -205,7 +190,7 @@ class BaseHTMLUrlParser(BaseUrlParser):
     data_get_function = GetDataClass.get_html_data
 
     @classmethod
-    def parse_link(cls, link, keys, empty_dict, fixed, *args, **kwargs) -> ParseResultDTO:
+    def parse_link(cls, link, keys, fixed, *args, **kwargs) -> ParseResultDTO:
         data = super().get_data(link)
         fixed_keys = fixed.keys()
         result_values = {}
@@ -215,10 +200,10 @@ class BaseHTMLUrlParser(BaseUrlParser):
         skills = cls.find_skills(soup.text)
         result_values['skills'] = skills
 
-        try:
-            for key, value in keys.items():
-                res_value = ''
+        for key, value in keys.items():
+            res_value = ''
 
+            try:
                 if key in fixed_keys:
                     res_value = fixed[key]
 
@@ -232,12 +217,12 @@ class BaseHTMLUrlParser(BaseUrlParser):
 
                 result_values[key] = str(res_value).replace('\xa0', ' ')
 
-        except IndexError:
-            print(f'Не найдем элемент на странице: {link}')
-            return ParseResultDTO(**empty_dict)
-        except Exception as e:
-            print(f'Не удалось обработать ссылку {link}, {e}')
-            return ParseResultDTO(**empty_dict)
+            except IndexError:
+                print(f'Не найден элемент на странице: {link}')
+                result_values[key] = ''
+            except Exception as e:
+                print(f'Не удалось обработать ссылку {link}\n{e}')
+                result_values[key] = ''
 
         result_values['link'] = link + '\n'
         return ParseResultDTO(**result_values)
