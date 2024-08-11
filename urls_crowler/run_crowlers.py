@@ -1,5 +1,5 @@
 import threading
-from datetime import datetime, timedelta
+from datetime import datetime
 
 from crowlers import (
     SberCrowler,
@@ -7,7 +7,6 @@ from crowlers import (
     AvitoCrowler,
     SberDevCrowler,
     OzonCrowler,
-    MtsCrowler,
     HhCrowler,
     CareerspaceCrowler,
     ChangellengeCrowler,
