@@ -11,7 +11,7 @@ class YandexCrowler(BaseJSONUrlCrowler):
                 '&professions=ml-researcher')
     vacancies_prefix = 'https://yandex.ru/jobs/vacancies/'
     data_get_function = GetDataClass.get_json_data
-    json_vacancies_path = 'vacancies'
+    json_vacancies_path = 'results'
     url_key = 'publication_slug_url'
     links_params = {'cities': str, 'professions': list}
 

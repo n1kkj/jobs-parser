@@ -5,24 +5,16 @@ from urls_crowler.storages import extract_dataframe
 
 
 class PandasXLSXStorage:
-    DATA_COLUMNS = ['title', 'desc', 'skills', 'salary', 'city', 'employer', 'link']
+    DATA_COLUMNS = ['Компания', 'Должность', 'Требуемый опыт', 'Стек', 'ЗП', 'Описание', 'Город', 'Ссылка']
 
     def __init__(self, file_name: str):
         self.__file_name = file_name
         self.__file_data = self.__initialize_file()
 
     def __initialize_file(self):
-        try:
-            file_data = pandas.read_excel(self.__file_name, index_col=0)
-            return file_data
-
-        except FileNotFoundError:
-            dataframe = pandas.DataFrame(
-                columns=self.DATA_COLUMNS,
-            )
-            dataframe.to_excel(self.__file_name)
-
-            return dataframe
+        dataframe = pandas.DataFrame(columns=self.DATA_COLUMNS)
+        dataframe.to_excel(self.__file_name, index=False)
+        return dataframe
 
     def store_many(self, pages_data: list[ParseResultDTO]):
         for page_data in pages_data:

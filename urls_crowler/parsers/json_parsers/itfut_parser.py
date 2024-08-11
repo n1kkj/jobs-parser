@@ -6,6 +6,7 @@ class ItFutParser(BaseJSONUrlParser):
     desc_key = 'description'
     skills_key = None
     salary_key = None
+    exp_key = None
     city_key = None
     employer_key = 'company/alias'
 

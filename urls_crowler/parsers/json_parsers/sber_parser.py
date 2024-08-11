@@ -4,8 +4,8 @@ from urls_crowler.parsers import BaseJSONUrlParser
 class SberParser(BaseJSONUrlParser):
     title_key = 'title'
     desc_key = 'duties'
-    skills_key = 'requirements'
     salary_key = None
+    exp_key = 'salary_min'
     city_key = 'city'
     employer_key = 'company'
 

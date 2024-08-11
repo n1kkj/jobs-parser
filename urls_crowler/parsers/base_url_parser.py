@@ -5,6 +5,7 @@ import dpath.util as du
 from bs4 import BeautifulSoup
 
 from urls_crowler.dto import ParseResultDTO, FixedValuesDTO
+from urls_crowler.utils import skills_list
 from urls_crowler.utils.get_data_class import GetDataClass
 
 
@@ -15,12 +16,14 @@ class BaseUrlParser:
     title_key = None
     desc_key = None
     salary_key = None
+    exp_key = None
     city_key = None
     employer_key = None
 
     fixed_title = None
     fixed_desc = None
     fixed_salary = None
+    fixed_exp = None
     fixed_city = None
     fixed_employer = None
 
@@ -35,13 +38,12 @@ class BaseUrlParser:
     extra_kwargs = {}
     result_dto = ParseResultDTO
 
-    skills_list = ['python', 'c++', 'c#', 'redis', 'linux', 'unix', 'php', 'c']
-
     @classmethod
     def find_skills(cls, text):
-        skills_set = set(cls.skills_list)
-        skills = re.findall(r"\b(" + "|".join(skills_set) + r")\b", text, re.IGNORECASE)
-        return skills
+        skills_set = set(skills_list)
+        pattern = r"\b(" + "|".join(re.escape(skill) for skill in skills_set) + r")\b"
+        skills = re.findall(pattern, text, re.IGNORECASE)
+        return ', '.join(set(skills))
 
     @classmethod
     def get_keys(cls) -> dict:
@@ -49,19 +51,26 @@ class BaseUrlParser:
             'title': cls.title_key,
             'desc': cls.desc_key,
             'salary': cls.salary_key,
+            'exp': cls.exp_key,
             'city': cls.city_key,
             'employer': cls.employer_key,
         }
 
     @classmethod
     def get_fixed(cls) -> dict:
-        fixed = FixedValuesDTO(
-            title=cls.fixed_title,
-            desc=cls.fixed_desc,
-            salary=cls.fixed_salary,
-            city=cls.fixed_city,
-            employer=cls.fixed_employer,
-        )
+        raw_fixed = {
+            'title': cls.fixed_title,
+            'desc': cls.fixed_desc,
+            'salary': cls.fixed_salary,
+            'exp': cls.fixed_exp,
+            'city': cls.fixed_city,
+            'employer': cls.fixed_employer,
+        }
+        prepare_fixed = {}
+        for key, value in raw_fixed.items():
+            if value:
+                prepare_fixed[key] = value
+        fixed = FixedValuesDTO(**prepare_fixed)
         return fixed.dict(exclude_unset=True)
 
     @staticmethod
@@ -71,6 +80,7 @@ class BaseUrlParser:
             'desc': '',
             'skills': '',
             'salary': '',
+            'exp': '',
             'city': '',
             'employer': '',
             'link': ''
@@ -92,7 +102,6 @@ class BaseUrlParser:
         Custom for every parser
         :return: Dict of data
         """
-        pass
 
     @classmethod
     def parse_link(cls, link, keys, empty_dict, fixed, *args, **kwargs) -> ParseResultDTO:
@@ -104,7 +113,7 @@ class BaseUrlParser:
     @classmethod
     def get_data(cls, link, *args, **kwargs) -> dict | str:
         """
-        Uses self.data_get_function function to parse self.main_ulr
+        Uses self.data_get_function function to parse givven link
         :return: dict or str of api data
         """
         kwargs = cls.extra_kwargs
@@ -154,25 +163,36 @@ class BaseJSONUrlParser(BaseUrlParser):
         keys = super().get_keys()
         empty_dict = super().get_empty_dict()
         result_all_links = []
-        vacancies_list = du.get(data, cls.vacancies_list_key)
+        fixed = super().get_fixed()
+        fixed_keys = fixed.keys()
+
+        try:
+            vacancies_list = du.get(data, cls.vacancies_list_key)
+        except KeyError:
+            print(f'Error dealing with {cls.__str__()}, wrong vacancies_list_key: {cls.vacancies_list_key}')
+            return []
 
         for vacancy in vacancies_list:
+            result_values = {}
+
+            skills = cls.find_skills(json.dumps(vacancy))
+            result_values['skills'] = skills
+
             try:
-                result_values = {}
-
-                skills = cls.find_skills(json.dumps(data))
-                result_values['skills'] = skills
-
                 for key, value in keys.items():
                     res_value = ''
 
-                    if value is not None:
+                    if key in fixed_keys:
+                        res_value = fixed[key]
+
+                    elif value is not None:
                         res_value = str(du.get(vacancy, value))
 
                         if cls.use_soup_desc and key == 'desc':
                             res_value = BeautifulSoup(res_value, 'html.parser').text
 
                     result_values[key] = res_value
+
                 result_values['link'] = f'{cls.vacancies_prefix}{du.get(vacancy, cls.url_key)}\n'
                 result_all_links.append(ParseResultDTO(**result_values))
 
@@ -191,10 +211,10 @@ class BaseHTMLUrlParser(BaseUrlParser):
         fixed_keys = fixed.keys()
         result_values = {}
 
-        skills = cls.find_skills(data)
-        result_values['skills'] = skills
-
         soup = BeautifulSoup(data, 'html.parser')
+
+        skills = cls.find_skills(soup.text)
+        result_values['skills'] = skills
 
         try:
             for key, value in keys.items():

@@ -6,6 +6,7 @@ class HhParser(BaseJSONUrlParser):
     desc_key = 'snippet/requirement'
     skills_key = None
     salary_key = None
+    exp_key = 'experience/name'
     city_key = 'area/name'
     employer_key = 'employer/name'
 

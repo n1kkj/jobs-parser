@@ -6,6 +6,7 @@ class AvitoParser(BaseHTMLUrlParser):
     desc_key = 'section|vacancies-detail__description'
     skills_key = None
     salary_key = None
+    exp_key = None
     city_key = 'span|page-info__link-text'
     employer_key = None
 
