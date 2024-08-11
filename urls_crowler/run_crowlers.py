@@ -15,15 +15,15 @@ from crowlers import (
 from urls_crowler.storages.pandas_storage import PandasXLSXStorage
 
 CROWLERS = [
-    # AvitoCrowler,
-    # SberDevCrowler,
-    # CareerspaceCrowler,
-    # ChangellengeCrowler,
-    # ITFutCrowler,
+    AvitoCrowler,
+    SberDevCrowler,
+    CareerspaceCrowler,
+    ChangellengeCrowler,
+    ITFutCrowler,
     SberCrowler,
-    # YandexCrowler,
-    # OzonCrowler,
-    # HhCrowler,
+    YandexCrowler,
+    OzonCrowler,
+    HhCrowler,
 ]
 
 
