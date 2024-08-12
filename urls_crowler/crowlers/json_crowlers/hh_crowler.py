@@ -23,5 +23,6 @@ class HhCrowler(BaseJSONUrlCrowler):
     link_parser = HhParser
 
     @classmethod
-    def run_crowl(cls, *args, **kwargs):
-        return cls.run_parse_all_links_from_one()
+    async def run_crowl(cls, redis_cache, *args, **kwargs):
+        results, all_links, cached_links = await cls.run_parse_all_links_from_one(redis_cache, *args, **kwargs)
+        return results, all_links, cached_links

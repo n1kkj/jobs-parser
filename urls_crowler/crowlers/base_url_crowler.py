@@ -19,7 +19,7 @@ class BaseUrlCrowler:
     link_parser = BaseUrlParser
 
     @classmethod
-    def run_crowl(cls, *args, **kwargs):
+    async def run_crowl(cls, redis_cache, *args, **kwargs):
         """
         Custom for every crowler
         """
@@ -41,16 +41,16 @@ class BaseUrlCrowler:
         """
 
     @classmethod
-    def run_parse_all_links(cls):
+    async def run_parse_all_links(cls, redis_cache, *args, **kwargs):
         links = cls.get_links()
-        links_data = cls.link_parser.parse_all_links(links)
-        return links_data
+        results, all_links, cached_links = await cls.link_parser.parse_all_links(links, redis_cache)
+        return results, all_links, cached_links
 
     @classmethod
-    def run_parse_all_links_from_one(cls):
+    async def run_parse_all_links_from_one(cls, redis_cache, *args, **kwargs):
         data = cls.get_data()
-        links_data = cls.link_parser.parse_all_links_from_one(data)
-        return links_data
+        results, all_links, cached_links = await cls.link_parser.parse_all_links_from_one(data, redis_cache)
+        return results, all_links, cached_links
 
 
 class BaseHTMLUrlCrowler(BaseUrlCrowler):
@@ -58,10 +58,10 @@ class BaseHTMLUrlCrowler(BaseUrlCrowler):
     html_link_class = None
 
     @classmethod
-    def run_parse_all_links(cls, *args, **kwargs):
+    async def run_parse_all_links(cls, redis_cache, *args, **kwargs):
         links = cls.get_links()
-        links_data = cls.link_parser.parse_all_links(links)
-        return links_data
+        results, all_links, cached_links = await cls.link_parser.parse_all_links(links, redis_cache)
+        return results, all_links, cached_links
 
     @classmethod
     def get_links(cls, *args, **kwargs) -> list:
@@ -77,16 +77,16 @@ class BaseJSONUrlCrowler(BaseUrlCrowler):
     url_key = None
 
     @classmethod
-    def run_parse_all_links(cls, *args, **kwargs):
+    async def run_parse_all_links(cls, redis_cache, *args, **kwargs):
         links = cls.get_links()
-        links_data = cls.link_parser.parse_all_links(links)
-        return links_data
+        results, all_links, cached_links = await cls.link_parser.parse_all_links(links, redis_cache)
+        return results, all_links, cached_links
 
     @classmethod
-    def run_parse_all_links_from_one(cls, *args, **kwargs):
+    async def run_parse_all_links_from_one(cls, redis_cache, *args, **kwargs):
         data = super().get_data(*args, **kwargs)
-        links_data = cls.link_parser.parse_all_links_from_one(data)
-        return links_data
+        results, all_links, cached_links = await cls.link_parser.parse_all_links_from_one(data, redis_cache)
+        return results, all_links, cached_links
 
     @classmethod
     def get_links(cls, *args, **kwargs) -> list:

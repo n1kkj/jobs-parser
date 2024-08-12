@@ -76,16 +76,28 @@ class BaseUrlParser:
         return fixed.dict(exclude_unset=True)
 
     @classmethod
-    def parse_all_links(cls, links) -> List[ParseResultDTO]:
+    async def parse_all_links(cls, all_links, redis_cache) -> (List[ParseResultDTO], List, List):
         keys = cls.get_keys()
         fixed = cls.get_fixed()
         results = []
-        for link in links:
-            results.append(cls.parse_link(link, keys, fixed))
-        return results
+
+        cached_links = []
+
+        for link in all_links:
+
+            cached_data = await redis_cache.get(link)
+            if cached_data:
+                results.append(ParseResultDTO.parse_raw(cached_data))
+                cached_links.append(link)
+            else:
+                parse_result = cls.parse_link(link, keys, fixed)
+                results.append(parse_result)
+                await redis_cache.set(link, parse_result.json())
+
+        return results, all_links, cached_links
 
     @classmethod
-    def parse_all_links_from_one(cls, data) -> List[ParseResultDTO]:
+    async def parse_all_links_from_one(cls, data, redis_cache) -> (List[ParseResultDTO], List, List):
         """
         Custom for every parser
         :return: Dict of data
@@ -112,12 +124,8 @@ class BaseJSONUrlParser(BaseUrlParser):
     data_get_function = GetDataClass.get_json_data
 
     @classmethod
-    def parse_link(cls, link, keys, fixed, *args, **kwargs) -> ParseResultDTO:
-        data = super().get_data(link)
-        fixed_keys = fixed.keys()
-        result_values = {}
-
-        skills = cls.find_skills(json.dumps(data))
+    def _parse_link(cls, vacancy, result_values, keys, fixed_keys, fixed, link) -> dict:
+        skills = cls.find_skills(json.dumps(vacancy))
         result_values['skills'] = skills
 
         for key, value in keys.items():
@@ -128,7 +136,7 @@ class BaseJSONUrlParser(BaseUrlParser):
                     res_value = fixed[key]
 
                 elif value is not None:
-                    res_value = str(du.get(data, value))
+                    res_value = str(du.get(vacancy, value))
 
                     if cls.use_soup_desc and key == 'desc':
                         res_value = BeautifulSoup(res_value, 'html.parser').text
@@ -139,15 +147,28 @@ class BaseJSONUrlParser(BaseUrlParser):
                 print(f'Ошибка при обработке ссылки {link}{e}')
                 result_values[key] = ''
 
+        return result_values
+
+    @classmethod
+    def parse_link(cls, link, keys, fixed, *args, **kwargs) -> ParseResultDTO:
+        data = super().get_data(link)
+        fixed_keys = fixed.keys()
+        result_values = {}
+
+        result_values = cls._parse_link(data, result_values, keys, fixed_keys, fixed, link)
+
         result_values['link'] = link + '\n'
         return ParseResultDTO(**result_values)
 
     @classmethod
-    def parse_all_links_from_one(cls, data, *args, **kwargs) -> List[ParseResultDTO]:
+    async def parse_all_links_from_one(cls, data, redis_cache, *args, **kwargs) -> (List[ParseResultDTO], List, List):
         keys = super().get_keys()
-        result_all_links = []
+        result_all_data = []
         fixed = super().get_fixed()
         fixed_keys = fixed.keys()
+
+        all_links = []
+        cached_links = []
 
         try:
             vacancies_list = du.get(data, cls.vacancies_list_key)
@@ -156,36 +177,21 @@ class BaseJSONUrlParser(BaseUrlParser):
             return []
 
         for vacancy in vacancies_list:
-            result_values = {}
-
-            skills = cls.find_skills(json.dumps(vacancy))
-            result_values['skills'] = skills
-
             link = f'{cls.vacancies_prefix}{du.get(vacancy, cls.url_key)}\n'
-            result_values['link'] = link
+            all_links.append(link)
 
-            for key, value in keys.items():
-                res_value = ''
+            cached_data = await redis_cache.get(link)
+            if cached_data:
+                result_all_data.append(ParseResultDTO.parse_raw(cached_data))
+                cached_links.append(link)
+            else:
+                result_values = {'link': link}
+                result_values = cls._parse_link(vacancy, result_values, keys, fixed_keys, fixed, link)
+                parse_result = ParseResultDTO(**result_values)
+                result_all_data.append(parse_result)
+                await redis_cache.set(link, parse_result.json())
 
-                try:
-                    if key in fixed_keys:
-                        res_value = fixed[key]
-
-                    elif value is not None:
-                        res_value = str(du.get(vacancy, value))
-
-                        if cls.use_soup_desc and key == 'desc':
-                            res_value = BeautifulSoup(res_value, 'html.parser').text
-
-                    result_values[key] = res_value
-
-                except Exception as e:
-                    print(f'Ошибка при обработке ссылки {link}{e}')
-                    result_values[key] = ''
-
-            result_all_links.append(ParseResultDTO(**result_values))
-
-        return result_all_links
+        return result_all_data, all_links, cached_links
 
 
 class BaseHTMLUrlParser(BaseUrlParser):

@@ -14,5 +14,6 @@ class MtsCrowler(BaseHTMLUrlCrowler):
     link_parser = MtsParser
 
     @classmethod
-    def run_crowl(cls, *args, **kwargs):
-        return cls.run_parse_all_links(*args, **kwargs)
+    async def run_crowl(cls, redis_cache, *args, **kwargs):
+        results, all_links, cached_links = await cls.run_parse_all_links(redis_cache, *args, **kwargs)
+        return results, all_links, cached_links

@@ -10,6 +10,10 @@ class RedisCache:
         if self.redis is None:
             self.redis = await aioredis.from_url(self.redis_url)
 
+    async def disconnect(self):
+        if self.redis is not None:
+            await self.redis.close()
+
     async def set(self, key: str, value: str):
         await self.redis.set(key.encode(), value.encode())
 
@@ -21,6 +25,6 @@ class RedisCache:
             return
         return value.decode()
 
-    async def delete(self, kek3):
+    async def delete(self, key):
         async with self.redis.client() as conn:
-            await conn.delete(kek3.encode())
+            await conn.delete(key.encode())
