@@ -34,3 +34,4 @@ dpath==2.2.0
 pydantic
 aioredis
 asyncio
+pytest
