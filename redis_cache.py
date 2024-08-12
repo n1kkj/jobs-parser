@@ -1,8 +1,10 @@
 import aioredis
 
+import settings
+
 
 class RedisCache:
-    def __init__(self, redis_url='redis://localhost:6379/0'):
+    def __init__(self, redis_url=settings.REDIS_DATABASE_URL):
         self.redis_url = redis_url
         self.redis = None
 
@@ -24,6 +26,9 @@ class RedisCache:
         if value is None:
             return
         return value.decode()
+
+    async def get_all_keys(self):
+        return [key.decode() for key in await self.redis.keys()]
 
     async def delete(self, key):
         async with self.redis.client() as conn:

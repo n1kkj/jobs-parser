@@ -1,6 +1,7 @@
 import asyncio
 from datetime import datetime
 
+import settings
 from urls_crowler.crowlers import (
     SberCrowler,
     YandexCrowler,
@@ -39,7 +40,7 @@ async def run_crowlers_threading():
     all_links = []
     cached_links = []
 
-    pandas_xlsx_storage = PandasXLSXStorage('result.xlsx')
+    pandas_xlsx_storage = PandasXLSXStorage(settings.FILE_PATH)
 
     print('Начал работу')
 
@@ -55,19 +56,25 @@ async def run_crowlers_threading():
     print('Сохраняю в файл')
     pandas_xlsx_storage.store_many(all_data)
     pandas_xlsx_storage.commit()
-    end_time = datetime.now() - start_time
 
     print('Очищаю кэш')
-    for link in all_links:
-        if link not in cached_links:
-            await redis_cache.delete(link)
+    all_redis_links = await redis_cache.get_all_keys()
+    for redis_link in all_redis_links:
+        if redis_link not in all_links:
+            await redis_cache.delete(redis_link)
 
-    print('Закончил обработку ссылок, надеюсь вы обрадуетесь результату, жду вас вновь!\n'
-          'Приберёг статистику для вас)\n')
+    await redis_cache.disconnect()
+
+    end_time = datetime.now() - start_time
+
+    print(
+        'Закончил обработку ссылок, надеюсь вы обрадуетесь результату, жду вас вновь!\n'
+        'Приберёг статистику для вас)\n'
+    )
     print(f'Всего ссылок: {len(all_links)}')
-    print(f'Ссылок взято из кэша: {len(cached_links)/len(all_links)*100:.2}%')
+    print(f'Ссылок взято из кэша: {len(cached_links)*100//len(all_links)}%')
     print(f'Всего времени: {end_time}')
-    print(f'Средняя скорость: {len(all_links)/end_time.total_seconds():.3} вакансий/сек')
+    print(f'Средняя скорость: {len(all_links)/end_time.total_seconds()} вакансий/сек')
 
 
 def main():
@@ -75,6 +82,10 @@ def main():
     asyncio.set_event_loop(loop)
 
     loop.run_until_complete(run_crowlers_threading())
+
+
+def run_parser_for_bot():
+    main()
 
 
 if __name__ == '__main__':

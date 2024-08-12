@@ -84,7 +84,6 @@ class BaseUrlParser:
         cached_links = []
 
         for link in all_links:
-
             cached_data = await redis_cache.get(link)
             if cached_data:
                 results.append(ParseResultDTO.parse_raw(cached_data))
