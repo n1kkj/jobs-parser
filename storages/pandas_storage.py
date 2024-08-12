@@ -1,7 +1,7 @@
 import pandas
 
 from urls_crowler.dto import ParseResultDTO
-from urls_crowler.storages import extract_dataframe
+from storages import extract_dataframe
 
 
 class PandasXLSXStorage:

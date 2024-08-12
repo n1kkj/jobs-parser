@@ -1,6 +1,7 @@
 import json
 import re
 from typing import List
+
 import dpath.util as du
 from bs4 import BeautifulSoup
 

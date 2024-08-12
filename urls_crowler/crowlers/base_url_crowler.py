@@ -1,8 +1,8 @@
-from bs4 import BeautifulSoup
 import dpath.util
+from bs4 import BeautifulSoup
 
-from urls_crowler.utils.get_data_class import GetDataClass
 from urls_crowler.parsers.base_url_parser import BaseUrlParser
+from urls_crowler.utils.get_data_class import GetDataClass
 
 
 class BaseUrlCrowler:

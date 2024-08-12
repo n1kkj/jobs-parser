@@ -32,3 +32,5 @@ webencodings==0.5.1
 wsproto==1.2.0
 dpath==2.2.0
 pydantic
+aioredis
+asyncio

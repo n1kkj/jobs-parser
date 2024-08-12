@@ -1,6 +1,6 @@
 from urls_crowler.crowlers.base_url_crowler import BaseJSONUrlCrowler
-from urls_crowler.utils.get_data_class import GetDataClass
 from urls_crowler.parsers import SberParser
+from urls_crowler.utils.get_data_class import GetDataClass
 
 
 class SberCrowler(BaseJSONUrlCrowler):
