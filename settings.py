@@ -1,14 +1,8 @@
-import os
-from dotenv import load_dotenv
-
-load_dotenv('.env')
-
-BOT_TOKEN = os.getenv('BOT_TOKEN', '')
-
-REDIS_HOST = os.getenv('REDIS_HOST', 'localhost')
-REDIS_PORT = os.getenv('REDIS_PORT', 6379)
-REDIS_DB = int(os.getenv('REDIS_DB', 0))
+REDIS_HOST = 'localhost'
+REDIS_PORT = 6379
+REDIS_DB = 0
 
 REDIS_DATABASE_URL = f'redis://{REDIS_HOST}:{REDIS_PORT}/{REDIS_DB}'
 
-FILE_PATH = os.getenv('FILE_PATH', 'result.xlsx')
+FILE_NAME = 'result.xlsx'
+BOT_TOKEN = '7405045997:AAG5c0acQn62ypW6xOgeg6bNCZwCF-8cX5I'
