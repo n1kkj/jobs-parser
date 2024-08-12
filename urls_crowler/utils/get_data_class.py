@@ -77,7 +77,7 @@ class GetDataClass:
                 driver.quit()
                 finished = True
                 return html_content
-            except Exception as e:
+            except Exception:
                 continue
 
     @staticmethod
