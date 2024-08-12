@@ -57,11 +57,12 @@ async def run_crowlers_threading():
     pandas_xlsx_storage.store_many(all_data)
     pandas_xlsx_storage.commit()
 
-    print('Очищаю кэш')
-    all_redis_links = await redis_cache.get_all_keys()
-    for redis_link in all_redis_links:
-        if redis_link not in all_links:
-            await redis_cache.delete(redis_link)
+    if settings.WITH_DELETE:
+        print('Очищаю кэш')
+        all_redis_links = await redis_cache.get_all_keys()
+        for redis_link in all_redis_links:
+            if redis_link not in all_links:
+                await redis_cache.delete(redis_link)
 
     await redis_cache.disconnect()
 
