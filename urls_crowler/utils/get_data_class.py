@@ -24,7 +24,7 @@ class GetDataClass:
         except Exception as e:
             if 'ozon' in url:
                 print(f'Скорее всего вакансия скрыта, поэтому у меня не получилось её обработать: {url}')
-            print(f"Ошибка при запросе: {e}")
+            print(f'Ошибка при запросе: {e}')
             return {}
 
     @staticmethod
@@ -39,7 +39,7 @@ class GetDataClass:
                 raise Exception(f"Ответ не является HTML: {response.headers['Content-Type']}")
 
         except Exception as e:
-            print(f"Ошибка при запросе: {e}")
+            print(f'Ошибка при запросе: {e}')
             return ''
 
     @staticmethod
@@ -49,9 +49,9 @@ class GetDataClass:
             try:
                 options = ChromeOptions()
                 options.add_experimental_option(
-                    "prefs",
+                    'prefs',
                     {
-                        "profile.managed_default_content_settings.images": 2,
+                        'profile.managed_default_content_settings.images': 2,
                     },
                 )
 
@@ -60,13 +60,12 @@ class GetDataClass:
 
                 button_xpath = kwargs['button_xpath']
 
-                WebDriverWait(driver, 2).until(EC.element_to_be_clickable(
-                    (By.XPATH, button_xpath)))
+                WebDriverWait(driver, 2).until(EC.element_to_be_clickable((By.XPATH, button_xpath)))
                 button = driver.find_element(By.XPATH, button_xpath)
 
                 while button.is_displayed():
                     try:
-                        driver.execute_script("arguments[0].click();", button)
+                        driver.execute_script('arguments[0].click();', button)
                         button = driver.find_element(By.XPATH, button_xpath)
                         WebDriverWait(driver, 2).until(EC.element_to_be_clickable((By.XPATH, button_xpath)))
                     except Exception:
@@ -86,24 +85,22 @@ class GetDataClass:
         try:
             options = ChromeOptions()
             options.add_experimental_option(
-                "prefs",
+                'prefs',
                 {
-                    "profile.managed_default_content_settings.images": 2,
+                    'profile.managed_default_content_settings.images': 2,
                 },
             )
 
             driver = webdriver.Chrome(options=options)
             driver.get(url)
 
-            last_height = driver.execute_script("return document.body.scrollHeight")
+            last_height = driver.execute_script('return document.body.scrollHeight')
 
             while True:
-                driver.execute_script("window.scrollTo(0, document.body.scrollHeight)")
+                driver.execute_script('window.scrollTo(0, document.body.scrollHeight)')
                 time.sleep(1.5)
-                WebDriverWait(driver, timeout=20).until(
-                    EC.presence_of_element_located((By.TAG_NAME, 'body'))
-                )
-                new_height = driver.execute_script("return document.body.scrollHeight")
+                WebDriverWait(driver, timeout=20).until(EC.presence_of_element_located((By.TAG_NAME, 'body')))
+                new_height = driver.execute_script('return document.body.scrollHeight')
                 time.sleep(1.5)
                 if new_height == last_height:
                     break
@@ -118,7 +115,7 @@ class GetDataClass:
             return html_content
 
         except Exception as e:
-            print(f"Ошибка при запросе: {e}")
+            print(f'Ошибка при запросе: {e}')
             return ''
 
     @staticmethod
@@ -133,7 +130,7 @@ class GetDataClass:
         response = requests.get(url)
         total_pages = dpath.util.get(response.json(), total_pages_path)
 
-        for page in range(total_pages-1):
+        for page in range(total_pages - 1):
             response = requests.get(f'{url}&page={page}')
 
             _next_vacancies = response.json()[vacancies_path]
@@ -164,7 +161,7 @@ class GetDataClass:
             data['vacancies'] = vacancies
             return data
         except Exception as e:
-            print(f"Ошибка при запросе: {e}")
+            print(f'Ошибка при запросе: {e}')
             return ''
 
     @staticmethod
@@ -180,7 +177,7 @@ class GetDataClass:
                 data = {}
 
         except Exception as e:
-            print(f"Ошибка при запросе: {e}")
+            print(f'Ошибка при запросе: {e}')
             data = {}
         vacancies = [publication for y in dpath.util.get(data, kwargs['json_vacancies_path']) for publication in y]
         return {'vacancies': vacancies}

@@ -29,7 +29,7 @@ CROWLERS = [
 ]
 
 
-async def run_test_crowlers_threading():
+async def run_crowlers_threading():
     threads = []
     start_time = datetime.now()
     all_links = []
@@ -37,9 +37,7 @@ async def run_test_crowlers_threading():
     redis_cache = RedisCache()
     await redis_cache.connect()
 
-    pandas_xlsx_storage = PandasXLSXStorage(
-        "urls_crowler/result.xlsx"
-    )
+    pandas_xlsx_storage = PandasXLSXStorage('urls_crowler/result.xlsx')
 
     print('Начал работу')
 
@@ -60,4 +58,4 @@ async def run_test_crowlers_threading():
 
 
 if __name__ == '__main__':
-    asyncio.run(run_test_crowlers_threading())
+    asyncio.run(run_crowlers_threading())

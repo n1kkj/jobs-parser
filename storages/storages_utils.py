@@ -17,7 +17,7 @@ def extract_dataframe(page_data: ParseResultDTO) -> pandas.DataFrame:
                 page_data.link,
             ]
         ],
-        columns=['Компания', 'Должность', 'Требуемый опыт', 'Стек', 'ЗП', 'Описание', 'Город', 'Ссылка']
+        columns=['Компания', 'Должность', 'Требуемый опыт', 'Стек', 'ЗП', 'Описание', 'Город', 'Ссылка'],
     )
 
     return dataframe

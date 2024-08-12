@@ -11,9 +11,7 @@ class ITFutCrowler(BaseJSONUrlCrowler):
     url_key = 'alias'
     links_params = {}
 
-    extra_kwargs = {
-        'json_vacancies_path': json_vacancies_path
-    }
+    extra_kwargs = {'json_vacancies_path': json_vacancies_path}
 
     link_parser = ItFutParser
 

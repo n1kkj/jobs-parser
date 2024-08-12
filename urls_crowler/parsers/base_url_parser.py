@@ -14,6 +14,7 @@ class BaseUrlParser:
     """
     Base URL parser class
     """
+
     title_key = None
     desc_key = None
     salary_key = None
@@ -42,7 +43,7 @@ class BaseUrlParser:
     @classmethod
     def find_skills(cls, text):
         skills_set = set(skills_list)
-        pattern = r"\b(" + "|".join(re.escape(skill) for skill in skills_set) + r")\b"
+        pattern = r'\b(' + '|'.join(re.escape(skill) for skill in skills_set) + r')\b'
         skills = re.findall(pattern, text, re.IGNORECASE)
         return ', '.join(set(skills))
 

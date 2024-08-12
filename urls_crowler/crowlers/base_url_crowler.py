@@ -9,6 +9,7 @@ class BaseUrlCrowler:
     """
     Base URL crowler class
     """
+
     main_ulr = None
     data_get_function = None
     vacancies_prefix = None
@@ -66,9 +67,7 @@ class BaseHTMLUrlCrowler(BaseUrlCrowler):
     def get_links(cls, *args, **kwargs) -> list:
         data = super().get_data(*args, **kwargs)
         soup = BeautifulSoup(data, 'html.parser')
-        vacancies_urls = [
-            f'{cls.vacancies_prefix}{x["href"]}' for x in soup.find_all('a', class_=cls.html_link_class)
-        ]
+        vacancies_urls = [f'{cls.vacancies_prefix}{x["href"]}' for x in soup.find_all('a', class_=cls.html_link_class)]
         return vacancies_urls
 
 
