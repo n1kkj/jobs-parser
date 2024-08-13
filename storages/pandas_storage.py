@@ -5,7 +5,8 @@ from storages import extract_dataframe
 
 
 class PandasXLSXStorage:
-    DATA_COLUMNS = ['Компания', 'Должность', 'Требуемый опыт', 'Стек', 'ЗП', 'Описание', 'Город', 'Ссылка']
+    DATA_COLUMNS = ['Компания', 'Должность', 'Направление', 'Поднаправление',
+                    'Требуемый опыт', 'Стек', 'ЗП', 'Описание', 'Город', 'Ссылка']
 
     def __init__(self, file_name: str):
         self.__file_name = file_name

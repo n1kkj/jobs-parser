@@ -30,11 +30,18 @@ CROWLERS = [
 
 
 async def run_crowlers_threading():
-    print('Произвожу подготовку')
-    start_time = datetime.now()
-
     redis_cache = RedisCache()
     await redis_cache.connect()
+
+    if settings.DELETE_ALL:
+        print('Стираю весь кэш')
+
+        all_redis_links = await redis_cache.get_all_keys()
+        for redis_link in all_redis_links:
+            await redis_cache.delete(redis_link)
+
+    print('Произвожу подготовку')
+    start_time = datetime.now()
 
     all_data = []
     all_links = []

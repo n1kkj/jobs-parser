@@ -6,7 +6,7 @@ import dpath.util as du
 from bs4 import BeautifulSoup
 
 from urls_crowler.dto import ParseResultDTO, FixedValuesDTO
-from urls_crowler.utils import skills_list
+from urls_crowler.utils import skills_dict
 from urls_crowler.utils.get_data_class import GetDataClass
 
 
@@ -42,10 +42,29 @@ class BaseUrlParser:
 
     @classmethod
     def find_skills(cls, text):
-        skills_set = set(skills_list)
+        skills_set = set(skills_dict.keys())
         pattern = r'\b(' + '|'.join(re.escape(skill) for skill in skills_set) + r')\b'
         skills = re.findall(pattern, text, re.IGNORECASE)
-        return ', '.join(set(skills))
+        skills = [skill.lower() for skill in skills]
+        return list(set(skills))
+
+    @classmethod
+    def specify_profession(cls, skills):
+        direction_counts = {}
+
+        for skill in skills:
+            directions = skills_dict[skill].split(", ")
+
+            for direction in directions:
+                if direction not in direction_counts:
+                    direction_counts[direction] = 0
+                direction_counts[direction] += 1
+
+        if len(direction_counts.values()) > 0:
+            max_count = max(direction_counts.values())
+            most_frequent_directions = [direction for direction, count in direction_counts.items() if count == max_count]
+            return most_frequent_directions[0].split('/')
+        return '/'.split('/')
 
     @classmethod
     def get_keys(cls) -> dict:
@@ -125,7 +144,10 @@ class BaseJSONUrlParser(BaseUrlParser):
     @classmethod
     def _parse_link(cls, vacancy, result_values, keys, fixed_keys, fixed, link) -> dict:
         skills = cls.find_skills(json.dumps(vacancy))
-        result_values['skills'] = skills
+        result_values['skills'] = ', '.join(skills)
+        specify_profession = cls.specify_profession(skills)
+        result_values['direction'] = specify_profession[0]
+        result_values['profession'] = specify_profession[1]
 
         for key, value in keys.items():
             res_value = ''
@@ -205,7 +227,10 @@ class BaseHTMLUrlParser(BaseUrlParser):
         soup = BeautifulSoup(data, 'html.parser')
 
         skills = cls.find_skills(soup.text)
-        result_values['skills'] = skills
+        result_values['skills'] = ', '.join(skills)
+        specify_profession = cls.specify_profession(skills)
+        result_values['direction'] = specify_profession[0]
+        result_values['profession'] = specify_profession[1]
 
         for key, value in keys.items():
             res_value = ''

@@ -8,3 +8,4 @@ FILE_NAME = 'result.xlsx'
 BOT_TOKEN = '7405045997:AAG5c0acQn62ypW6xOgeg6bNCZwCF-8cX5I'
 
 WITH_DELETE = False
+DELETE_ALL = True

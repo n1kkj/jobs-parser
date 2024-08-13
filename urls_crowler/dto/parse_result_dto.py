@@ -11,4 +11,6 @@ class ParseResultDTO(BaseModel):
     salary: Optional[str]
     city: Optional[str]
     employer: Optional[str]
+    direction: Optional[str]
+    profession: Optional[str]
     link: str
