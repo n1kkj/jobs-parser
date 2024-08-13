@@ -37,6 +37,7 @@ def start(start_message, file_name=settings.FILE_NAME):
         bot.send_message(start_message.from_user.id, 'Начал обработку')
         run_parser_for_bot()
         bot.send_document(start_message.from_user.id, open(file_name, 'rb'))
+        YOParserBot.set_progress(False)
     else:
         bot.send_message(start_message.from_user.id, YOParserBot.waiting_messages[YOParserBot.waiting_messages_index])
         if YOParserBot.waiting_messages_index == len(YOParserBot.waiting_messages) - 1:
