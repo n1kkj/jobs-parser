@@ -53,7 +53,7 @@ class BaseUrlParser:
         direction_counts = {}
 
         for skill in skills:
-            directions = skills_dict[skill].split(", ")
+            directions = skills_dict[skill].split(', ')
 
             for direction in directions:
                 if direction not in direction_counts:
@@ -62,7 +62,9 @@ class BaseUrlParser:
 
         if len(direction_counts.values()) > 0:
             max_count = max(direction_counts.values())
-            most_frequent_directions = [direction for direction, count in direction_counts.items() if count == max_count]
+            most_frequent_directions = [
+                direction for direction, count in direction_counts.items() if count == max_count
+            ]
             return most_frequent_directions[0].split('/')
         return '/'.split('/')
 
