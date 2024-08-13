@@ -18,12 +18,6 @@ def _run_bot():
     bot.polling(none_stop=True)
 
 
-def run_bot():
-    thread = threading.Thread(target=_run_bot)
-    thread.daemon = True
-    thread.start()
-    thread.join()
-
-
-if __name__ == '__main__':
-    run_bot()
+thread = threading.Thread(target=_run_bot)
+thread.daemon = True
+thread.start()
