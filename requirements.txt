@@ -36,3 +36,4 @@ aioredis
 asyncio
 pytest
 pytelegrambotapi~=4.22.0
+uvicorn~=0.30.1

@@ -154,7 +154,7 @@ class GetDataClass:
             response.raise_for_status()
             total_pages = response.json()['data']['total']
 
-            for skip in range(0, 1, 100):
+            for skip in range(0, total_pages, 100):
                 response = requests.get(f'{url}&skip={skip}')
                 vacancies.extend(response.json()['data']['vacancies'])
 
