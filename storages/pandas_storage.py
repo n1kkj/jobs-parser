@@ -35,6 +35,7 @@ class PandasXLSXStorage:
             max_len = max(len(str(col)), dataframe[col].astype(str).map(len).max())
             worksheet.set_column(i, i, max_len + 2)
 
+        worksheet.freeze_panes(1, 0)
         writer.save()
         return dataframe
 
