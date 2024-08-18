@@ -25,6 +25,17 @@ class PandasXLSXStorage:
     def __initialize_file(self):
         dataframe = pandas.DataFrame(columns=self.DATA_COLUMNS)
         dataframe.to_excel(self.__file_name, index=False)
+
+        writer = pandas.ExcelWriter(self.__file_name, engine='xlsxwriter')
+        dataframe.to_excel(writer, sheet_name='Sheet1', index=False)
+
+        worksheet = writer.sheets['Sheet1']
+
+        for i, col in enumerate(self.DATA_COLUMNS):
+            max_len = max(len(str(col)), dataframe[col].astype(str).map(len).max())
+            worksheet.set_column(i, i, max_len + 2)
+
+        writer.save()
         return dataframe
 
     def store_many(self, pages_data: list[ParseResultDTO]):
