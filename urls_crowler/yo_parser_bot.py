@@ -29,14 +29,22 @@ class YOParserBot:
     def set_progress(cls, in_process):
         cls.in_process = in_process
 
+    @staticmethod
+    def make_message_from_data(result_message):
+        return (f'Всего ссылок: {result_message.all_links_count}\n'
+                f'Всего времени: {result_message.time_spent}\n'
+                f'Средняя скорость: {result_message.av_speed} вакансий/сек')
+
+
 
 @bot.message_handler(commands=['start'])
 def start(start_message, file_name=settings.FILE_NAME):
     if not YOParserBot.get_progress():
         YOParserBot.set_progress(True)
         bot.send_message(start_message.from_user.id, 'Начал обработку')
-        run_parser_for_bot()
+        result_message = run_parser_for_bot()
         bot.send_document(start_message.from_user.id, open(file_name, 'rb'))
+        bot.send_message(start_message.from_user.id, YOParserBot.make_message_from_data(result_message))
         YOParserBot.set_progress(False)
     else:
         bot.send_message(start_message.from_user.id, YOParserBot.waiting_messages[YOParserBot.waiting_messages_index])

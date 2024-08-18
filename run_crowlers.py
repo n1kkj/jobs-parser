@@ -15,6 +15,7 @@ from urls_crowler.crowlers import (
 )
 from redis_cache import RedisCache
 from storages.pandas_storage import PandasXLSXStorage
+from urls_crowler.dto import ResultMessageDTO
 
 CROWLERS = [
     AvitoCrowler,
@@ -52,10 +53,9 @@ async def run_crowlers_threading():
     print('Начал работу')
 
     async def run_crowler(crowler):
-        data, links, cached = await crowler.run_crowl(redis_cache)
+        data, links = await crowler.run_crowl(redis_cache)
         all_data.extend(data)
         all_links.extend(links)
-        cached_links.extend(cached)
 
     tasks = [asyncio.create_task(run_crowler(crowler)) for crowler in CROWLERS]
     await asyncio.gather(*tasks)
@@ -64,36 +64,38 @@ async def run_crowlers_threading():
     pandas_xlsx_storage.store_many(all_data)
     pandas_xlsx_storage.commit()
 
-    if settings.WITH_DELETE:
-        print('Очищаю кэш')
-        all_redis_links = await redis_cache.get_all_keys()
-        for redis_link in all_redis_links:
-            if redis_link not in all_links:
-                await redis_cache.delete(redis_link)
-
     await redis_cache.disconnect()
 
     end_time = datetime.now() - start_time
+
+    result_message = ResultMessageDTO(
+        all_links_count = len(all_links),
+        time_spent = end_time,
+        av_speed = len(all_links)/end_time.total_seconds(),
+    )
 
     print(
         'Закончил обработку ссылок, надеюсь вы обрадуетесь результату, жду вас вновь!\n'
         'Приберёг статистику для вас)\n'
     )
-    print(f'Всего ссылок: {len(all_links)}')
-    print(f'Ссылок взято из кэша: {len(cached_links)*100//len(all_links)}%')
-    print(f'Всего времени: {end_time}')
-    print(f'Средняя скорость: {len(all_links)/end_time.total_seconds()} вакансий/сек')
+    print(f'Всего ссылок: {result_message.all_links_count}')
+    print(f'Всего времени: {result_message.time_spent}')
+    print(f'Средняя скорость: {result_message.av_speed} вакансий/сек')
+
+    return result_message
 
 
 def main():
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
 
-    loop.run_until_complete(run_crowlers_threading())
+    result_message = loop.run_until_complete(run_crowlers_threading())
+    return result_message
 
 
 def run_parser_for_bot():
-    main()
+    result_message = main()
+    return result_message
 
 
 if __name__ == '__main__':

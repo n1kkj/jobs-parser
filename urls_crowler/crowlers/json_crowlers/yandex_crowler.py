@@ -21,5 +21,5 @@ class YandexCrowler(BaseJSONUrlCrowler):
 
     @classmethod
     async def run_crowl(cls, redis_cache, *args, **kwargs):
-        results, all_links, cached_links = await cls.run_parse_all_links_from_one(redis_cache, *args, **kwargs)
-        return results, all_links, cached_links
+        results, all_links = await cls.run_parse_all_links_from_one(redis_cache, *args, **kwargs)
+        return results, all_links

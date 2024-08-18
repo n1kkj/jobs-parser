@@ -94,7 +94,7 @@ class BaseUrlParser:
             if value:
                 prepare_fixed[key] = value
         fixed = FixedValuesDTO(**prepare_fixed)
-        return fixed.dict(exclude_unset=True)
+        return fixed.model_dump(exclude_unset=True)
 
     @classmethod
     async def parse_all_links(cls, all_links, redis_cache) -> (List[ParseResultDTO], List, List):
@@ -102,19 +102,14 @@ class BaseUrlParser:
         fixed = cls.get_fixed()
         results = []
 
-        cached_links = []
-
         for link in all_links:
             cached_data = await redis_cache.get(link)
-            if cached_data:
-                results.append(ParseResultDTO.parse_raw(cached_data))
-                cached_links.append(link)
-            else:
+            if not cached_data:
                 parse_result = cls.parse_link(link, keys, fixed)
                 results.append(parse_result)
-                await redis_cache.set(link, parse_result.json())
+                await redis_cache.set(link, parse_result.model_dump_json())
 
-        return results, all_links, cached_links
+        return results, all_links
 
     @classmethod
     async def parse_all_links_from_one(cls, data, redis_cache) -> (List[ParseResultDTO], List, List):
@@ -191,7 +186,6 @@ class BaseJSONUrlParser(BaseUrlParser):
         fixed_keys = fixed.keys()
 
         all_links = []
-        cached_links = []
 
         try:
             vacancies_list = du.get(data, cls.vacancies_list_key)
@@ -204,17 +198,14 @@ class BaseJSONUrlParser(BaseUrlParser):
             all_links.append(link)
 
             cached_data = await redis_cache.get(link)
-            if cached_data:
-                result_all_data.append(ParseResultDTO.parse_raw(cached_data))
-                cached_links.append(link)
-            else:
+            if not cached_data:
                 result_values = {'link': link}
                 result_values = cls._parse_link(vacancy, result_values, keys, fixed_keys, fixed, link)
                 parse_result = ParseResultDTO(**result_values)
                 result_all_data.append(parse_result)
-                await redis_cache.set(link, parse_result.json())
+                await redis_cache.set(link, parse_result.model_dump_json())
 
-        return result_all_data, all_links, cached_links
+        return result_all_data, all_links
 
 
 class BaseHTMLUrlParser(BaseUrlParser):
