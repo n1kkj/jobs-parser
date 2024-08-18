@@ -46,7 +46,6 @@ async def run_crowlers_threading():
 
     all_data = []
     all_links = []
-    cached_links = []
 
     pandas_xlsx_storage = PandasXLSXStorage(settings.FILE_NAME)
 
