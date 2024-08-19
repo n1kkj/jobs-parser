@@ -24,12 +24,11 @@ class PandasXLSXStorage:
 
     def __initialize_file(self):
         dataframe = pandas.DataFrame(columns=self.DATA_COLUMNS)
-        dataframe.to_excel(self.__file_name, index=False)
+        dataframe.to_excel(self.__file_name, index=False, freeze_panes=(0, 1))
 
         with pandas.ExcelWriter(self.__file_name, engine='xlsxwriter') as writer:
             dataframe.to_excel(writer, sheet_name='Sheet1', index=False)
             worksheet = writer.sheets['Sheet1']
-            worksheet.freeze_panes(1, 0)
             for i, col in enumerate(self.DATA_COLUMNS):
                 worksheet.set_column(i, i, len(col) + 2)
 
