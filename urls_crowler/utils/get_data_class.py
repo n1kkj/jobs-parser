@@ -181,8 +181,9 @@ class GetDataClass:
             data = {}
 
         vacancies = []
+        json_vacancies_path = kwargs['json_vacancies_path']
         try:
-            vacancies = [publication for y in dpath.util.get(data, kwargs['json_vacancies_path']) for publication in y]
+            vacancies = [publication for y in dpath.util.get(data, json_vacancies_path) for publication in y]
         except KeyError:
-            print(f'Произошла ошибка с {url}, неверный ключ вакансий: {kwargs['json_vacancies_path']}')
+            print(f'Произошла ошибка с {url}, неверный ключ вакансий: {json_vacancies_path}')
         return {'vacancies': vacancies}
