@@ -97,22 +97,22 @@ class BaseUrlParser:
         return fixed.model_dump(exclude_unset=True)
 
     @classmethod
-    async def parse_all_links(cls, all_links, redis_cache) -> (List[ParseResultDTO], List, List):
+    def parse_all_links(cls, all_links, redis_cache) -> (List[ParseResultDTO], List, List):
         keys = cls.get_keys()
         fixed = cls.get_fixed()
         results = []
 
         for link in all_links:
-            cached_data = await redis_cache.get(link)
+            cached_data = redis_cache.get(link)
             if not cached_data:
                 parse_result = cls.parse_link(link, keys, fixed)
                 results.append(parse_result)
-                await redis_cache.set(link, parse_result.model_dump_json())
+                redis_cache.set(link, parse_result.model_dump_json())
 
         return results, all_links
 
     @classmethod
-    async def parse_all_links_from_one(cls, data, redis_cache) -> (List[ParseResultDTO], List, List):
+    def parse_all_links_from_one(cls, data, redis_cache) -> (List[ParseResultDTO], List, List):
         """
         Custom for every parser
         :return: Dict of data
@@ -179,7 +179,7 @@ class BaseJSONUrlParser(BaseUrlParser):
         return ParseResultDTO(**result_values)
 
     @classmethod
-    async def parse_all_links_from_one(cls, data, redis_cache, *args, **kwargs) -> (List[ParseResultDTO], List, List):
+    def parse_all_links_from_one(cls, data, redis_cache, *args, **kwargs) -> (List[ParseResultDTO], List, List):
         keys = super().get_keys()
         result_all_data = []
         fixed = super().get_fixed()
@@ -197,13 +197,13 @@ class BaseJSONUrlParser(BaseUrlParser):
             link = f'{cls.vacancies_prefix}{du.get(vacancy, cls.url_key)}\n'
             all_links.append(link)
 
-            cached_data = await redis_cache.get(link)
+            cached_data = redis_cache.get(link)
             if not cached_data:
                 result_values = {'link': link}
                 result_values = cls._parse_link(vacancy, result_values, keys, fixed_keys, fixed, link)
                 parse_result = ParseResultDTO(**result_values)
                 result_all_data.append(parse_result)
-                await redis_cache.set(link, parse_result.model_dump_json())
+                redis_cache.set(link, parse_result.model_dump_json())
 
         return result_all_data, all_links
 

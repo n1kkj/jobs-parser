@@ -1,4 +1,4 @@
-import aioredis
+import redis
 
 import settings
 
@@ -6,30 +6,22 @@ import settings
 class RedisCache:
     def __init__(self, redis_url=settings.REDIS_DATABASE_URL):
         self.redis_url = redis_url
-        self.redis = None
+        self.redis = redis.Redis.from_url(self.redis_url)
 
-    async def connect(self):
-        if self.redis is None:
-            self.redis = await aioredis.from_url(self.redis_url)
+    def disconnect(self):
+        self.redis.close()
 
-    async def disconnect(self):
-        if self.redis is not None:
-            await self.redis.close()
+    def set(self, key: str, value: str):
+        self.redis.set(key.encode(), value.encode())
 
-    async def set(self, key: str, value: str):
-        await self.redis.set(key.encode(), value.encode())
-
-    async def get(self, key: str):
-        async with self.redis.client() as conn:
-            value = await conn.get(key.encode())
-
+    def get(self, key: str):
+        value = self.redis.get(key)
         if value is None:
             return
         return value.decode()
 
-    async def get_all_keys(self):
-        return [key.decode() for key in await self.redis.keys()]
+    def get_all_keys(self):
+        return [key.decode() for key in self.redis.keys()]
 
-    async def delete(self, key):
-        async with self.redis.client() as conn:
-            await conn.delete(key.encode())
+    def delete(self, key):
+        self.redis.delete(key.encode())

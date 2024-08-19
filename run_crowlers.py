@@ -1,4 +1,4 @@
-import asyncio
+import threading
 from datetime import datetime
 
 import settings
@@ -30,46 +30,48 @@ CROWLERS = [
 ]
 
 
-async def run_crowlers_threading():
+def run_crowlers_threading():
+    print('Произвожу подготовку')
     redis_cache = RedisCache()
-    await redis_cache.connect()
 
     if settings.DELETE_ALL:
         print('Стираю весь кэш')
 
-        all_redis_links = await redis_cache.get_all_keys()
+        all_redis_links = redis_cache.get_all_keys()
         for redis_link in all_redis_links:
-            await redis_cache.delete(redis_link)
+            redis_cache.delete(redis_link)
 
-    print('Произвожу подготовку')
     start_time = datetime.now()
-
+    pandas_xlsx_storage = PandasXLSXStorage(settings.FILE_NAME)
     all_data = []
     all_links = []
-
-    pandas_xlsx_storage = PandasXLSXStorage(settings.FILE_NAME)
-
+    threads = []
     print('Начал работу')
 
-    async def run_crowler(crowler):
-        data, links = await crowler.run_crowl(redis_cache)
-        all_data.extend(data)
-        all_links.extend(links)
+    for crowler in CROWLERS:
+        def target_function():
+            data, links = crowler.run_crowl(redis_cache)
+            all_data.extend(data)
+            all_links.extend(links)
 
-    tasks = [asyncio.create_task(run_crowler(crowler)) for crowler in CROWLERS]
-    await asyncio.gather(*tasks)
+        thread = threading.Thread(target=target_function)
+        threads.append(thread)
+        thread.start()
+
+    for thread in threads:
+        thread.join()
 
     print('Сохраняю в файл')
     pandas_xlsx_storage.store_many(all_data)
     pandas_xlsx_storage.commit()
 
-    await redis_cache.disconnect()
+    redis_cache.disconnect()
 
     end_time = datetime.now() - start_time
 
     result_message = ResultMessageDTO(
         all_links_count = len(all_links),
-        time_spent = end_time,
+        time_spent = str(end_time),
         av_speed = len(all_links)/end_time.total_seconds(),
     )
 
@@ -85,10 +87,7 @@ async def run_crowlers_threading():
 
 
 def main():
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-
-    result_message = loop.run_until_complete(run_crowlers_threading())
+    result_message = run_crowlers_threading()
     return result_message
 
 

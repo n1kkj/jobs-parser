@@ -36,7 +36,7 @@ class PandasXLSXStorage:
             worksheet.set_column(i, i, max_len + 2)
 
         worksheet.freeze_panes(1, 0)
-        writer.save()
+        writer._save()
         return dataframe
 
     def store_many(self, pages_data: list[ParseResultDTO]):

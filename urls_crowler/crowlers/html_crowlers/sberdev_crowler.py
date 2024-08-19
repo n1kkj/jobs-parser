@@ -11,6 +11,6 @@ class SberDevCrowler(BaseHTMLUrlCrowler):
     link_parser = SberDevParser
 
     @classmethod
-    async def run_crowl(cls, redis_cache, *args, **kwargs):
-        results, all_links = await cls.run_parse_all_links(redis_cache, *args, **kwargs)
+    def run_crowl(cls, redis_cache, *args, **kwargs):
+        results, all_links = cls.run_parse_all_links(redis_cache, *args, **kwargs)
         return results, all_links
