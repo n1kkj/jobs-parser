@@ -179,5 +179,10 @@ class GetDataClass:
         except Exception as e:
             print(f'Ошибка при запросе: {e}')
             data = {}
-        vacancies = [publication for y in dpath.util.get(data, kwargs['json_vacancies_path']) for publication in y]
+
+        vacancies = []
+        try:
+            vacancies = [publication for y in dpath.util.get(data, kwargs['json_vacancies_path']) for publication in y]
+        except KeyError:
+            print(f'Произошла ошибка с {url}, неверный ключ вакансий: {kwargs['json_vacancies_path']}')
         return {'vacancies': vacancies}
