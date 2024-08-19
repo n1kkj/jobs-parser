@@ -32,7 +32,9 @@ class PandasXLSXStorage:
             for i, col in enumerate(self.DATA_COLUMNS):
                 worksheet.set_column(i, i, len(col) + 2)
 
-            worksheet.freeze_panes(0, 1)
+            worksheet.freeze_panes(1, 0)
+
+            writer.close()
 
         return dataframe
 
