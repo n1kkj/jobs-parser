@@ -1,6 +1,6 @@
-from typing import Optional
+from typing import Optional, List
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class ParseResultDTO(BaseModel):
@@ -14,3 +14,4 @@ class ParseResultDTO(BaseModel):
     direction: Optional[str]
     profession: Optional[str]
     link: str
+    users: Optional[List[str]] = Field(None)

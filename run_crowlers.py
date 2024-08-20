@@ -79,9 +79,9 @@ def run_crowlers_threading():
         'Закончил обработку ссылок, надеюсь вы обрадуетесь результату, жду вас вновь!\n'
         'Приберёг статистику для вас)\n'
     )
-    print(f'Всего ссылок: {result_message.all_links_count}')
+    print(f'Всего вакансий: {result_message.all_links_count}')
     print(f'Всего времени: {result_message.time_spent}')
-    print(f'Средняя скорость: {result_message.av_speed} вакансий/сек')
+    print(f'Скорость: {result_message.av_speed} вакансий/сек')
 
     return result_message
 

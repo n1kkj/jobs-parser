@@ -1,4 +1,5 @@
 import threading
+import time
 import uvicorn
 import telebot
 
@@ -9,49 +10,84 @@ bot = telebot.TeleBot(settings.BOT_TOKEN)
 
 
 class YOParserBot:
-    in_process = False
-    waiting_messages = [
-        'Подожди, я в процессе, не отвлекай',
-        'Я же попросил',
-        '..ну зачем ты так?',
-        'Уже скоро, потерпи',
-        'Прям чуточку, важный момент, дай подумать',
-        'Скоро будут тебе вакансии, много вакансий, честно честно',
-        'Я всё Никите расскажу!',
-    ]
-    waiting_messages_index = 0
+    def __init__(self):
+        self.last_message_id = None
+        self.in_process = False
 
-    @classmethod
-    def get_progress(cls):
-        return cls.in_process
+        self.status_messages = [
+            'Все обработанные ссылки храняться в кешэ, их не приходится заново обрабатывать.',
+            'Бот не пришлёт тебе те вакансии, которые он тебе уже присылал.',
+            'Бот не будет реагировать ни на какие сообщения пока обрабатывает вакансии.',
+            'Бот может запускать несколько юзеров одновременно и ничего не сломается.',
+            'Даже наоборот, если один юзер наткнётся на новую ссылку, он тут же положит её в кеш,'
+            ' и второй юзер достунет оттуда, а не станет обрабатывать сам',
+            'По окончанию процесса обработки тебе также пришлётся статистика.',
+            'Статистика состоит из трёх частей:\n'
+            '1) Количество вакансий в файле',
+            '2) Время выполнения обработки',
+            '3) Скорость обработки вакансий в секунду.',
+            'Скоро ты сможешь сам настроить интересующую тебя информацию.',
+            'К примеру, сможешь получать ошибки, которые возникли в процессе обработки, '
+            ' или же совсем откючить данную функцию.',
+            'Эти сообщения созданы для того, чтобы ты мог убедиться, что бот работает.',
+        ]
+        self.start_message = 'Начал обработку'
+        self.finish_message = 'Закончил обработку вакансий, надеюсь вы обрадуетесь результату, жду вас вновь!'
+        self.current_message_index = 0
 
-    @classmethod
-    def set_progress(cls, in_process):
-        cls.in_process = in_process
+    def update_status(self, chat_id):
+        self.current_message_index = (self.current_message_index + 1) % len(self.status_messages)
+        message_text = self.status_messages[self.current_message_index]
+        bot.edit_message_text(chat_id=chat_id, message_id=self.last_message_id, text=message_text)
+
+    def finish_status(self, chat_id):
+        self.current_message_index = (self.current_message_index + 1) % len(self.status_messages)
+        bot.edit_message_text(chat_id=chat_id, message_id=self.last_message_id, text=self.finish_message)
+
+    def get_progress(self):
+        return self.in_process
+
+    def set_progress(self, in_process):
+        self.in_process = in_process
 
     @staticmethod
     def make_message_from_data(result_message):
-        return (f'Всего ссылок: {result_message.all_links_count}\n'
+        return (f'Всего вакансий: {result_message.all_links_count}\n'
                 f'Всего времени: {result_message.time_spent}\n'
-                f'Средняя скорость: {result_message.av_speed} вакансий/сек')
+                f'Скорость: {result_message.av_speed} вакансий/сек')
+
+    def start_processing(self, chat_id):
+        self.set_progress(True)
+        bot.send_message(chat_id, self.start_message)
+        self.last_message_id = bot.send_message(chat_id, self.status_messages[0]).message_id
+
+        def run_parser_and_send_result():
+            result_message = run_parser_for_bot()
+            self.set_progress(False)
+            bot.send_document(chat_id, open(settings.FILE_NAME, 'rb'))
+            bot.send_message(chat_id, self.make_message_from_data(result_message))
+
+        parser_thread = threading.Thread(target=run_parser_and_send_result)
+        parser_thread.start()
+
+        while self.get_progress():
+            time.sleep(6)
+            self.update_status(chat_id)
+        self.finish_status(chat_id)
+
+        parser_thread.join()
 
 
-
+users_running = []
 @bot.message_handler(commands=['start'])
-def start(start_message, file_name=settings.FILE_NAME):
-    if not YOParserBot.get_progress():
-        YOParserBot.set_progress(True)
-        bot.send_message(start_message.from_user.id, 'Начал обработку')
-        result_message = run_parser_for_bot()
-        bot.send_document(start_message.from_user.id, open(file_name, 'rb'))
-        bot.send_message(start_message.from_user.id, YOParserBot.make_message_from_data(result_message))
-        YOParserBot.set_progress(False)
-    else:
-        bot.send_message(start_message.from_user.id, YOParserBot.waiting_messages[YOParserBot.waiting_messages_index])
-        if YOParserBot.waiting_messages_index == len(YOParserBot.waiting_messages) - 1:
-            YOParserBot.waiting_messages_index = 0
-        else:
-            YOParserBot.waiting_messages_index += 1
+def start(update):
+    chat_id = update.from_user.id
+    if chat_id not in users_running:
+        yo_instance = YOParserBot()
+        users_running.append(chat_id)
+        yo_instance.start_processing(chat_id)
+        users_running.remove(chat_id)
+
 
 
 def _run_bot():

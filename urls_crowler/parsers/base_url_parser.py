@@ -97,7 +97,7 @@ class BaseUrlParser:
         return fixed.model_dump(exclude_unset=True)
 
     @classmethod
-    def parse_all_links(cls, all_links, redis_cache) -> (List[ParseResultDTO], List, List):
+    def parse_all_links(cls, all_links, redis_cache) -> (List[ParseResultDTO], List):
         keys = cls.get_keys()
         fixed = cls.get_fixed()
         results = []
@@ -112,7 +112,7 @@ class BaseUrlParser:
         return results, all_links
 
     @classmethod
-    def parse_all_links_from_one(cls, data, redis_cache) -> (List[ParseResultDTO], List, List):
+    def parse_all_links_from_one(cls, data, redis_cache) -> (List[ParseResultDTO], List):
         """
         Custom for every parser
         :return: Dict of data
@@ -179,7 +179,7 @@ class BaseJSONUrlParser(BaseUrlParser):
         return ParseResultDTO(**result_values)
 
     @classmethod
-    def parse_all_links_from_one(cls, data, redis_cache, *args, **kwargs) -> (List[ParseResultDTO], List, List):
+    def parse_all_links_from_one(cls, data, redis_cache, *args, **kwargs) -> (List[ParseResultDTO], List):
         keys = super().get_keys()
         result_all_data = []
         fixed = super().get_fixed()
@@ -190,8 +190,8 @@ class BaseJSONUrlParser(BaseUrlParser):
         try:
             vacancies_list = du.get(data, cls.vacancies_list_key)
         except KeyError:
-            print(f'Произошла ошибка с {cls.__str__}, неверный ключ вакансий: {cls.vacancies_list_key}')
-            return []
+            print(f'Произошла ошибка с {cls.__name__}, неверный ключ вакансий: {cls.vacancies_list_key}')
+            return [], []
 
         for vacancy in vacancies_list:
             link = f'{cls.vacancies_prefix}{du.get(vacancy, cls.url_key)}\n'
