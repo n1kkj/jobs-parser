@@ -1,6 +1,6 @@
 import unittest
 
-from run_crowlers import run_crowlers_threading
+from urls_crowler.run_crowlers import run_crowlers_threading
 
 
 class TestMainApp(unittest.IsolatedAsyncioTestCase):

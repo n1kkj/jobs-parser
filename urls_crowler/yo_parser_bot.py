@@ -4,7 +4,7 @@ import uvicorn
 import telebot
 
 import settings
-from run_crowlers import run_parser_for_bot
+from urls_crowler.run_crowlers import run_parser_for_bot
 
 bot = telebot.TeleBot(settings.BOT_TOKEN)
 
