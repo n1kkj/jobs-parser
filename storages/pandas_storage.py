@@ -34,8 +34,6 @@ class PandasXLSXStorage:
 
             worksheet.freeze_panes = 'K1'
 
-            writer.close()
-
         return dataframe
 
     def store_many(self, pages_data: list[ParseResultDTO]):
