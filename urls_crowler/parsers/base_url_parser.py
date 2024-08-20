@@ -97,7 +97,7 @@ class BaseUrlParser:
         return fixed.model_dump(exclude_unset=True)
 
     @classmethod
-    def parse_all_links(cls, all_links, redis_cache) -> (List[ParseResultDTO], List):
+    def parse_all_links(cls, all_links, redis_cache, chat_id) -> (List[ParseResultDTO], List):
         keys = cls.get_keys()
         fixed = cls.get_fixed()
         results = []
@@ -107,12 +107,20 @@ class BaseUrlParser:
             if not cached_data:
                 parse_result = cls.parse_link(link, keys, fixed)
                 results.append(parse_result)
+                parse_result.users.append(chat_id)
                 redis_cache.set(link, parse_result.model_dump_json())
+            else:
+                parse_result = ParseResultDTO.model_validate_json(cached_data)
+                if chat_id not in parse_result.users:
+                    results.append(parse_result)
+                    parse_result.users.append(chat_id)
+                    redis_cache.set(link, parse_result.model_dump_json())
+
 
         return results, all_links
 
     @classmethod
-    def parse_all_links_from_one(cls, data, redis_cache) -> (List[ParseResultDTO], List):
+    def parse_all_links_from_one(cls, data, redis_cache, chat_id) -> (List[ParseResultDTO], List):
         """
         Custom for every parser
         :return: Dict of data
@@ -179,7 +187,7 @@ class BaseJSONUrlParser(BaseUrlParser):
         return ParseResultDTO(**result_values)
 
     @classmethod
-    def parse_all_links_from_one(cls, data, redis_cache, *args, **kwargs) -> (List[ParseResultDTO], List):
+    def parse_all_links_from_one(cls, data, redis_cache, chat_id, *args, **kwargs) -> (List[ParseResultDTO], List):
         keys = super().get_keys()
         result_all_data = []
         fixed = super().get_fixed()
@@ -203,7 +211,15 @@ class BaseJSONUrlParser(BaseUrlParser):
                 result_values = cls._parse_link(vacancy, result_values, keys, fixed_keys, fixed, link)
                 parse_result = ParseResultDTO(**result_values)
                 result_all_data.append(parse_result)
+                parse_result.users.append(chat_id)
                 redis_cache.set(link, parse_result.model_dump_json())
+            else:
+                parse_result = ParseResultDTO.model_validate_json(cached_data)
+                parse_result.users = [] if not parse_result.users else parse_result.users
+                if chat_id not in parse_result.users:
+                    result_all_data.append(parse_result)
+                    parse_result.users.append(chat_id)
+                    redis_cache.set(link, parse_result.model_dump_json())
 
         return result_all_data, all_links
 

@@ -14,6 +14,6 @@ class SberCrowler(BaseJSONUrlCrowler):
     link_parser = SberParser
 
     @classmethod
-    def run_crowl(cls, redis_cache, *args, **kwargs):
-        results, all_links = cls.run_parse_all_links_from_one(redis_cache, *args, **kwargs)
+    def run_crowl(cls, redis_cache, chat_id, *args, **kwargs):
+        results, all_links = cls.run_parse_all_links_from_one(redis_cache, chat_id, *args, **kwargs)
         return results, all_links

@@ -30,7 +30,7 @@ CROWLERS = [
 ]
 
 
-def run_crowlers_threading():
+def run_crowlers_threading(chat_id):
     print('Произвожу подготовку')
     redis_cache = RedisCache()
 
@@ -50,7 +50,7 @@ def run_crowlers_threading():
 
     for crowler in CROWLERS:
         def target_function():
-            data, links = crowler.run_crowl(redis_cache)
+            data, links = crowler.run_crowl(redis_cache, chat_id)
             all_data.extend(data)
             all_links.extend(links)
 
@@ -86,15 +86,15 @@ def run_crowlers_threading():
     return result_message
 
 
-def main():
-    result_message = run_crowlers_threading()
+def main(chat_id):
+    result_message = run_crowlers_threading(chat_id)
     return result_message
 
 
-def run_parser_for_bot():
-    result_message = main()
+def run_parser_for_bot(chat_id):
+    result_message = main(chat_id)
     return result_message
 
 
 if __name__ == '__main__':
-    main()
+    main(1334928287)

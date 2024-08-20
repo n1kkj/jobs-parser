@@ -16,6 +16,6 @@ class OzonCrowler(BaseJSONUrlCrowler):
     link_parser = OzonParser
 
     @classmethod
-    def run_crowl(cls, redis_cache, *args, **kwargs):
-        results, all_links = cls.run_parse_all_links(redis_cache, *args, **kwargs)
+    def run_crowl(cls, redis_cache, chat_id, *args, **kwargs):
+        results, all_links = cls.run_parse_all_links(redis_cache, chat_id, *args, **kwargs)
         return results, all_links

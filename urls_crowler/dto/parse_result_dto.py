@@ -14,4 +14,4 @@ class ParseResultDTO(BaseModel):
     direction: Optional[str]
     profession: Optional[str]
     link: str
-    users: Optional[List[str]] = Field(None)
+    users: Optional[List[int]] = []

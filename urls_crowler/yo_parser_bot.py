@@ -62,7 +62,7 @@ class YOParserBot:
         self.last_message_id = bot.send_message(chat_id, self.status_messages[0]).message_id
 
         def run_parser_and_send_result():
-            result_message = run_parser_for_bot()
+            result_message = run_parser_for_bot(chat_id)
             self.set_progress(False)
             bot.send_document(chat_id, open(settings.FILE_NAME, 'rb'))
             bot.send_message(chat_id, self.make_message_from_data(result_message))
