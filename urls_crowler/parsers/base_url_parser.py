@@ -104,9 +104,7 @@ class BaseUrlParser:
 
         for link in all_links:
             cached_data = redis_cache.get(link)
-            if cached_data:
-                all_links.remove(link)
-            else:
+            if not cached_data:
                 parse_result = cls.parse_link(link, keys, fixed)
                 results.append(parse_result)
                 redis_cache.set(link, parse_result.model_dump_json())
@@ -164,7 +162,7 @@ class BaseJSONUrlParser(BaseUrlParser):
                 result_values[key] = res_value
 
             except Exception as e:
-                print(f'Ошибка при обработке ссылки {link}{e}')
+                print(f'Ошибка при обработке ссылки {link}\n{e}')
                 result_values[key] = ''
 
         return result_values
@@ -200,9 +198,7 @@ class BaseJSONUrlParser(BaseUrlParser):
             all_links.append(link)
 
             cached_data = redis_cache.get(link)
-            if cached_data:
-                all_links.remove(link)
-            else:
+            if not cached_data:
                 result_values = {'link': link}
                 result_values = cls._parse_link(vacancy, result_values, keys, fixed_keys, fixed, link)
                 parse_result = ParseResultDTO(**result_values)

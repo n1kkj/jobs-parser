@@ -70,7 +70,7 @@ def run_crowlers_threading():
     end_time = datetime.now() - start_time
 
     result_message = ResultMessageDTO(
-        all_links_count = len(all_links),
+        all_links_count = len(all_data),
         time_spent = str(end_time).split('.')[0],
         av_speed = str(len(all_links)/end_time.total_seconds()).split('.')[0],
     )
