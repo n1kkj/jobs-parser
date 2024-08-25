@@ -2,6 +2,7 @@ import threading
 import time
 import uvicorn
 import telebot
+from starlette.applications import Starlette
 
 import settings
 from urls_crowler.run_crowlers import run_parser_for_bot
@@ -124,6 +125,8 @@ def start(update):
         yo_instance.start_processing(chat_id)
 
 
+app = Starlette(routes=[])
+
 
 def _run_bot():
     bot.polling(none_stop=True)
@@ -136,4 +139,5 @@ def run_bot():
 
 
 if __name__ == '__main__':
-    uvicorn.run(run_bot, host='0.0.0.0', port=8001)
+    run_bot()
+    uvicorn.run(app, host='0.0.0.0', port=8001)
