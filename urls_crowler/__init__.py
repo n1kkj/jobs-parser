@@ -1,1 +1,1 @@
-from .yo_parser_bot import run_bot
+from .yo_parser_bot import app

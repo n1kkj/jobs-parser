@@ -125,9 +125,6 @@ def start(update):
         yo_instance.start_processing(chat_id)
 
 
-app = Starlette(routes=[])
-
-
 def _run_bot():
     bot.polling(none_stop=True)
 
@@ -136,6 +133,8 @@ def run_bot():
     thread = threading.Thread(target=_run_bot)
     thread.daemon = True
     thread.start()
+
+app = Starlette(routes=[], on_startup=[run_bot])
 
 
 if __name__ == '__main__':
