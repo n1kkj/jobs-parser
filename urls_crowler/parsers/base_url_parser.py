@@ -114,12 +114,14 @@ class BaseUrlParser:
                 parse_result = cls.parse_link(link, keys, fixed)
                 results.append(parse_result)
                 parse_result.users.append(chat_id)
+                parse_result.users = list(set(parse_result.users))
                 redis_cache.set(link, parse_result.model_dump_json())
             else:
                 parse_result = ParseResultDTO.model_validate_json(cached_data)
-                if settings.INCLUDE_PREVIOUS >= chat_id not in parse_result.users:
+                if settings.INCLUDE_PREVIOUS >= (chat_id in parse_result.users):
                     results.append(parse_result)
                     parse_result.users.append(chat_id)
+                    parse_result.users = list(set(parse_result.users))
                     redis_cache.set(link, parse_result.model_dump_json())
 
 
@@ -189,7 +191,7 @@ class BaseJSONUrlParser(BaseUrlParser):
 
         result_values = cls._parse_link(data, result_values, keys, fixed_keys, fixed, link)
 
-        result_values['link'] = link + '\n'
+        result_values['link'] = link
         return ParseResultDTO(**result_values)
 
     @classmethod
@@ -208,7 +210,7 @@ class BaseJSONUrlParser(BaseUrlParser):
             return [], []
 
         for vacancy in vacancies_list:
-            link = f'{cls.vacancies_prefix}{du.get(vacancy, cls.url_key)}\n'
+            link = f'{cls.vacancies_prefix}{du.get(vacancy, cls.url_key)}'
             all_links.append(link)
 
             cached_data = redis_cache.get(link)
@@ -218,13 +220,15 @@ class BaseJSONUrlParser(BaseUrlParser):
                 parse_result = ParseResultDTO(**result_values)
                 result_all_data.append(parse_result)
                 parse_result.users.append(chat_id)
+                parse_result.users = list(set(parse_result.users))
                 redis_cache.set(link, parse_result.model_dump_json())
             else:
                 parse_result = ParseResultDTO.model_validate_json(cached_data)
                 parse_result.users = [] if not parse_result.users else parse_result.users
-                if settings.INCLUDE_PREVIOUS >= chat_id not in parse_result.users:
+                if settings.INCLUDE_PREVIOUS >= (chat_id in parse_result.users):
                     result_all_data.append(parse_result)
                     parse_result.users.append(chat_id)
+                    parse_result.users = list(set(parse_result.users))
                     redis_cache.set(link, parse_result.model_dump_json())
 
         return result_all_data, all_links
@@ -271,5 +275,5 @@ class BaseHTMLUrlParser(BaseUrlParser):
                 logging.warning(f'Не удалось обработать ссылку {link}\n{e}')
                 result_values[key] = ''
 
-        result_values['link'] = link + '\n'
+        result_values['link'] = link
         return ParseResultDTO(**result_values)

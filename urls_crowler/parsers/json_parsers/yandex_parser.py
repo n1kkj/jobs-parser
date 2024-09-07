@@ -8,7 +8,7 @@ class YandexParser(BaseJSONUrlParser):
     exp_key = None
     city_key = 'vacancy/cities'
     employer_key = 'public_service/name'
-    work_format_key = 'work_modes/'
+    work_format_key = 'vacancy/work_modes'
 
     vacancies_list_key = 'results'
     vacancies_prefix = 'https://yandex.ru/jobs/vacancies/'

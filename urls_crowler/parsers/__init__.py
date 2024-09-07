@@ -5,6 +5,8 @@ from .html_parsers import (
     ChangellengeParser,
     MtsParser,
     SberDevParser,
+    VsetiParser,
+    AichParser,
 )
 from .json_parsers import (
     HhParser,

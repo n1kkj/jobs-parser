@@ -5,6 +5,8 @@ from .html_crowlers import (
     ChangellengeCrowler,
     MtsCrowler,
     SberDevCrowler,
+    VsetiCrowler,
+    AichCrowler,
 )
 from .json_crowlers import (
     HhCrowler,

@@ -13,6 +13,8 @@ from urls_crowler.crowlers import (
     CareerspaceCrowler,
     ChangellengeCrowler,
     ITFutCrowler,
+    VsetiCrowler,
+    AichCrowler
 )
 from redis_cache import RedisCache
 from storages.pandas_storage import PandasXLSXStorage
@@ -28,6 +30,8 @@ CROWLERS = [
     YandexCrowler,
     OzonCrowler,
     HhCrowler,
+    VsetiCrowler,
+    AichCrowler,
 ]
 
 

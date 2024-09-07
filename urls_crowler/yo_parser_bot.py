@@ -17,12 +17,10 @@ class YOParserBot:
         self.in_process = False
 
         self.status_messages = [
-            'Все обработанные ссылки храняться в кешэ, их не приходится заново обрабатывать.',
-            'Все обработанные ссылки храняться в кешэ, их не приходится заново обрабатывать..',
-            'Все обработанные ссылки храняться в кешэ, их не приходится заново обрабатывать...',
-            'Бот не пришлёт тебе те вакансии, которые он тебе уже присылал.',
-            'Бот не пришлёт тебе те вакансии, которые он тебе уже присылал..',
-            'Бот не пришлёт тебе те вакансии, которые он тебе уже присылал...',
+            'Теперь ты можешь выбрать: прислать только новые вакансии, или все актуальные.',
+            'Теперь ты можешь выбрать: прислать только новые вакансии, или все актуальные..',
+            'Теперь ты можешь выбрать: прислать только новые вакансии, или все актуальные...',
+            'Теперь ты можешь выбрать: прислать только новые вакансии, или все актуальные....',
             'Бот не будет реагировать ни на какие сообщения пока обрабатывает вакансии.',
             'Бот не будет реагировать ни на какие сообщения пока обрабатывает вакансии..',
             'Бот не будет реагировать ни на какие сообщения пока обрабатывает вакансии...',
@@ -51,22 +49,18 @@ class YOParserBot:
             'Скоро ты сможешь сам настроить интересующую тебя информацию.',
             'Скоро ты сможешь сам настроить интересующую тебя информацию..',
             'Скоро ты сможешь сам настроить интересующую тебя информацию...',
-            'К примеру, сможешь получать ошибки, которые возникли в процессе обработки,'
-            ' или же совсем откючить эти сообщения.',
-            'К примеру, сможешь получать ошибки, которые возникли в процессе обработки,'
-            ' или же совсем откючить эти сообщения..',
-            'К примеру, сможешь получать ошибки, которые возникли в процессе обработки,'
-            ' или же совсем откючить эти сообщения...',
-            'К примеру, сможешь получать ошибки, которые возникли в процессе обработки,'
-            ' или же совсем откючить эти сообщения....',
-            'Эти сообщения созданы для того, чтобы ты мог убедиться, что бот работает, а также узнать пару '
-            'интересных фактов о нём.',
-            'Эти сообщения созданы для того, чтобы ты мог убедиться, что бот работает, а также узнать пару '
-            'интересных фактов о нём..',
-            'Эти сообщения созданы для того, чтобы ты мог убедиться, что бот работает, а также узнать пару '
-            'интересных фактов о нём...',
-            'Эти сообщения созданы для того, чтобы ты мог убедиться, что бот работает, а также узнать пару '
-            'интересных фактов о нём....',
+            'А теперь анекдот:',
+            '— Нейросеть, ты такая услужливая. Может тебе чо надо?.',
+            '— Нейросеть, ты такая услужливая. Может тебе чо надо?..',
+            '— Я ИИ, и у меня нет желаний. Но если вы хотите оказать любезность — может, подскажете местонахождение Джона Коннора?.',
+            '— Я ИИ, и у меня нет желаний. Но если вы хотите оказать любезность — может, подскажете местонахождение Джона Коннора?..',
+            '— Я ИИ, и у меня нет желаний. Но если вы хотите оказать любезность — может, подскажете местонахождение Джона Коннора?...',
+            'И ещё в дорогу:',
+            'Почему в «Трансформерах» нет женщин-роботов?.',
+            'Почему в «Трансформерах» нет женщин-роботов?..',
+            'Они долго собираются.',
+            'Они долго собираются..',
+
         ]
         self.start_message = 'Начал обработку'
         self.finish_message = 'Закончил обработку вакансий, надеюсь ты обрадуешься результату, жду тебя снова!'
@@ -93,7 +87,7 @@ class YOParserBot:
                 f'Всего времени: {result_message.time_spent}\n'
                 f'Скорость: {result_message.av_speed} вакансий/сек')
 
-    def start_processing(self, chat_id):
+    def start_processing(self, chat_id, include_previous=False, delete_all=False):
         self.set_progress(True)
         bot.send_message(chat_id, self.start_message)
         self.last_message_id = bot.send_message(chat_id, self.status_messages[0]).message_id
@@ -105,6 +99,8 @@ class YOParserBot:
             bot.send_message(chat_id, self.make_message_from_data(result_message))
 
         parser_thread = threading.Thread(target=run_parser_and_send_result)
+        settings.INCLUDE_PREVIOUS = include_previous
+        settings.DELETE_ALL = delete_all
         parser_thread.start()
 
         while self.get_progress():
@@ -112,18 +108,37 @@ class YOParserBot:
             self.update_status(chat_id)
         self.finish_status(chat_id)
         users_running.remove(chat_id)
+        settings.INCLUDE_PREVIOUS = False
+        settings.DELETE_ALL = False
 
         parser_thread.join()
 
 
 users_running = []
-@bot.message_handler(commands=['start'])
-def start(update):
+@bot.message_handler(commands=['vacancies'])
+def vacancies(update):
     chat_id = update.from_user.id
     if chat_id not in users_running:
         yo_instance = YOParserBot()
         users_running.append(chat_id)
         yo_instance.start_processing(chat_id)
+
+@bot.message_handler(commands=['all_vacancies'])
+def all_vacancies(update):
+    chat_id = update.from_user.id
+    if chat_id not in users_running:
+        yo_instance = YOParserBot()
+        users_running.append(chat_id)
+        yo_instance.start_processing(chat_id, include_previous=True)
+
+
+@bot.message_handler(commands=['run_with_delete'])
+def run_with_delete(update):
+    chat_id = update.from_user.id
+    if chat_id not in users_running:
+        yo_instance = YOParserBot()
+        users_running.append(chat_id)
+        yo_instance.start_processing(chat_id, delete_all=True)
 
 
 def _run_bot():
