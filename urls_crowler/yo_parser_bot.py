@@ -1,3 +1,4 @@
+import logging
 import threading
 import time
 import uvicorn
@@ -130,13 +131,16 @@ def _run_bot():
 
 
 def run_bot():
+    logging.info('startup')
     thread = threading.Thread(target=_run_bot)
     thread.daemon = True
     thread.start()
 
-app = Starlette(routes=[], on_startup=[run_bot])
+def stop_bot():
+    bot.stop_polling()
+
+app = Starlette(routes=[], on_startup=[run_bot], on_shutdown=[stop_bot])
 
 
 if __name__ == '__main__':
-    run_bot()
     uvicorn.run(app, host='0.0.0.0', port=8001)
