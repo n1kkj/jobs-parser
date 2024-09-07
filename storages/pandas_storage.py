@@ -91,5 +91,4 @@ class PandasXLSXStorage:
         elif page_data.direction in ('Product Management', 'Project  Management'):
             return 'Product Project'
         else:
-            logging.error(f"Unknown direction: {page_data.direction}")
             return 'Разработка'
