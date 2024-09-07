@@ -1,7 +1,7 @@
-import pandas
+import logging
+import pandas as pd
 
 from urls_crowler.dto import ParseResultDTO
-from storages import extract_dataframe
 
 
 class PandasXLSXStorage:
@@ -22,28 +22,83 @@ class PandasXLSXStorage:
         self.__file_name = file_name
         self.__file_data = self.__initialize_file()
 
-    def __initialize_file(self):
-        dataframe = pandas.DataFrame(columns=self.DATA_COLUMNS)
-
-        with pandas.ExcelWriter(self.__file_name, engine='xlsxwriter') as writer:
-            dataframe.to_excel(writer, sheet_name='Sheet1', index=False)
-            worksheet = writer.sheets['Sheet1']
-
-            for i, col in enumerate(self.DATA_COLUMNS):
-                worksheet.set_column(i, i, len(col) + 2)
-
-            worksheet.freeze_panes = 'K1'
+    @staticmethod
+    def extract_dataframe(page_data: ParseResultDTO):
+        dataframe = pd.DataFrame(
+            [
+                [
+                    page_data.employer,
+                    page_data.title,
+                    page_data.direction,
+                    page_data.profession,
+                    page_data.exp,
+                    page_data.skills,
+                    page_data.salary,
+                    page_data.desc,
+                    page_data.city,
+                    page_data.link,
+                ]
+            ],
+            columns=[
+                'Компания',
+                'Должность',
+                'Направление',
+                'Поднаправление',
+                'Требуемый опыт',
+                'Стек',
+                'ЗП',
+                'Описание',
+                'Город',
+                'Ссылка',
+            ],
+        )
 
         return dataframe
+
+    def __initialize_file(self):
+        sheets = {
+            'Разработка': pd.DataFrame(columns=self.DATA_COLUMNS),
+            'Аналитика': pd.DataFrame(columns=self.DATA_COLUMNS),
+            'ML': pd.DataFrame(columns=self.DATA_COLUMNS),
+            'Product Project': pd.DataFrame(columns=self.DATA_COLUMNS),
+        }
+
+        with pd.ExcelWriter(self.__file_name, engine='xlsxwriter') as writer:
+            for sheet_name, dataframe in sheets.items():
+                dataframe.to_excel(writer, sheet_name=sheet_name, index=False)
+                worksheet = writer.sheets[sheet_name]
+
+                for i, col in enumerate(self.DATA_COLUMNS):
+                    worksheet.set_column(i, i, len(col) + 2)
+
+                worksheet.freeze_panes = 'K1'
+
+        return sheets
 
     def store_many(self, pages_data: list[ParseResultDTO]):
         for page_data in pages_data:
             self.store_one(page_data)
 
     def store_one(self, page_data: ParseResultDTO):
-        self.__file_data = pandas.concat([self.__file_data, extract_dataframe(page_data)], ignore_index=True)
+        sheet_name = self._get_sheet_name(page_data)
+        self.__file_data[sheet_name] = pd.concat([self.__file_data[sheet_name], self.extract_dataframe(page_data)],
+                                                 ignore_index=True)
 
     def commit(self):
-        self.__file_data.to_excel(
-            self.__file_name,
-        )
+        with pd.ExcelWriter(self.__file_name, engine='xlsxwriter', mode='w') as writer:
+            for sheet_name, dataframe in self.__file_data.items():
+                dataframe.to_excel(writer, sheet_name=sheet_name, index=False)
+
+    @staticmethod
+    def _get_sheet_name(page_data: ParseResultDTO):
+        if page_data.direction == 'Разработка':
+            return 'Разработка'
+        elif page_data.direction == 'Аналитика':
+            return 'Аналитика'
+        elif page_data.direction == 'ML':
+            return 'ML'
+        elif page_data.direction in ('Product Management', 'Project  Management'):
+            return 'Product Project'
+        else:
+            logging.error(f"Unknown direction: {page_data.direction}")
+            return 'Разработка'
