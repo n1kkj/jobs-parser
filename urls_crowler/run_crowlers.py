@@ -14,7 +14,10 @@ from urls_crowler.crowlers import (
     ChangellengeCrowler,
     ITFutCrowler,
     VsetiCrowler,
-    AichCrowler
+    AichCrowler,  # Some strange 'wized' action
+    ChoiciCrowler,  # Does not work
+    MtsCrowler,  # Breaking if caught that it`s a machine
+    RemocateCrowler,  #  Too long ^)
 )
 from redis_cache import RedisCache
 from storages.pandas_storage import PandasXLSXStorage
@@ -31,16 +34,18 @@ CROWLERS = [
     OzonCrowler,
     HhCrowler,
     VsetiCrowler,
-    AichCrowler,
+    RemocateCrowler,
 ]
 
 
 def run_crowlers_threading(chat_id):
-    logging.info('Произвожу подготовку')
+    log = logging.getLogger('crowlers')
+    log.setLevel('INFO')
+    log.info('Произвожу подготовку')
     redis_cache = RedisCache()
 
     if settings.DELETE_ALL:
-        logging.info('Стираю весь кэш')
+        log.info('Стираю весь кэш')
 
         all_redis_links = redis_cache.get_all_keys()
         for redis_link in all_redis_links:
@@ -51,9 +56,10 @@ def run_crowlers_threading(chat_id):
     all_data = []
     all_links = []
     threads = []
-    logging.info('Начал работу')
+    log.info('Начал работу')
 
     for crowler in CROWLERS:
+
         def target_function():
             data, links = crowler.run_crowl(redis_cache, chat_id)
             all_data.extend(data)
@@ -66,7 +72,7 @@ def run_crowlers_threading(chat_id):
     for thread in threads:
         thread.join()
 
-    logging.info('Сохраняю в файл')
+    log.info('Сохраняю в файл')
     pandas_xlsx_storage.store_many(all_data)
     pandas_xlsx_storage.commit()
 
@@ -75,18 +81,18 @@ def run_crowlers_threading(chat_id):
     end_time = datetime.now() - start_time
 
     result_message = ResultMessageDTO(
-        all_links_count = len(all_data),
-        time_spent = str(end_time).split('.')[0],
-        av_speed = str(len(all_data)/end_time.total_seconds()).split('.')[0],
+        all_links_count=len(all_data),
+        time_spent=str(end_time).split('.')[0],
+        av_speed=str(len(all_data) / end_time.total_seconds()).split('.')[0],
     )
 
-    logging.info(
+    log.info(
         'Закончил обработку ссылок, надеюсь вы обрадуетесь результату, жду вас вновь!\n'
         'Приберёг статистику для вас)\n'
     )
-    logging.info(f'Всего вакансий: {result_message.all_links_count}')
-    logging.info(f'Всего времени: {result_message.time_spent}')
-    logging.info(f'Скорость: {result_message.av_speed} вакансий/сек')
+    log.info(f'Всего вакансий: {result_message.all_links_count}')
+    log.info(f'Всего времени: {result_message.time_spent}')
+    log.info(f'Скорость: {result_message.av_speed} вакансий/сек')
 
     return result_message
 

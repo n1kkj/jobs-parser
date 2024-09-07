@@ -1,4 +1,3 @@
-import logging
 import pandas as pd
 
 from urls_crowler.dto import ParseResultDTO
@@ -72,8 +71,9 @@ class PandasXLSXStorage:
 
     def store_one(self, page_data: ParseResultDTO):
         sheet_name = self._get_sheet_name(page_data)
-        self.__file_data[sheet_name] = pd.concat([self.__file_data[sheet_name], self.extract_dataframe(page_data)],
-                                                 ignore_index=True)
+        self.__file_data[sheet_name] = pd.concat(
+            [self.__file_data[sheet_name], self.extract_dataframe(page_data)], ignore_index=True
+        )
 
     def commit(self):
         with pd.ExcelWriter(self.__file_name, engine='xlsxwriter', mode='w') as writer:

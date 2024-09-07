@@ -7,6 +7,8 @@ from .html_crowlers import (
     SberDevCrowler,
     VsetiCrowler,
     AichCrowler,
+    ChoiciCrowler,
+    RemocateCrowler,
 )
 from .json_crowlers import (
     HhCrowler,

@@ -7,6 +7,8 @@ from .html_parsers import (
     SberDevParser,
     VsetiParser,
     AichParser,
+    ChoiciParser,
+    RemocateParser,
 )
 from .json_parsers import (
     HhParser,

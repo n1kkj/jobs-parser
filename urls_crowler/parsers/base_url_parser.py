@@ -93,7 +93,7 @@ class BaseUrlParser:
             'exp': cls.fixed_exp,
             'city': cls.fixed_city,
             'employer': cls.fixed_employer,
-            'work_format': cls.fixed_work_format
+            'work_format': cls.fixed_work_format,
         }
         prepare_fixed = {}
         for key, value in raw_fixed.items():
@@ -123,7 +123,6 @@ class BaseUrlParser:
                     parse_result.users.append(chat_id)
                     parse_result.users = list(set(parse_result.users))
                     redis_cache.set(link, parse_result.model_dump_json())
-
 
         return results, all_links
 
@@ -269,7 +268,7 @@ class BaseHTMLUrlParser(BaseUrlParser):
                 result_values[key] = str(res_value).replace('\xa0', ' ')
 
             except IndexError:
-                logging.warning(f'Не найден элемент на странице: {link}')
+                logging.warning(f'Не найден элемент {key}: {value} на странице: {link}')
                 result_values[key] = ''
             except Exception as e:
                 logging.warning(f'Не удалось обработать ссылку {link}\n{e}')

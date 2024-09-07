@@ -5,3 +5,5 @@ from .mts_parser import MtsParser
 from .sberdev_parser import SberDevParser
 from .vseti_parser import VsetiParser
 from .aich_parser import AichParser
+from .choici_parser import ChoiciParser
+from .remocate_parser import RemocateParser

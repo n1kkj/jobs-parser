@@ -1,4 +1,3 @@
-import logging
 import threading
 import time
 import uvicorn
@@ -38,10 +37,8 @@ class YOParserBot:
             'По окончанию процесса обработки тебе также пришлётся статистика.',
             'По окончанию процесса обработки тебе также пришлётся статистика..',
             'По окончанию процесса обработки тебе также пришлётся статистика...',
-            'Статистика по дефолту состоит из трёх частей:\n'
-            '1) Количество вакансий в файле.',
-            'Статистика по дефолту состоит из трёх частей:\n'
-            '1) Количество вакансий в файле..',
+            'Статистика по дефолту состоит из трёх частей:\n' '1) Количество вакансий в файле.',
+            'Статистика по дефолту состоит из трёх частей:\n' '1) Количество вакансий в файле..',
             '2) Время выполнения обработки.',
             '2) Время выполнения обработки..',
             '3) Скорость обработки вакансий в секунду.',
@@ -60,7 +57,6 @@ class YOParserBot:
             'Почему в «Трансформерах» нет женщин-роботов?..',
             'Они долго собираются.',
             'Они долго собираются..',
-
         ]
         self.start_message = 'Начал обработку'
         self.finish_message = 'Закончил обработку вакансий, надеюсь ты обрадуешься результату, жду тебя снова!'
@@ -83,9 +79,11 @@ class YOParserBot:
 
     @staticmethod
     def make_message_from_data(result_message):
-        return (f'Всего вакансий: {result_message.all_links_count}\n'
-                f'Всего времени: {result_message.time_spent}\n'
-                f'Скорость: {result_message.av_speed} вакансий/сек')
+        return (
+            f'Всего вакансий: {result_message.all_links_count}\n'
+            f'Всего времени: {result_message.time_spent}\n'
+            f'Скорость: {result_message.av_speed} вакансий/сек'
+        )
 
     def start_processing(self, chat_id, include_previous=False, delete_all=False):
         self.set_progress(True)
@@ -115,6 +113,8 @@ class YOParserBot:
 
 
 users_running = []
+
+
 @bot.message_handler(commands=['vacancies'])
 def vacancies(update):
     chat_id = update.from_user.id
@@ -122,6 +122,7 @@ def vacancies(update):
         yo_instance = YOParserBot()
         users_running.append(chat_id)
         yo_instance.start_processing(chat_id)
+
 
 @bot.message_handler(commands=['all_vacancies'])
 def all_vacancies(update):
@@ -146,13 +147,14 @@ def _run_bot():
 
 
 def run_bot():
-    logging.info('startup')
     thread = threading.Thread(target=_run_bot)
     thread.daemon = True
     thread.start()
 
+
 def stop_bot():
     bot.stop_polling()
+
 
 app = Starlette(routes=[], on_startup=[run_bot], on_shutdown=[stop_bot])
 

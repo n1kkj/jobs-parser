@@ -5,3 +5,5 @@ from .mts_crowler import MtsCrowler
 from .sberdev_crowler import SberDevCrowler
 from .vseti_crowler import VsetiCrowler
 from .aich_crowler import AichCrowler
+from .choici_crowler import ChoiciCrowler
+from .remocate_crowler import RemocateCrowler
