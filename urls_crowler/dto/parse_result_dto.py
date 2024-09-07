@@ -13,5 +13,6 @@ class ParseResultDTO(BaseModel):
     employer: Optional[str]
     direction: Optional[str]
     profession: Optional[str]
+    work_format: Optional[str]
     link: str
     users: Optional[List[int]] = []

@@ -8,5 +8,6 @@ class OzonParser(BaseJSONUrlParser):
     exp_key = 'exp'
     city_key = 'city'
     employer_key = 'dep'
+    work_format_key = 'employment'
 
     use_soup_desc = True

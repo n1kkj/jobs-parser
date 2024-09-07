@@ -8,3 +8,4 @@ class CareerspaceParser(BaseHTMLUrlParser):
     exp_key = None
     city_key = 'span|job-lb__tx'
     employer_key = 'div|j-d-h__bl cs-df-alc-jsb/span|'
+    work_format_key = 'span|job-lb__tx|0'

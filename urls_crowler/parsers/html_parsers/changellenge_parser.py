@@ -8,3 +8,4 @@ class ChangellengeParser(BaseHTMLUrlParser):
     exp_key = 'h3|vacancy-without-form-tag__experience'
     city_key = 'h3|vacancy-without-form-tag__city/span|'
     employer_key = None
+    work_format_key = 'h3|vacancy-without-form-tag__employment'

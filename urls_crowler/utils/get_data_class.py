@@ -1,3 +1,4 @@
+import logging
 import time
 
 import dpath.util
@@ -23,8 +24,8 @@ class GetDataClass:
 
         except Exception as e:
             if 'ozon' in url:
-                print(f'Скорее всего вакансия скрыта, поэтому у меня не получилось её обработать: {url}')
-            print(f'Ошибка при запросе: {e}')
+                logging.info(f'Скорее всего вакансия скрыта, поэтому у меня не получилось её обработать: {url}')
+            logging.error(f'Ошибка при запросе: {e}')
             return {}
 
     @staticmethod
@@ -39,7 +40,7 @@ class GetDataClass:
                 raise Exception(f"Ответ не является HTML: {response.headers['Content-Type']}")
 
         except Exception as e:
-            print(f'Ошибка при запросе: {e}')
+            logging.error(f'Ошибка при запросе: {e}')
             return ''
 
     @staticmethod
@@ -115,7 +116,7 @@ class GetDataClass:
             return html_content
 
         except Exception as e:
-            print(f'Ошибка при запросе: {e}')
+            logging.error(f'Ошибка при запросе: {e}')
             return ''
 
     @staticmethod
@@ -161,7 +162,7 @@ class GetDataClass:
             data['vacancies'] = vacancies
             return data
         except Exception as e:
-            print(f'Ошибка при запросе: {e}')
+            logging.error(f'Ошибка при запросе: {e}')
             return ''
 
     @staticmethod
@@ -173,11 +174,11 @@ class GetDataClass:
             if 'application/json' in response.headers['Content-Type']:
                 data = response.json()
             else:
-                print(f"Ответ не является JSON: {response.headers['Content-Type']}")
+                logging.error(f"Ответ не является JSON: {response.headers['Content-Type']}")
                 data = {}
 
         except Exception as e:
-            print(f'Ошибка при запросе: {e}')
+            logging.error(f'Ошибка при запросе: {e}')
             data = {}
 
         vacancies = []
@@ -185,5 +186,5 @@ class GetDataClass:
         try:
             vacancies = [publication for y in dpath.util.get(data, json_vacancies_path) for publication in y]
         except KeyError:
-            print(f'Произошла ошибка с {url}, неверный ключ вакансий: {json_vacancies_path}')
+            logging.warning(f'Произошла ошибка с {url}, неверный ключ вакансий: {json_vacancies_path}')
         return {'vacancies': vacancies}

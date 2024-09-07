@@ -8,6 +8,7 @@ class HhParser(BaseJSONUrlParser):
     exp_key = 'experience/name'
     city_key = 'area/name'
     employer_key = 'employer/name'
+    work_format_key = 'schedule/name'
 
     vacancies_list_key = 'vacancies'
     vacancies_prefix = 'https://hh.ru/vacancy/'

@@ -1,10 +1,12 @@
 import json
+import logging
 import re
 from typing import List
 
 import dpath.util as du
 from bs4 import BeautifulSoup
 
+import settings
 from urls_crowler.dto import ParseResultDTO, FixedValuesDTO
 from urls_crowler.utils import skills_dict
 from urls_crowler.utils.get_data_class import GetDataClass
@@ -21,6 +23,7 @@ class BaseUrlParser:
     exp_key = None
     city_key = None
     employer_key = None
+    work_format_key = None
 
     fixed_title = None
     fixed_desc = None
@@ -28,6 +31,7 @@ class BaseUrlParser:
     fixed_exp = None
     fixed_city = None
     fixed_employer = None
+    fixed_work_format = None
 
     vacancies_list_key = None
     vacancies_prefix = None
@@ -77,6 +81,7 @@ class BaseUrlParser:
             'exp': cls.exp_key,
             'city': cls.city_key,
             'employer': cls.employer_key,
+            'work_format': cls.work_format_key,
         }
 
     @classmethod
@@ -88,6 +93,7 @@ class BaseUrlParser:
             'exp': cls.fixed_exp,
             'city': cls.fixed_city,
             'employer': cls.fixed_employer,
+            'work_format': cls.fixed_work_format
         }
         prepare_fixed = {}
         for key, value in raw_fixed.items():
@@ -111,7 +117,7 @@ class BaseUrlParser:
                 redis_cache.set(link, parse_result.model_dump_json())
             else:
                 parse_result = ParseResultDTO.model_validate_json(cached_data)
-                if chat_id not in parse_result.users:
+                if settings.INCLUDE_PREVIOUS >= chat_id not in parse_result.users:
                     results.append(parse_result)
                     parse_result.users.append(chat_id)
                     redis_cache.set(link, parse_result.model_dump_json())
@@ -170,7 +176,7 @@ class BaseJSONUrlParser(BaseUrlParser):
                 result_values[key] = res_value
 
             except Exception as e:
-                print(f'Ошибка при обработке ссылки {link}\n{e}')
+                logging.warning(f'Ошибка при обработке ссылки {link}\n{e}')
                 result_values[key] = ''
 
         return result_values
@@ -198,7 +204,7 @@ class BaseJSONUrlParser(BaseUrlParser):
         try:
             vacancies_list = du.get(data, cls.vacancies_list_key)
         except KeyError:
-            print(f'Произошла ошибка с {cls.__name__}, неверный ключ вакансий: {cls.vacancies_list_key}')
+            logging.warning(f'Произошла ошибка с {cls.__name__}, неверный ключ вакансий: {cls.vacancies_list_key}')
             return [], []
 
         for vacancy in vacancies_list:
@@ -216,7 +222,7 @@ class BaseJSONUrlParser(BaseUrlParser):
             else:
                 parse_result = ParseResultDTO.model_validate_json(cached_data)
                 parse_result.users = [] if not parse_result.users else parse_result.users
-                if chat_id not in parse_result.users:
+                if settings.INCLUDE_PREVIOUS >= chat_id not in parse_result.users:
                     result_all_data.append(parse_result)
                     parse_result.users.append(chat_id)
                     redis_cache.set(link, parse_result.model_dump_json())
@@ -259,10 +265,10 @@ class BaseHTMLUrlParser(BaseUrlParser):
                 result_values[key] = str(res_value).replace('\xa0', ' ')
 
             except IndexError:
-                print(f'Не найден элемент на странице: {link}')
+                logging.warning(f'Не найден элемент на странице: {link}')
                 result_values[key] = ''
             except Exception as e:
-                print(f'Не удалось обработать ссылку {link}\n{e}')
+                logging.warning(f'Не удалось обработать ссылку {link}\n{e}')
                 result_values[key] = ''
 
         result_values['link'] = link + '\n'

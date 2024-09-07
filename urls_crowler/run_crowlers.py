@@ -1,3 +1,4 @@
+import logging
 import threading
 from datetime import datetime
 
@@ -31,11 +32,11 @@ CROWLERS = [
 
 
 def run_crowlers_threading(chat_id):
-    print('Произвожу подготовку')
+    logging.info('Произвожу подготовку')
     redis_cache = RedisCache()
 
     if settings.DELETE_ALL:
-        print('Стираю весь кэш')
+        logging.info('Стираю весь кэш')
 
         all_redis_links = redis_cache.get_all_keys()
         for redis_link in all_redis_links:
@@ -46,7 +47,7 @@ def run_crowlers_threading(chat_id):
     all_data = []
     all_links = []
     threads = []
-    print('Начал работу')
+    logging.info('Начал работу')
 
     for crowler in CROWLERS:
         def target_function():
@@ -61,7 +62,7 @@ def run_crowlers_threading(chat_id):
     for thread in threads:
         thread.join()
 
-    print('Сохраняю в файл')
+    logging.info('Сохраняю в файл')
     pandas_xlsx_storage.store_many(all_data)
     pandas_xlsx_storage.commit()
 
@@ -75,13 +76,13 @@ def run_crowlers_threading(chat_id):
         av_speed = str(len(all_data)/end_time.total_seconds()).split('.')[0],
     )
 
-    print(
+    logging.info(
         'Закончил обработку ссылок, надеюсь вы обрадуетесь результату, жду вас вновь!\n'
         'Приберёг статистику для вас)\n'
     )
-    print(f'Всего вакансий: {result_message.all_links_count}')
-    print(f'Всего времени: {result_message.time_spent}')
-    print(f'Скорость: {result_message.av_speed} вакансий/сек')
+    logging.info(f'Всего вакансий: {result_message.all_links_count}')
+    logging.info(f'Всего времени: {result_message.time_spent}')
+    logging.info(f'Скорость: {result_message.av_speed} вакансий/сек')
 
     return result_message
 

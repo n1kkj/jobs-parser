@@ -8,5 +8,6 @@ class AvitoParser(BaseHTMLUrlParser):
     exp_key = None
     city_key = 'span|page-info__link-text'
     employer_key = None
+    work_format_key = 'span|page-info__link-text'
 
     fixed_employer = 'Avito'

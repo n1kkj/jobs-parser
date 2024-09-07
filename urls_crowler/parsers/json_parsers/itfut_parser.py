@@ -8,6 +8,7 @@ class ItFutParser(BaseJSONUrlParser):
     exp_key = None
     city_key = None
     employer_key = 'company/alias'
+    work_format_key = None
 
     vacancies_list_key = 'vacancies'
     vacancies_prefix = 'https://it.fut.ru/internship/'

@@ -8,3 +8,4 @@ class MtsParser(BaseHTMLUrlParser):
     exp_key = None
     city_key = None
     employer_key = None
+    work_format_key = None

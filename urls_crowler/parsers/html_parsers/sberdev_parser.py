@@ -8,3 +8,4 @@ class SberDevParser(BaseHTMLUrlParser):
     exp_key = 'div|sc-81d0f9f1-12 jsWPdY|1'
     city_key = 'div|sc-81d0f9f1-12 jsWPdY|0'
     employer_key = 'span|sc-fd3988f5-10 gcZxDC'
+    work_format_key = None

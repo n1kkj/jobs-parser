@@ -14,6 +14,7 @@ class PandasXLSXStorage:
         'Стек',
         'ЗП',
         'Описание',
+        'Формат работы',
         'Город',
         'Ссылка',
     ]
@@ -22,8 +23,8 @@ class PandasXLSXStorage:
         self.__file_name = file_name
         self.__file_data = self.__initialize_file()
 
-    @staticmethod
-    def extract_dataframe(page_data: ParseResultDTO):
+    @classmethod
+    def extract_dataframe(cls, page_data: ParseResultDTO):
         dataframe = pd.DataFrame(
             [
                 [
@@ -35,22 +36,12 @@ class PandasXLSXStorage:
                     page_data.skills,
                     page_data.salary,
                     page_data.desc,
+                    page_data.work_format,
                     page_data.city,
                     page_data.link,
                 ]
             ],
-            columns=[
-                'Компания',
-                'Должность',
-                'Направление',
-                'Поднаправление',
-                'Требуемый опыт',
-                'Стек',
-                'ЗП',
-                'Описание',
-                'Город',
-                'Ссылка',
-            ],
+            columns=cls.DATA_COLUMNS,
         )
 
         return dataframe
