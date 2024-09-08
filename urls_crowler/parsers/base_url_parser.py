@@ -44,16 +44,16 @@ class BaseUrlParser:
     extra_kwargs = {}
     result_dto = ParseResultDTO
 
-    @classmethod
-    def find_skills(cls, text):
+    @staticmethod
+    def find_skills(text):
         skills_set = set(skills_dict.keys())
         pattern = r'\b(' + '|'.join(re.escape(skill) for skill in skills_set) + r')\b'
         skills = re.findall(pattern, text, re.IGNORECASE)
         skills = [skill.lower() for skill in skills]
         return list(set(skills))
 
-    @classmethod
-    def specify_profession(cls, skills):
+    @staticmethod
+    def specify_profession(skills):
         direction_counts = {}
 
         for skill in skills:
@@ -101,6 +101,14 @@ class BaseUrlParser:
                 prepare_fixed[key] = value
         fixed = FixedValuesDTO(**prepare_fixed)
         return fixed.model_dump(exclude_unset=True)
+
+    @staticmethod
+    def tech_true(text):
+        tech_flags = ('Техническое образование', 'техническое образование')
+        for flag in tech_flags:
+            if flag in text:
+                return True
+        return False
 
     @classmethod
     def parse_all_links(cls, all_links, redis_cache, chat_id) -> (List[ParseResultDTO], List):
@@ -157,6 +165,7 @@ class BaseJSONUrlParser(BaseUrlParser):
     def _parse_link(cls, vacancy, result_values, keys, fixed_keys, fixed, link) -> dict:
         skills = cls.find_skills(json.dumps(vacancy))
         result_values['skills'] = ', '.join(skills)
+        result_values['tech_flag'] = cls.tech_true(json.dumps(vacancy))
         specify_profession = cls.specify_profession(skills)
         result_values['direction'] = specify_profession[0]
         result_values['profession'] = specify_profession[1]
@@ -246,6 +255,7 @@ class BaseHTMLUrlParser(BaseUrlParser):
 
         skills = cls.find_skills(soup.text)
         result_values['skills'] = ', '.join(skills)
+        result_values['tech_flag'] = cls.tech_true(soup.text)
         specify_profession = cls.specify_profession(skills)
         result_values['direction'] = specify_profession[0]
         result_values['profession'] = specify_profession[1]
