@@ -34,6 +34,7 @@ CROWLERS = [
     OzonCrowler,
     HhCrowler,
     VsetiCrowler,
+    RemocateCrowler,
 ]
 
 

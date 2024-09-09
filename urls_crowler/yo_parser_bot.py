@@ -65,11 +65,17 @@ class YOParserBot:
     def update_status(self, chat_id):
         self.current_message_index = (self.current_message_index + 1) % len(self.status_messages)
         message_text = self.status_messages[self.current_message_index]
-        bot.edit_message_text(chat_id=chat_id, message_id=self.last_message_id, text=message_text)
+        try:
+            bot.edit_message_text(chat_id=chat_id, message_id=self.last_message_id, text=message_text)
+        except Exception:
+            return
 
     def finish_status(self, chat_id):
         self.current_message_index = (self.current_message_index + 1) % len(self.status_messages)
-        bot.edit_message_text(chat_id=chat_id, message_id=self.last_message_id, text=self.finish_message)
+        try:
+            bot.edit_message_text(chat_id=chat_id, message_id=self.last_message_id, text=self.finish_message)
+        except Exception:
+            return
 
     def get_progress(self):
         return self.in_process
