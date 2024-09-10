@@ -149,7 +149,7 @@ def run_with_delete(update):
 
 
 def _run_bot():
-    bot.polling(none_stop=True)
+    bot.infinity_polling(timeout=10, long_polling_timeout=5)
 
 
 def run_bot():
