@@ -14,9 +14,9 @@ from urls_crowler.crowlers import (
     ChangellengeCrowler,
     ITFutCrowler,
     VsetiCrowler,
-    AichCrowler,  # Some strange 'wized' action
-    ChoiciCrowler,  # Does not work
-    MtsCrowler,  # Breaking if caught that it`s a machine
+    # AichCrowler, Some strange 'wized' stuff
+    # ChoiciCrowler,  Does not work
+    # MtsCrowler,  Breaking if caught that it`s a machine
     RemocateCrowler,  #  Too long ^)
 )
 from redis_cache import RedisCache
@@ -34,29 +34,30 @@ CROWLERS = [
     OzonCrowler,
     HhCrowler,
     VsetiCrowler,
-    RemocateCrowler,
+    # RemocateCrowler,
 ]
 
 
 def run_crowlers_threading(chat_id):
     log = logging.getLogger('crowlers')
     log.setLevel('INFO')
-    log.info('Произвожу подготовку')
+    log.warning('Произвожу подготовку')
     redis_cache = RedisCache()
 
     if settings.DELETE_ALL:
-        log.info('Стираю весь кэш')
+        log.warning('Стираю весь кэш')
 
         all_redis_links = redis_cache.get_all_keys()
         for redis_link in all_redis_links:
-            redis_cache.delete(redis_link)
+            if redis_link.startswith('http'):
+                redis_cache.delete(redis_link)
 
     start_time = datetime.now()
     pandas_xlsx_storage = PandasXLSXStorage(settings.FILE_NAME)
     all_data = []
     all_links = []
     threads = []
-    log.info('Начал работу')
+    log.warning('Начал работу')
 
     for crowler in CROWLERS:
 
@@ -72,7 +73,7 @@ def run_crowlers_threading(chat_id):
     for thread in threads:
         thread.join()
 
-    log.info('Сохраняю в файл')
+    log.warning('Сохраняю в файл')
     pandas_xlsx_storage.store_many(all_data)
     pandas_xlsx_storage.commit()
 
@@ -86,13 +87,13 @@ def run_crowlers_threading(chat_id):
         av_speed=str(len(all_data) / end_time.total_seconds()).split('.')[0],
     )
 
-    log.info(
+    log.warning(
         'Закончил обработку ссылок, надеюсь вы обрадуетесь результату, жду вас вновь!\n'
         'Приберёг статистику для вас)\n'
     )
-    log.info(f'Всего вакансий: {result_message.all_links_count}')
-    log.info(f'Всего времени: {result_message.time_spent}')
-    log.info(f'Скорость: {result_message.av_speed} вакансий/сек')
+    log.warning(f'Всего вакансий: {result_message.all_links_count}')
+    log.warning(f'Всего времени: {result_message.time_spent}')
+    log.warning(f'Скорость: {result_message.av_speed} вакансий/сек')
 
     return result_message
 

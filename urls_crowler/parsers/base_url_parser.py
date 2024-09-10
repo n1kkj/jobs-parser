@@ -8,7 +8,7 @@ from bs4 import BeautifulSoup
 
 import settings
 from urls_crowler.dto import ParseResultDTO, FixedValuesDTO
-from urls_crowler.utils import skills_dict
+from urls_crowler.utils import skills_dict, ExpCases
 from urls_crowler.utils.get_data_class import GetDataClass
 
 
@@ -51,6 +51,33 @@ class BaseUrlParser:
         skills = re.findall(pattern, text, re.IGNORECASE)
         skills = [skill.lower() for skill in skills]
         return list(set(skills))
+
+    @staticmethod
+    def format_exp(exp):
+        for char in exp:
+            if char.isdigit():
+                return int(char)
+        return ExpCases.get_exp(exp)
+
+    @classmethod
+    def find_exp(cls, text, prev_exp):
+        prev_exp = cls.format_exp(prev_exp)
+        if not prev_exp:
+            prev_exp = -1
+        found_exp = -2
+        match = re.search(r'\bОпыт\b', text, re.IGNORECASE)
+        if match:
+            sentence = text[match.start():text.find('.', match.start())]
+            found_exp = re.search(r'\d+', sentence)
+            if found_exp:
+                found_exp = int(found_exp.group(0))
+        if not found_exp:
+            found_exp = -2
+        if found_exp > prev_exp:
+            return str(found_exp)
+        if prev_exp == -1:
+            return 'Не найден'
+        return str(prev_exp)
 
     @staticmethod
     def specify_profession(skills):
@@ -183,6 +210,9 @@ class BaseJSONUrlParser(BaseUrlParser):
                     if cls.use_soup_desc and key == 'desc':
                         res_value = BeautifulSoup(res_value, 'html.parser').text
 
+                    if key == 'exp':
+                        res_value = cls.find_exp(json.dumps(vacancy), res_value)
+
                 result_values[key] = res_value
 
             except Exception as e:
@@ -269,13 +299,18 @@ class BaseHTMLUrlParser(BaseUrlParser):
 
                 elif value is not None:
                     res_value = soup
+
                     for v in value.split('/'):
                         v = v.split('|')
                         index = v[-1] if str(v[-1]).isdigit() else 0
                         res_value = res_value.find_all(v[0], class_=v[1])[index]
                     res_value = res_value.text if res_value else res_value
+                    res_value = str(res_value).replace('\xa0', ' ')
 
-                result_values[key] = str(res_value).replace('\xa0', ' ')
+                    if key == 'exp':
+                        res_value = cls.find_exp(soup.text, res_value)
+
+                result_values[key] = res_value
 
             except IndexError:
                 logging.warning(f'Не найден элемент {key}: {value} на странице: {link}')
