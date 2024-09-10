@@ -215,8 +215,7 @@ class BaseJSONUrlParser(BaseUrlParser):
 
                 result_values[key] = res_value
 
-            except Exception as e:
-                logging.warning(f'Ошибка при обработке ссылки {link}\n{e}')
+            except Exception:
                 result_values[key] = ''
 
         return result_values
@@ -315,8 +314,7 @@ class BaseHTMLUrlParser(BaseUrlParser):
             except IndexError:
                 logging.warning(f'Не найден элемент {key}: {value} на странице: {link}')
                 result_values[key] = ''
-            except Exception as e:
-                logging.warning(f'Не удалось обработать ссылку {link}\n{e}')
+            except Exception:
                 result_values[key] = ''
 
         result_values['link'] = link
