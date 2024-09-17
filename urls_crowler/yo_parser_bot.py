@@ -1,3 +1,4 @@
+import logging
 import threading
 import time
 import uvicorn
@@ -94,7 +95,11 @@ class YOParserBot:
     def start_processing(self, chat_id, include_previous=False, delete_all=False):
         self.set_progress(True)
         bot.send_message(chat_id, self.start_message)
-        self.last_message_id = bot.send_message(chat_id, self.status_messages[0]).message_id
+        try:
+            self.last_message_id = bot.send_message(chat_id, self.status_messages[0]).message_id
+        except Exception as e:
+            logging.error(f'Error while sending message: {e}')
+            return
 
         def run_parser_and_send_result():
             result_message = run_parser_for_bot(chat_id)
