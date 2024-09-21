@@ -113,7 +113,7 @@ class YOParserBot:
         parser_thread.start()
 
         while self.get_progress():
-            time.sleep(1.5)
+            time.sleep(3)
             self.update_status(chat_id)
         self.finish_status(chat_id)
         users_running.remove(chat_id)
