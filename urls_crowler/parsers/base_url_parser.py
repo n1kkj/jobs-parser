@@ -67,7 +67,7 @@ class BaseUrlParser:
         found_exp = -2
         match = re.search(r'\bОпыт\b', text, re.IGNORECASE)
         if match:
-            sentence = text[match.start():text.find('.', match.start())]
+            sentence = text[match.start() : text.find('.', match.start())]
             found_exp = re.search(r'\d+', sentence)
             if found_exp:
                 found_exp = int(found_exp.group(0))
