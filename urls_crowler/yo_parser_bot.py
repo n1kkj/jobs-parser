@@ -94,27 +94,27 @@ class YOParserBot:
 
     def start_processing(self, chat_id, include_previous=False, delete_all=False):
         self.set_progress(True)
-        # try:
-        #     bot.send_message(chat_id, self.start_message)
-        #     self.last_message_id = bot.send_message(chat_id, self.status_messages[0]).message_id
-        # except Exception as e:
-        #     logging.error(f'Error while sending message: {e}')
-        #     return
+        try:
+            bot.send_message(chat_id, self.start_message)
+            self.last_message_id = bot.send_message(chat_id, self.status_messages[0]).message_id
+        except Exception as e:
+            logging.error(f'Error while sending message: {e}')
+            return
 
         def run_parser_and_send_result():
             result_message = run_parser_for_bot(chat_id)
             self.set_progress(False)
             bot.send_document(chat_id, open(settings.FILE_NAME, 'rb'))
-            # bot.send_message(chat_id, self.make_message_from_data(result_message))
+            bot.send_message(chat_id, self.make_message_from_data(result_message))
 
         parser_thread = threading.Thread(target=run_parser_and_send_result)
         settings.INCLUDE_PREVIOUS = include_previous
         settings.DELETE_ALL = delete_all
         parser_thread.start()
 
-        # while self.get_progress():
-        #     time.sleep(3)
-        #     self.update_status(chat_id)
+        while self.get_progress():
+            time.sleep(3)
+            self.update_status(chat_id)
         self.finish_status(chat_id)
         users_running.remove(chat_id)
         settings.INCLUDE_PREVIOUS = False
