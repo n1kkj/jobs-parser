@@ -4,7 +4,7 @@ from urls_crowler.utils.get_data_class import GetDataClass
 
 
 class ITFutCrowler(BaseJSONUrlCrowler):
-    main_ulr = 'https://it.fut.ru/_next/data/7XxZdZwQI0bwhANJJhX3P/internship.json?alias_company_or_type=internship'
+    main_ulr = 'https://it.fut.ru/_next/data/BcQO6tp6G4dJcTbOOb6kv/internship.json?alias_company_or_type=internship'
     vacancies_prefix = 'https://it.fut.ru/internship/'
     data_get_function = GetDataClass.itfut_get_json_data
     json_vacancies_path = 'pageProps/data/publications'
