@@ -46,7 +46,11 @@ class GetDataClass:
     @staticmethod
     def get_html_data_by_clicking(url, *args, **kwargs):
         finished = False
+        count = 1
         while not finished:
+            if count > 1000:
+                break
+            count += 1
             try:
                 options = ChromeOptions()
                 options.add_experimental_option(
