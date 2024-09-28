@@ -210,8 +210,8 @@ class BaseJSONUrlParser(BaseUrlParser):
                     if cls.use_soup_desc and key == 'desc':
                         res_value = BeautifulSoup(res_value, 'html.parser').text
 
-                    if key == 'exp':
-                        res_value = cls.find_exp(json.dumps(vacancy), res_value)
+                if key == 'exp':
+                    res_value = cls.find_exp(json.dumps(vacancy), res_value)
 
                 result_values[key] = res_value
 
@@ -306,8 +306,8 @@ class BaseHTMLUrlParser(BaseUrlParser):
                     res_value = res_value.text if res_value else res_value
                     res_value = str(res_value).replace('\xa0', ' ')
 
-                    if key == 'exp':
-                        res_value = cls.find_exp(soup.text, res_value)
+                if key == 'exp':
+                    res_value = cls.find_exp(soup.text, res_value)
 
                 result_values[key] = res_value
 
