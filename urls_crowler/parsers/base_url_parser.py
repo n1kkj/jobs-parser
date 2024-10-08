@@ -54,6 +54,9 @@ class BaseUrlParser:
 
     @staticmethod
     def format_exp(exp):
+        for i in ('нет опыта', 'опыт не нужен', 'опыт не требуется'):
+            if i in exp.lower():
+                return 0
         for char in exp:
             if char.isdigit():
                 return int(char)
