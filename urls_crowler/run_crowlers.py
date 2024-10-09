@@ -39,7 +39,7 @@ CROWLERS = [
 ]
 
 
-def run_crowlers_threading(chat_id):
+def run_crowlers_threading(chat_id: int):
     log = logging.getLogger('crowlers')
     log.setLevel('INFO')
     log.warning('Произвожу подготовку')

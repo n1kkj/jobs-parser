@@ -50,7 +50,8 @@ class BaseUrlParser:
                      'опыт управления командой')
 
     tech_flags = ('техническое образование',
-                  'высшее техническое образование')
+                  'высшее техническое образование',
+                  'высшее образование')
 
     @staticmethod
     def find_skills(text):
@@ -61,33 +62,59 @@ class BaseUrlParser:
         return list(set(skills))
 
     @staticmethod
+    def format_salary(raw_salary: str) -> str:
+        matches = re.findall(r'\d+', raw_salary)
+        if len(matches) == 2:
+            return str(int((int(matches[0]) + int(matches[1])) / 2))
+        elif matches:
+            return matches[0]
+
+        return raw_salary
+
+    @staticmethod
     def format_exp(exp):
+        # 1) Опыт не нужен
         for i in ('нет опыта', 'опыт не нужен', 'опыт не требуется'):
             if i in exp.lower():
                 return 0
+        # 2) В строке есть чило
         for char in exp:
             if char.isdigit():
                 return int(char)
+        # 3) Случай с грейдами
         return ExpCases.get_exp(exp)
 
     @classmethod
     def find_exp(cls, text, prev_exp):
+        # Форматируем опыт
         prev_exp = cls.format_exp(prev_exp)
+
+        # Если опыт None, то даем ему -1, чтобы при сравнении был ниже
         if not prev_exp:
             prev_exp = -1
+
+        # По дефолту -2, чтобы при сравнении был ниже
         found_exp = -2
+
+        # Ищем строку со словом опыт
         match = re.search(r'\bОпыт\b', text, re.IGNORECASE)
+
+        # Если нашли, то находим цифру в этом предложении
         if match:
             sentence = text[match.start() : text.find('.', match.start())]
             found_exp = re.search(r'\d+', sentence)
             if found_exp:
                 found_exp = int(found_exp.group(0))
-        if not found_exp:
-            found_exp = -2
+
+        # Если найденный опыт больше предыдущего, то возвращаем новый
         if found_exp > prev_exp:
             return str(found_exp)
+
+        # Если найденный опыт меньше и не было предыдущего, то возвращаем Не найден
         if prev_exp == -1:
             return 'Не найден'
+
+        # В любом другом случае просто возвращаем строку
         return str(prev_exp)
 
     @staticmethod
@@ -228,6 +255,9 @@ class BaseJSONUrlParser(BaseUrlParser):
                     if cls.use_soup_desc and key == 'desc':
                         res_value = BeautifulSoup(res_value, 'html.parser').text
 
+                    if key == 'salary':
+                        res_value = cls.format_salary(res_value)
+
                 if key == 'exp':
                     res_value = cls.find_exp(json.dumps(vacancy), res_value)
 
@@ -324,6 +354,9 @@ class BaseHTMLUrlParser(BaseUrlParser):
                         res_value = res_value.find_all(v[0], class_=v[1])[index]
                     res_value = res_value.text if res_value else res_value
                     res_value = str(res_value).replace('\xa0', ' ')
+
+                    if key == 'salary':
+                        res_value = cls.format_salary(res_value)
 
                 if key == 'exp':
                     res_value = cls.find_exp(soup.text, res_value)
