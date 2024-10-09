@@ -9,6 +9,7 @@ from bs4 import BeautifulSoup
 import settings
 from urls_crowler.dto import ParseResultDTO, FixedValuesDTO
 from urls_crowler.utils import skills_dict, ExpCases
+from urls_crowler.utils.JOBS_TITLES import job_titles
 from urls_crowler.utils.get_data_class import GetDataClass
 
 
@@ -56,10 +57,17 @@ class BaseUrlParser:
     @staticmethod
     def find_skills(text):
         skills_set = set(skills_dict.keys())
-        pattern = r'\b(' + '|'.join(re.escape(skill) for skill in skills_set) + r')\b'
+        pattern = r'\b(' + '|'.join(re.escape(skill.replace('-', ' ')) for skill in skills_set) + r')\b'
         skills = re.findall(pattern, text, re.IGNORECASE)
         skills = [skill.lower() for skill in skills]
         return list(set(skills))
+
+    @staticmethod
+    def format_job_title(raw_title: str) -> str:
+        for title in job_titles:
+            if title in raw_title.lower():
+                return title
+        return raw_title
 
     @staticmethod
     def format_salary(raw_salary: str) -> str:
@@ -72,10 +80,10 @@ class BaseUrlParser:
         return raw_salary
 
     @staticmethod
-    def format_exp(exp):
+    def format_exp(text, exp):
         # 1) Опыт не нужен
         for i in ('нет опыта', 'опыт не нужен', 'опыт не требуется'):
-            if i in exp.lower():
+            if i in text.lower():
                 return 0
         # 2) В строке есть чило
         for char in exp:
@@ -87,7 +95,7 @@ class BaseUrlParser:
     @classmethod
     def find_exp(cls, text, prev_exp):
         # Форматируем опыт
-        prev_exp = cls.format_exp(prev_exp)
+        prev_exp = cls.format_exp(text, prev_exp)
 
         # Если опыт None, то даем ему -1, чтобы при сравнении был ниже
         if not prev_exp:
@@ -122,7 +130,7 @@ class BaseUrlParser:
         direction_counts = {}
 
         for skill in skills:
-            directions = skills_dict[skill].split(', ')
+            directions = skills_dict[skill.replace(' ', '-')].split(', ')
 
             for direction in directions:
                 if direction not in direction_counts:
@@ -258,6 +266,9 @@ class BaseJSONUrlParser(BaseUrlParser):
                     if key == 'salary':
                         res_value = cls.format_salary(res_value)
 
+                    if key == 'title':
+                        res_value = cls.format_job_title(res_value)
+
                 if key == 'exp':
                     res_value = cls.find_exp(json.dumps(vacancy), res_value)
 
@@ -357,6 +368,9 @@ class BaseHTMLUrlParser(BaseUrlParser):
 
                     if key == 'salary':
                         res_value = cls.format_salary(res_value)
+
+                    if key == 'title':
+                        res_value = cls.format_job_title(res_value)
 
                 if key == 'exp':
                     res_value = cls.find_exp(soup.text, res_value)
