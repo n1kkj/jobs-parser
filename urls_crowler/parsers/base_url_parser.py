@@ -52,6 +52,27 @@ class BaseUrlParser:
     tech_flags = ('техническое образование',
                   'высшее техническое образование')
 
+    salary_range = [
+        (0, 10_000),
+        (10_000, 40_000),
+        (40_000, 70_000),
+        (70_000, 100_000),
+        (100_000, 130_000),
+        (130_000, 160_000),
+        (160_000, 190_000),
+        (190_000, 1_000_000),
+    ]
+
+    @classmethod
+    def determine_salary(cls, salary):
+        if not (salary and salary.isdigit()):
+            return salary
+        salary = int(salary)
+        for range in cls.salary_range:
+            if range[0] <= salary <= range[1]:
+                return range
+        return range
+
     @staticmethod
     def find_skills(text):
         skills_set = set(skills_dict.keys())
@@ -224,6 +245,8 @@ class BaseJSONUrlParser(BaseUrlParser):
 
                     if cls.use_soup_desc and key == 'desc':
                         res_value = BeautifulSoup(res_value, 'html.parser').text
+                    if key == 'salary':
+                        result_values['salary_range'] = cls.determine_salary(res_value)
 
                 if key == 'exp':
                     res_value = cls.find_exp(json.dumps(vacancy), res_value)
@@ -321,6 +344,9 @@ class BaseHTMLUrlParser(BaseUrlParser):
                         res_value = res_value.find_all(v[0], class_=v[1])[index]
                     res_value = res_value.text if res_value else res_value
                     res_value = str(res_value).replace('\xa0', ' ')
+
+                    if key == 'salary':
+                        result_values['salary_range'] = cls.determine_salary(res_value)
 
                 if key == 'exp':
                     res_value = cls.find_exp(soup.text, res_value)
