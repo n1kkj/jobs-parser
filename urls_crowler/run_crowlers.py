@@ -15,9 +15,9 @@ from urls_crowler.crowlers import (
     ITFutCrowler,
     VsetiCrowler,
     # AichCrowler, Some strange 'wized' stuff
-    # ChoiciCrowler,  Does not work
+    ChoiciCrowler,
     # MtsCrowler,  Breaking if caught that it`s a machine
-    RemocateCrowler,  #  Too long ^)
+    RemocateCrowler,
 )
 from redis_cache import RedisCache
 from storages.pandas_storage import PandasXLSXStorage
@@ -34,11 +34,12 @@ CROWLERS = [
     OzonCrowler,
     HhCrowler,
     VsetiCrowler,
-    # RemocateCrowler,
+    RemocateCrowler,
+    ChoiciCrowler,
 ]
 
 
-def run_crowlers_threading(chat_id):
+def run_crowlers_threading(chat_id: int):
     log = logging.getLogger('crowlers')
     log.setLevel('INFO')
     log.warning('Произвожу подготовку')
@@ -55,16 +56,14 @@ def run_crowlers_threading(chat_id):
     start_time = datetime.now()
     pandas_xlsx_storage = PandasXLSXStorage(settings.FILE_NAME)
     all_data = []
-    all_links = []
     threads = []
     log.warning('Начал работу')
 
     for crowler in CROWLERS:
 
         def target_function():
-            data, links = crowler.run_crowl(redis_cache, chat_id)
+            data, _ = crowler.run_crowl(redis_cache, chat_id)
             all_data.extend(data)
-            all_links.extend(links)
 
         thread = threading.Thread(target=target_function)
         threads.append(thread)

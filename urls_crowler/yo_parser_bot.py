@@ -115,6 +115,7 @@ class YOParserBot:
         while self.get_progress():
             time.sleep(3)
             self.update_status(chat_id)
+
         self.finish_status(chat_id)
         users_running.remove(chat_id)
         settings.INCLUDE_PREVIOUS = False
