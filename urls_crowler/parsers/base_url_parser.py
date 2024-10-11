@@ -70,7 +70,10 @@ class BaseUrlParser:
         return raw_title
 
     @staticmethod
-    def format_salary(raw_salary: str) -> str:
+    def format_salary(raw_salary: str | None) -> str:
+        if not raw_salary:
+            return ''
+
         matches = re.findall(r'\d+', raw_salary)
         if len(matches) == 2:
             return str(int((int(matches[0]) + int(matches[1])) / 2))
