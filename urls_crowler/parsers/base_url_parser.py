@@ -44,15 +44,16 @@ class BaseUrlParser:
 
     extra_kwargs = {}
     result_dto = ParseResultDTO
-    manager_flags = ('опыт работы руководителем',
-                     'опыт управления',
-                     'опыт управления проектами',
-                     'руководили', 'в подчинении',
-                     'опыт управления командой')
+    manager_flags = (
+        'опыт работы руководителем',
+        'опыт управления',
+        'опыт управления проектами',
+        'руководили',
+        'в подчинении',
+        'опыт управления командой',
+    )
 
-    tech_flags = ('техническое образование',
-                  'высшее техническое образование',
-                  'высшее образование')
+    tech_flags = ('техническое образование', 'высшее техническое образование', 'высшее образование')
 
     salary_range = [
         (0, 10_000),
@@ -70,10 +71,10 @@ class BaseUrlParser:
         if not (salary and salary.isdigit()):
             return salary
         salary = int(salary)
-        for range in cls.salary_range:
-            if range[0] <= salary <= range[1]:
-                return range
-        return range
+        for s_range in cls.salary_range:
+            if s_range[0] <= salary <= s_range[1]:
+                return s_range
+        return salary
 
     @staticmethod
     def find_skills(text):
