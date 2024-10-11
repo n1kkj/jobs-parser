@@ -66,6 +66,10 @@ class BaseUrlParser:
         (190_000, 1_000_000),
     ]
 
+    @staticmethod
+    def tuple_to_str(t):
+        return f'{t[0]} - {t[1]}'
+
     @classmethod
     def determine_salary(cls, salary):
         if not (salary and salary.isdigit()):
@@ -73,8 +77,8 @@ class BaseUrlParser:
         salary = int(salary)
         for s_range in cls.salary_range:
             if s_range[0] <= salary <= s_range[1]:
-                return s_range
-        return salary
+                return cls.tuple_to_str(s_range)
+        return str(salary)
 
     @staticmethod
     def find_skills(text):
@@ -274,6 +278,7 @@ class BaseJSONUrlParser(BaseUrlParser):
         specify_profession = cls.specify_profession(skills)
         result_values['direction'] = specify_profession[0]
         result_values['profession'] = specify_profession[1]
+        result_values['salary_range'] = None
 
         for key, value in keys.items():
             res_value = ''
@@ -373,6 +378,7 @@ class BaseHTMLUrlParser(BaseUrlParser):
         specify_profession = cls.specify_profession(skills)
         result_values['direction'] = specify_profession[0]
         result_values['profession'] = specify_profession[1]
+        result_values['salary_range'] = None
 
         for key, value in keys.items():
             res_value = ''
