@@ -16,4 +16,5 @@ from .json_crowlers import (
     OzonCrowler,
     SberCrowler,
     YandexCrowler,
+    HabrCrowler,
 )

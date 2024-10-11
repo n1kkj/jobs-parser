@@ -48,7 +48,7 @@ class GetDataClass:
         finished = False
         count = 1
         while not finished:
-            if count > 1000:
+            if count > 100:
                 break
             count += 1
             try:
@@ -141,7 +141,7 @@ class GetDataClass:
         response = requests.get(url)
         total_pages = dpath.util.get(response.json(), total_pages_path)
 
-        for page in range(total_pages - 1):
+        for page in range(total_pages):
             response = requests.get(f'{url}&page={page}')
 
             _next_vacancies = response.json()[vacancies_path]

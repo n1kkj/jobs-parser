@@ -16,4 +16,5 @@ from .json_parsers import (
     OzonParser,
     SberParser,
     YandexParser,
+    HabrParser,
 )
