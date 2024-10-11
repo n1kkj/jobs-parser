@@ -54,6 +54,27 @@ class BaseUrlParser:
                   'высшее техническое образование',
                   'высшее образование')
 
+    salary_range = [
+        (0, 10_000),
+        (10_000, 40_000),
+        (40_000, 70_000),
+        (70_000, 100_000),
+        (100_000, 130_000),
+        (130_000, 160_000),
+        (160_000, 190_000),
+        (190_000, 1_000_000),
+    ]
+
+    @classmethod
+    def determine_salary(cls, salary):
+        if not (salary and salary.isdigit()):
+            return salary
+        salary = int(salary)
+        for range in cls.salary_range:
+            if range[0] <= salary <= range[1]:
+                return range
+        return range
+
     @staticmethod
     def find_skills(text):
         skills_set = set(skills_dict.keys())
@@ -265,9 +286,9 @@ class BaseJSONUrlParser(BaseUrlParser):
 
                     if cls.use_soup_desc and key == 'desc':
                         res_value = BeautifulSoup(res_value, 'html.parser').text
-
                     if key == 'salary':
                         res_value = cls.format_salary(res_value)
+                        result_values['salary_range'] = cls.determine_salary(res_value)
 
                     if key == 'title':
                         res_value = cls.format_job_title(res_value)
@@ -371,7 +392,7 @@ class BaseHTMLUrlParser(BaseUrlParser):
 
                     if key == 'salary':
                         res_value = cls.format_salary(res_value)
-
+                        result_values['salary_range'] = cls.determine_salary(res_value)
                     if key == 'title':
                         res_value = cls.format_job_title(res_value)
 
