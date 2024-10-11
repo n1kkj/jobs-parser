@@ -127,7 +127,7 @@ class BaseUrlParser:
         prev_exp = cls.format_exp(text, prev_exp)
 
         # Если опыт None, то даем ему -1, чтобы при сравнении был ниже
-        if (type(prev_exp) == int and prev_exp == 0) or type(prev_exp) == str:
+        if (type(prev_exp) is int and prev_exp == 0) or type(prev_exp) is str:
             return str(prev_exp)
 
         if not prev_exp:
@@ -141,7 +141,7 @@ class BaseUrlParser:
 
         # Если нашли, то находим цифру в этом предложении
         if match:
-            sentence = text[match.start():text.find('.', match.start())]
+            sentence = text[match.start() : text.find('.', match.start())]
             found_exp = re.search(r'\d+', sentence)
             if found_exp:
                 found_exp = int(found_exp.group(0))

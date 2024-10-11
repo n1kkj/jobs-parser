@@ -4,8 +4,10 @@ from urls_crowler.utils.get_data_class import GetDataClass
 
 
 class HabrCrowler(BaseJSONUrlCrowler):
-    main_ulr = ('https://career.habr.com/api/frontend/vacancies?sort=relevance&type=all&currency=RUR'
-                '&s[]=2&s[]=3&s[]=4&s[]=6&s[]=41&s[]=42&s[]=43&s[]=97&s[]=32&s[]=34&s[]=176&s[]=125&s[]=44')
+    main_ulr = (
+        'https://career.habr.com/api/frontend/vacancies?sort=relevance&type=all&currency=RUR'
+        '&s[]=2&s[]=3&s[]=4&s[]=6&s[]=41&s[]=42&s[]=43&s[]=97&s[]=32&s[]=34&s[]=176&s[]=125&s[]=44'
+    )
     vacancies_prefix = 'https://career.habr.com'
     data_get_function = GetDataClass.get_json_data_by_pages
     json_vacancies_path = 'vacancies'
