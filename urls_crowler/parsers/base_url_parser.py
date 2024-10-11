@@ -109,10 +109,10 @@ class BaseUrlParser:
         return raw_salary
 
     @staticmethod
-    def format_exp(text, exp):
+    def format_exp(text: str, exp: str):
         # 1) Опыт не нужен
-        for i in ('нет опыта', 'опыт не нужен', 'опыт не требуется'):
-            if i in text.lower():
+        for i in ('нет опыта', 'не нужен', 'не требуется', 'опыт не нужен', 'опыт не требуется'):
+            if (i in text.lower()) or (i in exp.lower()):
                 return 0
         # 2) В строке есть чило
         for char in exp:
@@ -127,6 +127,9 @@ class BaseUrlParser:
         prev_exp = cls.format_exp(text, prev_exp)
 
         # Если опыт None, то даем ему -1, чтобы при сравнении был ниже
+        if (type(prev_exp) == int and prev_exp == 0) or type(prev_exp) == str:
+            return str(prev_exp)
+
         if not prev_exp:
             prev_exp = -1
 
@@ -138,17 +141,22 @@ class BaseUrlParser:
 
         # Если нашли, то находим цифру в этом предложении
         if match:
-            sentence = text[match.start() : text.find('.', match.start())]
+            sentence = text[match.start():text.find('.', match.start())]
             found_exp = re.search(r'\d+', sentence)
             if found_exp:
                 found_exp = int(found_exp.group(0))
-
+            else:
+                found_exp = -2
         # Если найденный опыт больше предыдущего, то возвращаем новый
         if found_exp > prev_exp:
             return str(found_exp)
 
+        # Если найденный опыт равен предыдущему, то просто возвращаем предыдущий
+        elif found_exp == prev_exp:
+            return str(prev_exp)
+
         # Если найденный опыт меньше и не было предыдущего, то возвращаем Не найден
-        if prev_exp == -1:
+        elif prev_exp == -1:
             return 'Не найден'
 
         # В любом другом случае просто возвращаем строку
@@ -300,7 +308,7 @@ class BaseJSONUrlParser(BaseUrlParser):
                         res_value = cls.format_job_title(res_value)
 
                 if key == 'exp':
-                    res_value = cls.find_exp(json.dumps(vacancy), res_value)
+                    res_value = cls.find_exp(json.dumps(vacancy, ensure_ascii=False), res_value)
 
                 result_values[key] = res_value
 
@@ -392,7 +400,7 @@ class BaseHTMLUrlParser(BaseUrlParser):
 
                     for v in value.split('/'):
                         v = v.split('|')
-                        index = v[-1] if str(v[-1]).isdigit() else 0
+                        index = int(v[-1]) if str(v[-1]).isdigit() else 0
                         res_value = res_value.find_all(v[0], class_=v[1])[index]
                     res_value = res_value.text if res_value else res_value
                     res_value = str(res_value).replace('\xa0', ' ')

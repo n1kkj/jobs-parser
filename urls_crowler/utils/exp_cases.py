@@ -18,4 +18,4 @@ class ExpCases:
             return cls.SENIOR[1]
         elif exp.lower() == cls.LEAD[0]:
             return cls.LEAD[1]
-        return cls.NONE[1]
+        return exp
