@@ -421,7 +421,8 @@ class BaseHTMLUrlParser(BaseUrlParser):
             except IndexError:
                 logging.warning(f'Не найден элемент {key}: {value} на странице: {link}')
                 result_values[key] = ''
-            except Exception:
+            except Exception as e:
+                print(e)
                 result_values[key] = ''
 
         result_values['link'] = link

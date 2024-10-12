@@ -3,6 +3,7 @@ import threading
 from datetime import datetime
 
 import settings
+from storages.google_storage import GoogleStorage
 from urls_crowler.crowlers import (
     SberCrowler,
     YandexCrowler,
@@ -57,6 +58,7 @@ def run_crowlers_threading(chat_id: int):
 
     start_time = datetime.now()
     pandas_xlsx_storage = PandasXLSXStorage(settings.FILE_NAME)
+    google_storage = GoogleStorage(settings.GOOGLE_API_KEY)
     all_data = []
     threads = []
     log.warning('Начал работу')
@@ -74,9 +76,11 @@ def run_crowlers_threading(chat_id: int):
     for thread in threads:
         thread.join()
 
-    log.warning('Сохраняю в файл')
+    log.warning('Сохраняю в файл и в гугл табличку')
     pandas_xlsx_storage.store_many(all_data)
     pandas_xlsx_storage.commit()
+    google_storage.save_many_vacancies(all_data)
+    google_link = google_storage.get_spreadsheet_link()
 
     redis_cache.disconnect()
 
@@ -86,6 +90,7 @@ def run_crowlers_threading(chat_id: int):
         all_links_count=len(all_data),
         time_spent=str(end_time).split('.')[0],
         av_speed=str(len(all_data) / end_time.total_seconds()).split('.')[0],
+        google_link=google_link,
     )
 
     log.warning(

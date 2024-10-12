@@ -85,7 +85,8 @@ class YOParserBot:
         return (
             f'Всего вакансий: {result_message.all_links_count}\n'
             f'Всего времени: {result_message.time_spent}\n'
-            f'Скорость: {result_message.av_speed} вакансий/сек'
+            f'Скорость: {result_message.av_speed} вакансий/сек\n\n'
+            f'Гугл сссылка: {result_message.google_link}'
         )
 
     def start_processing(self, chat_id, include_previous=False, delete_all=False):
