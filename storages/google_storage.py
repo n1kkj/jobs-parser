@@ -89,21 +89,25 @@ class GoogleStorage:
                 fields='id',
             ).execute()
 
+    def send_data(self, sending_data):
+        self.sheet_service.spreadsheets().values().batchUpdate(
+            spreadsheetId=self.spreadsheet_id,
+            body={
+                'valueInputOption': 'RAW',
+                'data': sending_data,
+            },
+        ).execute()
+
     def create_column_names(self):
+        sending_data = []
         for i in self.sheets:
-            self.sheet_service.spreadsheets().values().batchUpdate(
-                spreadsheetId=self.spreadsheet_id,
-                body={
-                    'valueInputOption': 'USER_ENTERED',
-                    'data': [
-                        {
-                            'range': f'{i}!A1:N1',
-                            'majorDimension': 'ROWS',
-                            'values': [self.columns],
-                        }
-                    ],
-                },
-            ).execute()
+            sending_data.append(
+                {
+                    'range': f'{i}!A1:N1',
+                    'values': [self.columns],
+                }
+            )
+        self.send_data(sending_data)
 
     @staticmethod
     def get_sheet_name(direction):
@@ -159,13 +163,7 @@ class GoogleStorage:
                     'values': sheets_data[i],
                 }
             )
-        self.sheet_service.spreadsheets().values().batchUpdate(
-            spreadsheetId=self.spreadsheet_id,
-            body={
-                'valueInputOption': 'RAW',
-                'data': sending_data,
-            },
-        ).execute()
+        self.send_data(sending_data)
 
 
 if __name__ == '__main__':
