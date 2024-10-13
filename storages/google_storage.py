@@ -41,9 +41,21 @@ class GoogleStorage:
         self.spreadsheet_id = None
 
         self.auth(api_file)
-        self.set_spreadsheet()
-        self.add_permissions()
-        self.create_column_names()
+        self.get_settings_spreadsheet()
+        self.delete_all()
+        self.create_column_names(self.columns)
+
+    def delete_all(self):
+        self.create_column_names(['' for i in range(15)])
+        spreadsheet_data = []
+        for i in range(len(self.sheets)):
+            spreadsheet_data.append(
+                {'deleteDimension': {'range': {'sheetId': i, 'dimension': 'COLUMNS', 'startIndex': 0, 'endIndex': 14}}}
+            )
+
+        self.sheet_service.spreadsheets().batchUpdate(
+            spreadsheetId=self.spreadsheet_id, body={'requests': spreadsheet_data}
+        ).execute()
 
     def get_spreadsheet_link(self):
         return f'https://docs.google.com/spreadsheets/d/{self.spreadsheet_id}'
@@ -80,12 +92,15 @@ class GoogleStorage:
         )
         self.spreadsheet_id = spreadsheet['spreadsheetId']
 
+    def get_settings_spreadsheet(self):
+        self.spreadsheet_id = settings.GOOGLE_SPREADSHEET_ID
+
     def add_permissions(self):
         self.service = apiclient.discovery.build('drive', 'v3', http=self.httpAuth)
         for i in self.permissions:
             self.service.permissions().create(
                 fileId=self.spreadsheet_id,
-                body={'type': 'user', 'role': 'writer', 'emailAddress': i},
+                body={'sendNotificationEmails': False, 'type': 'user', 'role': 'writer', 'emailAddress': i},
                 fields='id',
             ).execute()
 
@@ -98,13 +113,13 @@ class GoogleStorage:
             },
         ).execute()
 
-    def create_column_names(self):
+    def create_column_names(self, columns):
         sending_data = []
         for i in self.sheets:
             sending_data.append(
                 {
-                    'range': f'{i}!A1:N1',
-                    'values': [self.columns],
+                    'range': f'{i}!A1',
+                    'values': [columns],
                 }
             )
         self.send_data(sending_data)
@@ -112,16 +127,12 @@ class GoogleStorage:
     @staticmethod
     def get_sheet_name(direction):
         if direction == 'Аналитика':
-            # self.global_1_row += 1
             return 'Аналитика'
         elif direction == 'ML':
-            # self.global_2_row += 1
             return 'ML'
         elif direction in ('Product Management', 'Project  Management'):
-            # self.global_3_row += 1
             return 'Product Project'
         else:
-            # self.global_0_row += 1
             return 'Разработка'
 
     @classmethod
@@ -167,5 +178,5 @@ class GoogleStorage:
 
 
 if __name__ == '__main__':
-    google_storage = GoogleStorage(settings.GOOGLE_API_KEY)
+    google_storage = GoogleStorage('../urls_crowler/google-api-key.json')
     print(google_storage.get_spreadsheet_link())
