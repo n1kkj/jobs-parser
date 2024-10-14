@@ -20,6 +20,7 @@ from urls_crowler.crowlers import (
     # MtsCrowler,  Breaking if caught that it`s a machine
     RemocateCrowler,
     HabrCrowler,
+    SuperJobCrowler,
 )
 from redis_cache import RedisCache
 from storages.pandas_storage import PandasXLSXStorage
@@ -39,6 +40,7 @@ CROWLERS = [
     RemocateCrowler,
     ChoiciCrowler,
     HabrCrowler,
+    SuperJobCrowler,
 ]
 
 

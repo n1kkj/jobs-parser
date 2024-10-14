@@ -9,6 +9,7 @@ from .html_crowlers import (
     AichCrowler,
     ChoiciCrowler,
     RemocateCrowler,
+    SuperJobCrowler,
 )
 from .json_crowlers import (
     HhCrowler,

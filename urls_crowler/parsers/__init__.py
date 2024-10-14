@@ -9,6 +9,7 @@ from .html_parsers import (
     AichParser,
     ChoiciParser,
     RemocateParser,
+    SuperJobParser,
 )
 from .json_parsers import (
     HhParser,
