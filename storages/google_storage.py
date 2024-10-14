@@ -1,3 +1,6 @@
+import logging
+import time
+
 import httplib2
 import apiclient
 from oauth2client.service_account import ServiceAccountCredentials
@@ -104,14 +107,21 @@ class GoogleStorage:
                 fields='id',
             ).execute()
 
-    def send_data(self, sending_data):
-        self.sheet_service.spreadsheets().values().batchUpdate(
-            spreadsheetId=self.spreadsheet_id,
-            body={
-                'valueInputOption': 'RAW',
-                'data': sending_data,
-            },
-        ).execute()
+    def send_data(self, sending_data, n=0):
+        if n >= 10:
+            return
+        try:
+            self.sheet_service.spreadsheets().values().batchUpdate(
+                spreadsheetId=self.spreadsheet_id,
+                body={
+                    'valueInputOption': 'RAW',
+                    'data': sending_data,
+                },
+            ).execute()
+        except Exception as e:
+            logging.error(f'Error while saving into google: {e}')
+            time.sleep(30 + n)
+            self.send_data(sending_data, n + 1)
 
     def create_column_names(self, columns):
         sending_data = []
