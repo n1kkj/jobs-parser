@@ -112,14 +112,19 @@ class BaseUrlParser:
 
     @staticmethod
     def format_exp(text: str, exp: str):
-        # 1) Опыт не нужен
-        for i in ('нет опыта', 'не нужен', 'не требуется', 'опыт не нужен', 'опыт не требуется'):
-            if (i in text.lower()) or (i in exp.lower()):
-                return 0
-        # 2) В строке есть чило
+        if not exp:
+            exp = 'Не найден'
+
+        # 1) В строке есть чило
         for char in exp:
             if char.isdigit():
                 return int(char)
+
+        # 2) Опыт не нужен
+        for i in ('нет опыта', 'опыт не нужен', 'опыт не требуется', 'опыт не нужен', 'опыт необязателен', 'без опыта'):
+            if (i in text.lower()) or (i in exp.lower()):
+                return 0
+
         # 3) Случай с грейдами
         return ExpCases.get_exp(exp)
 
@@ -128,9 +133,14 @@ class BaseUrlParser:
         # Форматируем опыт
         prev_exp = cls.format_exp(text, prev_exp)
 
-        # Если опыт None, то даем ему -1, чтобы при сравнении был ниже
-        if (type(prev_exp) is int and prev_exp == 0) or type(prev_exp) is str:
-            return str(prev_exp)
+        if type(prev_exp) is int and prev_exp == 0:
+            return '0'
+
+        if type(prev_exp) is str and prev_exp != 'Не найден':
+            return prev_exp
+
+        if type(prev_exp) is str and prev_exp == 'Не найден':
+            prev_exp = -1
 
         if not prev_exp:
             prev_exp = -1
@@ -298,7 +308,10 @@ class BaseJSONUrlParser(BaseUrlParser):
                     res_value = fixed[key]
 
                 elif value is not None:
-                    res_value = str(du.get(vacancy, value))
+                    try:
+                        res_value = str(du.get(vacancy, value))
+                    except Exception:
+                        res_value = ''
 
                     if cls.use_soup_desc and key == 'desc':
                         res_value = BeautifulSoup(res_value, 'html.parser').text
@@ -400,12 +413,15 @@ class BaseHTMLUrlParser(BaseUrlParser):
                 elif value is not None:
                     res_value = soup
 
-                    for v in value.split('/'):
-                        v = v.split('|')
-                        index = int(v[-1]) if str(v[-1]).isdigit() else 0
-                        res_value = res_value.find_all(v[0], class_=v[1])[index]
-                    res_value = res_value.text if res_value else res_value
-                    res_value = str(res_value).replace('\xa0', ' ')
+                    try:
+                        for v in value.split('/'):
+                            v = v.split('|')
+                            index = int(v[-1]) if str(v[-1]).isdigit() else 0
+                            res_value = res_value.find_all(v[0], class_=v[1])[index]
+                        res_value = res_value.text if res_value else res_value
+                        res_value = str(res_value).replace('\xa0', ' ')
+                    except Exception:
+                        res_value = ''
 
                     if key == 'salary':
                         res_value = cls.format_salary(res_value)
@@ -421,8 +437,7 @@ class BaseHTMLUrlParser(BaseUrlParser):
             except IndexError:
                 logging.warning(f'Не найден элемент {key}: {value} на странице: {link}')
                 result_values[key] = ''
-            except Exception as e:
-                print(e)
+            except Exception:
                 result_values[key] = ''
 
         result_values['link'] = link
