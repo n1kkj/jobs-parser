@@ -9,7 +9,7 @@ from bs4 import BeautifulSoup
 import settings
 from urls_crowler.dto import ParseResultDTO, FixedValuesDTO
 from urls_crowler.utils import skills_dict, ExpCases
-from urls_crowler.utils.JOBS_TITLES import job_titles
+from urls_crowler.utils.JOBS_TITLES import job_titles, banned_job_titles
 from urls_crowler.utils.get_data_class import GetDataClass
 
 
@@ -90,6 +90,9 @@ class BaseUrlParser:
 
     @staticmethod
     def format_job_title(raw_title: str) -> str:
+        for title in banned_job_titles:
+            if title in raw_title.lower():
+                return 'BANNED'
         for title in job_titles:
             if title in raw_title.lower():
                 return title
@@ -248,10 +251,11 @@ class BaseUrlParser:
             cached_data = redis_cache.get(link)
             if not cached_data:
                 parse_result = cls.parse_link(link, keys, fixed)
-                results.append(parse_result)
-                parse_result.users.append(chat_id)
-                parse_result.users = list(set(parse_result.users))
-                redis_cache.set(link, parse_result.model_dump_json())
+                if parse_result['profession'] != '':
+                    results.append(parse_result)
+                    parse_result.users.append(chat_id)
+                    parse_result.users = list(set(parse_result.users))
+                    redis_cache.set(link, parse_result.model_dump_json())
             else:
                 parse_result = ParseResultDTO.model_validate_json(cached_data)
                 if settings.INCLUDE_PREVIOUS >= (chat_id in parse_result.users):
@@ -321,6 +325,8 @@ class BaseJSONUrlParser(BaseUrlParser):
 
                     if key == 'title':
                         res_value = cls.format_job_title(res_value)
+                        if res_value == 'BANNED':
+                            return ParseResultDTO().model_dump()
 
                 if key == 'exp':
                     res_value = cls.find_exp(json.dumps(vacancy, ensure_ascii=False), res_value)
@@ -366,7 +372,12 @@ class BaseJSONUrlParser(BaseUrlParser):
             if not cached_data:
                 result_values = {'link': link}
                 result_values = cls._parse_link(vacancy, result_values, keys, fixed_keys, fixed, link)
-                parse_result = ParseResultDTO(**result_values)
+
+                if result_values['profession'] == '':
+                    parse_result = ParseResultDTO()
+                else:
+                    parse_result = ParseResultDTO(**result_values)
+
                 result_all_data.append(parse_result)
                 parse_result.users.append(chat_id)
                 parse_result.users = list(set(parse_result.users))
@@ -428,6 +439,8 @@ class BaseHTMLUrlParser(BaseUrlParser):
                         result_values['salary_range'] = cls.determine_salary(res_value)
                     if key == 'title':
                         res_value = cls.format_job_title(res_value)
+                        if res_value == 'BANNED':
+                            return ParseResultDTO()
 
                 if key == 'exp':
                     res_value = cls.find_exp(soup.text, res_value)
