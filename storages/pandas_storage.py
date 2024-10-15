@@ -73,13 +73,12 @@ class PandasXLSXStorage:
 
     def store_many(self, pages_data: list[ParseResultDTO]):
         for page_data in pages_data:
-            self.store_one(page_data)
-
-    def store_one(self, page_data: ParseResultDTO):
-        sheet_name = self._get_sheet_name(page_data)
-        self.__file_data[sheet_name] = pd.concat(
-            [self.__file_data[sheet_name], self.extract_dataframe(page_data)], ignore_index=True
-        )
+            if page_data.profession is None or page_data.profession == '':
+                continue
+            sheet_name = self._get_sheet_name(page_data)
+            self.__file_data[sheet_name] = pd.concat(
+                [self.__file_data[sheet_name], self.extract_dataframe(page_data)], ignore_index=True
+            )
 
     def commit(self):
         with pd.ExcelWriter(self.__file_name, engine='xlsxwriter', mode='w') as writer:

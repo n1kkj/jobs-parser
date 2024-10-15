@@ -81,7 +81,7 @@ def run_crowlers_threading(chat_id: int):
     log.warning('Сохраняю в файл и в гугл табличку')
     pandas_xlsx_storage.store_many(all_data)
     pandas_xlsx_storage.commit()
-    google_storage.save_many_vacancies(all_data)
+    new_data_len = google_storage.save_many_vacancies(all_data)
     google_link = google_storage.get_spreadsheet_link()
 
     redis_cache.disconnect()
@@ -89,9 +89,9 @@ def run_crowlers_threading(chat_id: int):
     end_time = datetime.now() - start_time
 
     result_message = ResultMessageDTO(
-        all_links_count=len(all_data),
+        all_links_count=new_data_len,
         time_spent=str(end_time).split('.')[0],
-        av_speed=str(len(all_data) / end_time.total_seconds()).split('.')[0],
+        av_speed=str(new_data_len / end_time.total_seconds()).split('.')[0],
         google_link=google_link,
     )
 

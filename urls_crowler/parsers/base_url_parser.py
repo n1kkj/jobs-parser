@@ -2,6 +2,7 @@ import json
 import logging
 import re
 from typing import List
+import chardet
 
 import dpath.util as du
 from bs4 import BeautifulSoup
@@ -57,13 +58,15 @@ class BaseUrlParser:
 
     salary_range = [
         (0, 10_000),
-        (10_000, 40_000),
-        (40_000, 70_000),
+        (10_000, 50_000),
+        (50_000, 70_000),
         (70_000, 100_000),
         (100_000, 130_000),
         (130_000, 160_000),
-        (160_000, 190_000),
-        (190_000, 1_000_000),
+        (160_000, 200_000),
+        (200_000, 300_000),
+        (300_000, 400_000),
+        (400_000, 1_000_000),
     ]
 
     @staticmethod
@@ -79,6 +82,19 @@ class BaseUrlParser:
             if s_range[0] <= salary <= s_range[1]:
                 return cls.tuple_to_str(s_range)
         return str(salary)
+
+    @staticmethod
+    def decode_text(text: str) -> str:
+        detected_encoding = chardet.detect(text.encode())['encoding']
+
+        if detected_encoding == 'ascii':
+            return text
+
+        try:
+            decoded_text = text.encode('latin_1').decode()
+            return decoded_text
+        except Exception:
+            return text
 
     @staticmethod
     def find_skills(text):
@@ -251,7 +267,7 @@ class BaseUrlParser:
             cached_data = redis_cache.get(link)
             if not cached_data:
                 parse_result = cls.parse_link(link, keys, fixed)
-                if parse_result['profession'] != '':
+                if parse_result.profession != '':
                     results.append(parse_result)
                     parse_result.users.append(chat_id)
                     parse_result.users = list(set(parse_result.users))
@@ -295,10 +311,13 @@ class BaseJSONUrlParser(BaseUrlParser):
 
     @classmethod
     def _parse_link(cls, vacancy, result_values, keys, fixed_keys, fixed, link) -> dict:
-        skills = cls.find_skills(json.dumps(vacancy))
+        vacancy_text = json.dumps(vacancy)
+        if 'vseti' in link:
+            vacancy_text = cls.decode_text(vacancy_text)
+        skills = cls.find_skills(vacancy_text)
         result_values['skills'] = ', '.join(skills)
-        result_values['tech_flag'] = cls.tech_true(json.dumps(vacancy))
-        result_values['manager_flag'] = cls.manager_true(json.dumps(vacancy))
+        result_values['tech_flag'] = cls.tech_true(vacancy_text)
+        result_values['manager_flag'] = cls.manager_true(vacancy_text)
         specify_profession = cls.specify_profession(skills)
         result_values['direction'] = specify_profession[0]
         result_values['profession'] = specify_profession[1]
@@ -316,6 +335,9 @@ class BaseJSONUrlParser(BaseUrlParser):
                         res_value = str(du.get(vacancy, value))
                     except Exception:
                         res_value = ''
+
+                    if 'vseti' in link:
+                        res_value = cls.decode_text(res_value)
 
                     if cls.use_soup_desc and key == 'desc':
                         res_value = BeautifulSoup(res_value, 'html.parser').text
@@ -404,11 +426,15 @@ class BaseHTMLUrlParser(BaseUrlParser):
         result_values = {}
 
         soup = BeautifulSoup(data, 'html.parser')
+        soup_text = soup.text
 
-        skills = cls.find_skills(soup.text)
+        if 'vseti' in link:
+            soup_text = cls.decode_text(soup_text)
+
+        skills = cls.find_skills(soup_text)
         result_values['skills'] = ', '.join(skills)
-        result_values['tech_flag'] = cls.tech_true(soup.text)
-        result_values['manager_flag'] = cls.manager_true(soup.text)
+        result_values['tech_flag'] = cls.tech_true(soup_text)
+        result_values['manager_flag'] = cls.manager_true(soup_text)
         specify_profession = cls.specify_profession(skills)
         result_values['direction'] = specify_profession[0]
         result_values['profession'] = specify_profession[1]
@@ -433,6 +459,9 @@ class BaseHTMLUrlParser(BaseUrlParser):
                         res_value = str(res_value).replace('\xa0', ' ')
                     except Exception:
                         res_value = ''
+
+                    if 'vseti' in link:
+                        res_value = cls.decode_text(res_value)
 
                     if key == 'salary':
                         res_value = cls.format_salary(res_value)

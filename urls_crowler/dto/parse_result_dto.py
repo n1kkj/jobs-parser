@@ -4,18 +4,18 @@ from pydantic import BaseModel
 
 
 class ParseResultDTO(BaseModel):
-    title: Optional[str]
-    desc: Optional[str]
-    skills: Optional[str]
-    exp: Optional[str]
-    salary: Optional[str]
-    city: Optional[str]
-    employer: Optional[str]
-    direction: Optional[str]
-    profession: Optional[str]
-    work_format: Optional[str]
-    tech_flag: Optional[bool]
-    manager_flag: Optional[bool]
-    salary_range: Optional[str]
-    link: Optional[str]
+    title: Optional[str] = None
+    desc: Optional[str] = None
+    skills: Optional[str] = None
+    exp: Optional[str] = None
+    salary: Optional[str] = None
+    city: Optional[str] = None
+    employer: Optional[str] = None
+    direction: Optional[str] = None
+    profession: Optional[str] = None
+    work_format: Optional[str] = None
+    tech_flag: Optional[bool] = None
+    manager_flag: Optional[bool] = None
+    salary_range: Optional[str] = None
+    link: Optional[str] = None
     users: Optional[List[int]] = []

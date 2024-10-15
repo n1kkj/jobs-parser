@@ -153,7 +153,11 @@ class GoogleStorage:
             'ML': [],
             'Product Project': [],
         }
+        count = 0
         for i in data:
+            if i.profession is None or i.profession == '':
+                continue
+            count += 1
             sheet_name = cls.get_sheet_name(i.direction)
             sheets_data[sheet_name].append(
                 [
@@ -172,10 +176,10 @@ class GoogleStorage:
                     i.link,
                 ]
             )
-        return sheets_data
+        return sheets_data, count
 
     def save_many_vacancies(self, data: list[ParseResultDTO]):
-        sheets_data = self.extract_dataframe(data)
+        sheets_data, count = self.extract_dataframe(data)
         sending_data = []
         for i in self.sheets:
             sending_data.append(
@@ -185,6 +189,7 @@ class GoogleStorage:
                 }
             )
         self.send_data(sending_data)
+        return count
 
 
 if __name__ == '__main__':
