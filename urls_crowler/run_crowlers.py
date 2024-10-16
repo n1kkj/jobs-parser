@@ -31,7 +31,7 @@ CROWLERS = [
     AvitoCrowler,
     SberDevCrowler,
     CareerspaceCrowler,
-    ChangellengeCrowler,
+    # ChangellengeCrowler,
     ITFutCrowler,
     SberCrowler,
     YandexCrowler,
