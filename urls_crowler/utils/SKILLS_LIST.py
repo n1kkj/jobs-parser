@@ -46,7 +46,6 @@ skills_dict = {
     'nginx': 'Разработка/Backend, Разработка/DevOps',
     'apache': 'Разработка/Backend',
     'docker': 'Разработка/Backend, Разработка/DevOps',
-
     'front-end': 'Разработка/Frontend, Разработка/Frontend',
     'frontend': 'Разработка/Frontend, Разработка/Frontend',
     'react': 'Разработка/Frontend',
@@ -57,7 +56,6 @@ skills_dict = {
     'css': 'Разработка/Frontend',
     'html5': 'Разработка/Frontend',
     'css3': 'Разработка/Frontend',
-
     'fullstack': 'Разработка/Fullstack, Разработка/Fullstack',
     'full-stack': 'Разработка/Fullstack, Разработка/Fullstack',
     'node.js': 'Разработка/Fullstack',
@@ -74,7 +72,6 @@ skills_dict = {
     'gitlab': 'Разработка/DevOps, Разработка/Backend',
     'gitflow': 'Разработка/DevOps, Разработка/Backend',
     'azure': 'Разработка/DevOps, Разработка/Backend',
-
     'аналитика': 'Аналитика/Продуктовая аналитика, Аналитика/Бизнес-аналитика, Аналитика/Системная аналитика',
     'sql': 'Аналитика/Продуктовая аналитика, Аналитика/Бизнес-аналитика, Аналитика/Системная аналитика, ML/DS, Разработка/Backend',
     'excel': 'Аналитика/Продуктовая аналитика',
@@ -84,17 +81,14 @@ skills_dict = {
     'tableau': 'Аналитика/Продуктовая аналитика',
     'google-analytics': 'Аналитика/Продуктовая аналитика',
     'a/b': 'Аналитика/Продуктовая аналитика, Аналитика/Дата аналитика',
-
     'bpmn': 'Аналитика/Бизнес-аналитика, Аналитика/Системная аналитика, Аналитика/Дата аналитика',
     'uml': 'Аналитика/Бизнес-аналитика, Аналитика/Системная аналитика, Аналитика/Дата аналитика',
     'jira': 'Аналитика/Бизнес-аналитика, Аналитика/Системная аналитика',
     'confluence': 'Аналитика/Бизнес-аналитика, Аналитика/Системная аналитика, Аналитика/Дата аналитика',
     'crm': 'Аналитика/Бизнес-аналитика',
-
     'xml': 'Аналитика/Системная аналитика, Аналитика/Дата аналитика',
     'json': 'Аналитика/Системная аналитика, Аналитика/Дата аналитика',
     'soap': 'Аналитика/Системная аналитика',
-
     'grafana': 'Аналитика/Дата аналитика',
     'graphql': 'Аналитика/Дата аналитика',
     'yandex-datalens': 'Аналитика/Дата аналитика',
@@ -106,7 +100,6 @@ skills_dict = {
     'elasticsearch': 'Аналитика/Дата аналитика',
     'logstash': 'Аналитика/Дата аналитика',
     'kibana': 'Аналитика/Дата аналитика',
-
     'pandas': 'ML/DS, Аналитика/Дата аналитика',
     'numpy': 'ML/DS, Аналитика/Дата аналитика',
     'scipy': 'ML/DS',
@@ -133,7 +126,6 @@ skills_dict = {
     'spacy': 'ML/DS',
     'nvidea': 'ML/DS',
     'nltk': 'ML/DS',
-
     'product': 'Product Management/Product, Product Management/Product, Product Management/Product',
     'product-management': 'Project  Management/Project, Project  Management/Project, Project  Management/Project',
     'project': 'Project  Management/Project, Project  Management/Project, Project  Management/Project',

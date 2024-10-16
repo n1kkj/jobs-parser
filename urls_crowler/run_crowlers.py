@@ -46,8 +46,8 @@ CROWLERS = [
 
 
 def main_add_permissions(email: str):
-        google_storage = GoogleStorage(settings.GOOGLE_API_KEY)
-        google_storage.add_permissions([email])
+    google_storage = GoogleStorage(settings.GOOGLE_API_KEY)
+    google_storage.add_permissions([email])
 
 
 def run_crowlers_threading(chat_id: int):
