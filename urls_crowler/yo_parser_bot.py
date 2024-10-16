@@ -1,4 +1,5 @@
 import logging
+import re
 import threading
 import time
 import uvicorn
@@ -150,7 +151,14 @@ def add_permissions(update):
     @bot.message_handler(func=lambda m: m.chat.id == chat_id)
     def handle_email(message):
         email = message.text
-        main_add_permissions(bot, chat_id, email)
+        if not re.match(r'(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)', email):
+            bot.send_message(chat_id, 'Чую неладное, это точно email? Вызови команду снова')
+            return
+        try:
+            main_add_permissions(email)
+            bot.send_message(chat_id, f'Разрешения для почты {email} добавлены!')
+        except Exception as e:
+            bot.send_message(chat_id, f'Возникла ошибка: {e}')
 
 
 @bot.message_handler(commands=['run_with_delete'])

@@ -45,16 +45,9 @@ CROWLERS = [
 ]
 
 
-def main_add_permissions(bot, chat_id: int, email: str):
-    if not re.match(r'(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)', email):
-        bot.send_message(chat_id, 'Чую неладное, это точно email? Вызови команду снова')
-        return
-    try:
+def main_add_permissions(email: str):
         google_storage = GoogleStorage(settings.GOOGLE_API_KEY)
         google_storage.add_permissions([email])
-        bot.send_message(chat_id, f'Разрешения для почты {email} добавлены!')
-    except Exception as e:
-        bot.send_message(chat_id, f'Возникла ошибка: {e}')
 
 
 def run_crowlers_threading(chat_id: int):
