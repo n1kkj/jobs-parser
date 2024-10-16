@@ -6,7 +6,7 @@ import telebot
 from starlette.applications import Starlette
 
 import settings
-from urls_crowler.run_crowlers import run_parser_for_bot
+from urls_crowler.run_crowlers import run_parser_for_bot, main_add_permissions
 
 bot = telebot.TeleBot(settings.BOT_TOKEN)
 
@@ -140,6 +140,17 @@ def all_vacancies(update):
         yo_instance = YOParserBot()
         users_running.append(chat_id)
         yo_instance.start_processing(chat_id, include_previous=True)
+
+
+@bot.message_handler(commands=['add_permissions'])
+def add_permissions(update):
+    chat_id = update.from_user.id
+    bot.send_message(chat_id, 'Пришлите почту для добавления в google таблицу:')
+
+    @bot.message_handler(func=lambda m: m.chat.id == chat_id)
+    def handle_email(message):
+        email = message.text
+        main_add_permissions(bot, chat_id, email)
 
 
 @bot.message_handler(commands=['run_with_delete'])

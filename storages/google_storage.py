@@ -97,10 +97,12 @@ class GoogleStorage:
 
     def get_settings_spreadsheet(self):
         self.spreadsheet_id = settings.GOOGLE_SPREADSHEET_ID
+        if not settings.INCLUDE_PREVIOUS:
+            self.spreadsheet_id = settings.GOOGLE_SPREADSHEET_ID_VACANCIES
 
-    def add_permissions(self):
+    def add_permissions(self, permissions):
         self.service = apiclient.discovery.build('drive', 'v3', http=self.httpAuth)
-        for i in self.permissions:
+        for i in permissions:
             self.service.permissions().create(
                 fileId=self.spreadsheet_id,
                 body={'sendNotificationEmails': False, 'type': 'user', 'role': 'writer', 'emailAddress': i},
