@@ -1,7 +1,7 @@
+import json
 import logging
 import threading
 from datetime import datetime
-import re
 
 import settings
 from storages.google_storage import GoogleStorage
@@ -13,7 +13,7 @@ from urls_crowler.crowlers import (
     OzonCrowler,
     HhCrowler,
     CareerspaceCrowler,
-    ChangellengeCrowler,
+    # ChangellengeCrowler, Not working rn
     ITFutCrowler,
     VsetiCrowler,
     # AichCrowler, Some strange 'wized' stuff
@@ -66,7 +66,9 @@ def run_crowlers_threading(chat_id: int):
 
     start_time = datetime.now()
     pandas_xlsx_storage = PandasXLSXStorage(settings.FILE_NAME)
-    google_storage = GoogleStorage(settings.GOOGLE_API_KEY)
+    with open('google-api-key.json', 'r') as f:
+        api_file = json.load(f)
+    google_storage = GoogleStorage(api_file)
     all_data = []
     threads = []
     log.warning('Начал работу')

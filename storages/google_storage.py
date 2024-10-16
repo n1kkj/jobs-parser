@@ -1,5 +1,7 @@
 import json
 import logging
+import os
+import tempfile
 import time
 
 import httplib2
@@ -64,11 +66,18 @@ class GoogleStorage:
     def get_spreadsheet_link(self):
         return f'https://docs.google.com/spreadsheets/d/{self.spreadsheet_id}'
 
-    def auth(self, api_file):
-        self.credentials = ServiceAccountCredentials.from_json_keyfile_name(
-            'google-api-key.json',
-            ['https://www.googleapis.com/auth/spreadsheets', 'https://www.googleapis.com/auth/drive'],
-        )
+    def auth(self, api_key_json):
+        api_key_json_str = json.dumps(api_key_json)
+
+        with tempfile.NamedTemporaryFile(delete=False, mode='w') as f:
+            f.write(api_key_json_str)
+            f.flush()
+            self.credentials = ServiceAccountCredentials.from_json_keyfile_name(
+                f.name,
+                ['https://www.googleapis.com/auth/spreadsheets', 'https://www.googleapis.com/auth/drive'],
+            )
+
+        os.remove(f.name)
         self.httpAuth = self.credentials.authorize(httplib2.Http())
         self.sheet_service = apiclient.discovery.build('sheets', 'v4', http=self.httpAuth)
 
