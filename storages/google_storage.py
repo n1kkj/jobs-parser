@@ -1,3 +1,4 @@
+import json
 import logging
 import time
 
@@ -65,7 +66,7 @@ class GoogleStorage:
 
     def auth(self, api_file):
         self.credentials = ServiceAccountCredentials.from_json_keyfile_name(
-            api_file,
+            'google-api-key.json',
             ['https://www.googleapis.com/auth/spreadsheets', 'https://www.googleapis.com/auth/drive'],
         )
         self.httpAuth = self.credentials.authorize(httplib2.Http())
