@@ -66,9 +66,7 @@ def run_crowlers_threading(chat_id: int):
 
     start_time = datetime.now()
     pandas_xlsx_storage = PandasXLSXStorage(settings.FILE_NAME)
-    with open('google-api-key.json', 'r') as f:
-        api_file = json.load(f)
-    google_storage = GoogleStorage(api_file)
+    google_storage = GoogleStorage(settings.GOOGLE_API_KEY)
     all_data = []
     threads = []
     log.warning('Начал работу')
