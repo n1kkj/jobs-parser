@@ -5,6 +5,8 @@ import dpath.util
 import requests
 from selenium import webdriver
 from selenium.webdriver import ChromeOptions
+from selenium.webdriver.chrome.service import Service
+from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
@@ -29,6 +31,22 @@ class GetDataClass:
             return {}
 
     @staticmethod
+    def get_chrome_driver():
+        options = ChromeOptions()
+        # options.add_experimental_option(
+        #     'prefs',
+        #     {
+        #         'profile.managed_default_content_settings.images': 2,
+        #     },
+        # )
+        options.add_argument('--no-sandbox')
+        options.add_argument('--disable-dev-shm-usage')
+        options.add_argument('--headless')
+
+        driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
+        return driver
+
+    @staticmethod
     def get_html_data(url, *args, **kwargs):
         try:
             response = requests.get(url)
@@ -43,8 +61,8 @@ class GetDataClass:
             logging.error(f'Ошибка при запросе: {e}')
             return ''
 
-    @staticmethod
-    def get_html_data_by_clicking(url, *args, **kwargs):
+    @classmethod
+    def get_html_data_by_clicking(cls, url, *args, **kwargs):
         finished = False
         count = 1
         while not finished:
@@ -52,20 +70,8 @@ class GetDataClass:
                 break
             count += 1
             try:
-                options = ChromeOptions()
-                options.add_experimental_option(
-                    'prefs',
-                    {
-                        'profile.managed_default_content_settings.images': 2,
-                    },
-                )
-                options.add_argument('--no-sandbox')
-                options.add_argument('--disable-dev-shm-usage')
-                options.add_argument('--headless')
-
-                driver = webdriver.Chrome(options=options)
+                driver = cls.get_chrome_driver()
                 driver.get(url)
-
                 button_xpath = kwargs['button_xpath']
 
                 WebDriverWait(driver, 2).until(EC.element_to_be_clickable((By.XPATH, button_xpath)))
@@ -88,21 +94,10 @@ class GetDataClass:
             except Exception:
                 continue
 
-    @staticmethod
-    def get_html_data_by_scrolling(url, *args, **kwargs):
+    @classmethod
+    def get_html_data_by_scrolling(cls, url, *args, **kwargs):
         try:
-            options = ChromeOptions()
-            options.add_experimental_option(
-                'prefs',
-                {
-                    'profile.managed_default_content_settings.images': 2,
-                },
-            )
-            options.add_argument('--no-sandbox')
-            options.add_argument('--disable-dev-shm-usage')
-            options.add_argument('--headless')
-
-            driver = webdriver.Chrome(options=options)
+            driver = cls.get_chrome_driver()
             driver.get(url)
 
             last_height = driver.execute_script('return document.body.scrollHeight')
