@@ -7,7 +7,7 @@ import telebot
 from starlette.applications import Starlette
 
 import settings
-from urls_crowler.run_crowlers import run_parser_for_bot, main_add_permissions
+from run_crowlers import run_parser_for_bot, main_add_permissions
 
 bot = telebot.TeleBot(settings.BOT_TOKEN)
 

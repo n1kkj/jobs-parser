@@ -67,11 +67,15 @@ class GoogleStorage:
         return f'https://docs.google.com/spreadsheets/d/{self.spreadsheet_id}'
 
     def auth(self, api_file):
+        with tempfile.NamedTemporaryFile(mode='w', delete=False) as temp_file:
+            json.dump(api_file, temp_file, indent=4)
+            temp_file_path = temp_file.name
+
         self.credentials = ServiceAccountCredentials.from_json_keyfile_name(
-            api_file,
+            temp_file_path,
             ['https://www.googleapis.com/auth/spreadsheets', 'https://www.googleapis.com/auth/drive'],
         )
-
+        os.remove(temp_file_path)
         self.httpAuth = self.credentials.authorize(httplib2.Http())
         self.sheet_service = apiclient.discovery.build('sheets', 'v4', http=self.httpAuth)
 
@@ -199,5 +203,5 @@ class GoogleStorage:
 
 
 if __name__ == '__main__':
-    google_storage = GoogleStorage('../urls_crowler/google-api-key.json')
+    google_storage = GoogleStorage('google-api-key.json')
     print(google_storage.get_spreadsheet_link())
