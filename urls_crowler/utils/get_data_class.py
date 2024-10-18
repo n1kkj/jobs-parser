@@ -6,10 +6,12 @@ import requests
 from selenium import webdriver
 from selenium.webdriver import ChromeOptions
 from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.firefox.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
+from webdriver_manager.firefox import GeckoDriverManager
 
 
 class GetDataClass:
@@ -41,13 +43,13 @@ class GetDataClass:
         )
         # options.add_argument('enable-automation')
         options.add_argument('--no-sandbox')
-        options.add_argument('--disable-dev-shm-usage')
+        # options.add_argument('--disable-dev-shm-usage')
         options.add_argument('--headless')
-        options.add_argument('--disable-gpu')
+        # options.add_argument('--disable-gpu')
         # options.add_argument('--disable-extensions')
         # options.add_argument('--start-maximized')
-        # options.add_argument('--ignore-certificate-errors')
-        # options.add_argument('--dns-prefetch-disable')
+        options.add_argument('--ignore-certificate-errors')
+        options.add_argument('--dns-prefetch-disable')
 
         driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
         return driver
