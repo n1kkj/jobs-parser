@@ -112,7 +112,13 @@ class GoogleStorage:
         self.service = apiclient.discovery.build('drive', 'v3', http=self.httpAuth)
         for i in permissions:
             self.service.permissions().create(
-                fileId=self.spreadsheet_id,
+                fileId=settings.GOOGLE_SPREADSHEET_ID,
+                body={'sendNotificationEmails': False, 'type': 'user', 'role': 'writer', 'emailAddress': i},
+                fields='id',
+            ).execute()
+        for i in permissions:
+            self.service.permissions().create(
+                fileId=settings.GOOGLE_SPREADSHEET_ID_VACANCIES,
                 body={'sendNotificationEmails': False, 'type': 'user', 'role': 'writer', 'emailAddress': i},
                 fields='id',
             ).execute()
