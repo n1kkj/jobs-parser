@@ -1,0 +1,30 @@
+services:
+  redis:
+    image: redis:alpine
+    env_file: .env
+    networks:
+      - database_network
+    volumes:
+       - redis_data:/data
+    command: redis-server --bind 0.0.0.0
+
+  app:
+    build:
+      dockerfile: Dockerfile
+    command: uvicorn yo_parser_bot:app --host 0.0.0.0 --port 8001
+    volumes:
+      - .:/app
+    env_file: .env
+    restart: on-failure
+    networks:
+      - database_network
+    ports:
+      - "8001:8001"
+    expose:
+      - 8001
+
+
+volumes:
+  redis_data:
+networks:
+  database_network:

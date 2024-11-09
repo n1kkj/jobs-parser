@@ -1,13 +1,20 @@
-REDIS_HOST = 'localhost'
-REDIS_PORT = 6379
-REDIS_DB = 0
+import os
+from dotenv import load_dotenv
+
+load_dotenv('.env')
+
+DB_HOST = os.getenv('DB_HOST', 'db')
+
+REDIS_HOST = os.getenv('REDIS_HOST', 'redis')
+REDIS_PORT = os.getenv('REDIS_PORT', 6379)
+REDIS_DB = os.getenv('REDIS_DB', 0)
 
 REDIS_DATABASE_URL = f'redis://{REDIS_HOST}:{REDIS_PORT}/{REDIS_DB}'
 
-FILE_NAME = 'result.xlsx'
-GOOGLE_API_KEY = 'google-api-key.json'
-GOOGLE_SPREADSHEET_ID = '1RZYaxU30CqtQEMGBKXbNyEZBMY6i4yS0RSKteD0Loxg'
-GOOGLE_SPREADSHEET_ID_VACANCIES = '1QCQ_RbCV7bj2dNFqW2HHru6xyXa_1yQaDZcQOgIt7vc'
+FILE_NAME = os.getenv('FILE_NAME', 'result.xlsx')
+GOOGLE_API_KEY = {}
+GOOGLE_SPREADSHEET_ID = os.getenv('GOOGLE_SPREADSHEET_ID', '1RZYaxU30CqtQEMGBKXbNyEZBMY6i4yS0RSKteD0Loxg')
+GOOGLE_SPREADSHEET_ID_VACANCIES = os.getenv('GOOGLE_SPREADSHEET_ID_VACANCIES', '1QCQ_RbCV7bj2dNFqW2HHru6xyXa_1yQaDZcQOgIt7vc')
 
 # BOT_TOKEN = '7357401151:AAE8Q17dpROq1szPxchFmu-Tjo0-pzipoxI'
 BOT_TOKEN = '7357401151:AAGz3IHeF1QYen2e37ZvQiMT2YpE9RhVdgQ'
