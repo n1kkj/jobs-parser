@@ -13,7 +13,7 @@ from urls_crowler.crowlers import (
     HhCrowler,
     CareerspaceCrowler,
     # ChangellengeCrowler, Not working rn
-    ITFutCrowler,
+    # ITFutCrowler, Always changing key
     VsetiCrowler,
     # AichCrowler, Some strange 'wized' stuff
     ChoiciCrowler,
@@ -30,8 +30,6 @@ CROWLERS = [
     AvitoCrowler,
     SberDevCrowler,
     CareerspaceCrowler,
-    # ChangellengeCrowler,
-    ITFutCrowler,
     SberCrowler,
     YandexCrowler,
     OzonCrowler,

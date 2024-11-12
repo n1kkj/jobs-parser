@@ -18,4 +18,5 @@ class ParseResultDTO(BaseModel):
     manager_flag: Optional[bool] = None
     salary_range: Optional[str] = None
     link: Optional[str] = None
+    grade: Optional[str] = None
     users: Optional[List[int]] = []

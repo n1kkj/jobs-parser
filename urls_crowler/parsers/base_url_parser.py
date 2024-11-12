@@ -71,10 +71,16 @@ class BaseUrlParser:
 
     @staticmethod
     def tuple_to_str(t):
+        """
+        Форматирует tuple в строку
+        """
         return f'{t[0]} - {t[1]}'
 
     @classmethod
-    def determine_salary(cls, salary):
+    def determine_salary_range(cls, salary):
+        """
+        Определяет зарплатную вилку по зарплате
+        """
         if not (salary and salary.isdigit()):
             return salary
         salary = int(salary)
@@ -83,8 +89,34 @@ class BaseUrlParser:
                 return cls.tuple_to_str(s_range)
         return str(salary)
 
+    @classmethod
+    def determine_grade(cls, salary: int|str, exp: str):
+        """
+        Сопоставляет опыт с соответствующим грейдом
+        """
+        _grades = ['intern', 'junior', 'middle', 'senior', 'lead']
+        if salary and type(salary) is str and salary.lower() in _grades:
+            return salary
+        if type(exp) is str and (exp.lower() in _grades):
+            return exp
+        if type(exp) is str and (exp == 'Не найден'):
+            return 'junior'
+        if exp in ('0', '1'):
+            return 'junior'
+        elif exp in ('2', '3'):
+            return 'middle'
+        elif exp in ('4', '5', '6'):
+            return 'senior'
+        elif exp in ('7', '8', '9', '10'):
+            return 'lead'
+        else:
+            return ''
+
     @staticmethod
     def decode_text(text: str) -> str:
+        """
+        Декодирует текст из latin_1 в ascii если необходимо
+        """
         detected_encoding = chardet.detect(text.encode())['encoding']
 
         if detected_encoding == 'ascii':
@@ -97,7 +129,16 @@ class BaseUrlParser:
             return text
 
     @staticmethod
+    def format_json(text: str):
+        """Оставляет в тексте только русские слова через запятую из json"""
+        words = re.findall(r'\b[А-Яа-я]+\b', text)
+        return ', '.join(words)
+
+    @staticmethod
     def find_skills(text):
+        """
+        Находит скилы из списко в тексте
+        """
         skills_set = set(skills_dict.keys())
         pattern = r'\b(' + '|'.join(re.escape(skill.replace('-', ' ')) for skill in skills_set) + r')\b'
         skills = re.findall(pattern, text, re.IGNORECASE)
@@ -106,16 +147,23 @@ class BaseUrlParser:
 
     @staticmethod
     def format_job_title(raw_title: str) -> str:
+        """
+        Проверяет названия вакансий на запрещенные слова и стандартизирует если может
+        """
+        title_words = raw_title.lower().split(' ')
         for title in banned_job_titles:
-            if title in raw_title.lower():
+            if title in title_words:
                 return 'BANNED'
         for title in job_titles:
-            if title in raw_title.lower():
+            if title in title_words:
                 return title
         return raw_title
 
     @staticmethod
     def format_salary(raw_salary: str | None) -> str:
+        """
+        Превращает найденную зарплату в число
+        """
         if not raw_salary:
             return ''
 
@@ -131,6 +179,9 @@ class BaseUrlParser:
 
     @staticmethod
     def format_exp(text: str, exp: str):
+        """
+        Форматирует опыт, обрабатывает случаи без опыта и стандартными словами
+        """
         if not exp:
             exp = 'Не найден'
 
@@ -140,7 +191,7 @@ class BaseUrlParser:
                 return int(char)
 
         # 2) Опыт не нужен
-        for i in ('нет опыта', 'опыт не нужен', 'опыт не требуется', 'опыт не нужен', 'опыт необязателен', 'без опыта'):
+        for i in ('нет опыта', 'опыт не нужен', 'опыт не требуется', 'опыт необязателен', 'без опыта'):
             if (i in text.lower()) or (i in exp.lower()):
                 return 0
 
@@ -148,8 +199,10 @@ class BaseUrlParser:
         return ExpCases.get_exp(exp)
 
     @classmethod
-    def find_exp(cls, text, prev_exp):
-        # Форматируем опыт
+    def find_exp(cls, text, prev_exp) -> str:
+        """
+        Находит опыт в тексте, форматирует и сравнивает с найденным, если был
+        """
         prev_exp = cls.format_exp(text, prev_exp)
 
         if type(prev_exp) is int and prev_exp == 0:
@@ -168,14 +221,18 @@ class BaseUrlParser:
         found_exp = -2
 
         # Ищем строку со словом опыт
-        match = re.search(r'\bОпыт\b', text, re.IGNORECASE)
+        match = re.search(r'опыт|experience', text, re.IGNORECASE)
 
         # Если нашли, то находим цифру в этом предложении
         if match:
-            sentence = text[match.start() : text.find('.', match.start())]
-            found_exp = re.search(r'\d+', sentence)
+            sentence = text[match.start() : text.find(r'[\.\,\;\-\:]', match.start(), re.IGNORECASE)]
+            found_exp = re.search(r'\s\d+(\s|-)', sentence)
             if found_exp:
-                found_exp = int(found_exp.group(0))
+                found_str = found_exp.group(0)
+                found_str = found_str.replace('-', '')
+                found_exp = int(found_str)
+                if found_exp > 6:
+                    found_exp = -2
             else:
                 found_exp = -2
         # Если найденный опыт больше предыдущего, то возвращаем новый
@@ -195,6 +252,9 @@ class BaseUrlParser:
 
     @staticmethod
     def specify_profession(skills):
+        """
+        По скилам определяет профессию и направление
+        """
         direction_counts = {}
 
         for skill in skills:
@@ -343,12 +403,15 @@ class BaseJSONUrlParser(BaseUrlParser):
                         res_value = BeautifulSoup(res_value, 'html.parser').text
                     if key == 'salary':
                         res_value = cls.format_salary(res_value)
-                        result_values['salary_range'] = cls.determine_salary(res_value)
+                        result_values['salary_range'] = cls.determine_salary_range(res_value)
 
                     if key == 'title':
                         res_value = cls.format_job_title(res_value)
                         if res_value == 'BANNED':
                             return ParseResultDTO().model_dump()
+
+                    if key in ('work_format', 'city'):
+                        res_value = cls.format_json(str(res_value))
 
                 if key == 'exp':
                     res_value = cls.find_exp(json.dumps(vacancy, ensure_ascii=False), res_value)
@@ -358,6 +421,7 @@ class BaseJSONUrlParser(BaseUrlParser):
             except Exception:
                 result_values[key] = ''
 
+        result_values['grade'] = cls.determine_grade(result_values['salary'], result_values['exp'])
         return result_values
 
     @classmethod
@@ -465,11 +529,15 @@ class BaseHTMLUrlParser(BaseUrlParser):
 
                     if key == 'salary':
                         res_value = cls.format_salary(res_value)
-                        result_values['salary_range'] = cls.determine_salary(res_value)
+                        result_values['salary_range'] = cls.determine_salary_range(res_value)
+
                     if key == 'title':
                         res_value = cls.format_job_title(res_value)
                         if res_value == 'BANNED':
                             return ParseResultDTO()
+
+                    if key in ('work_format', 'city'):
+                        res_value = cls.format_json(str(res_value))
 
                 if key == 'exp':
                     res_value = cls.find_exp(soup.text, res_value)
@@ -482,5 +550,6 @@ class BaseHTMLUrlParser(BaseUrlParser):
             except Exception:
                 result_values[key] = ''
 
+        result_values['grade'] = cls.determine_grade(result_values['salary'], result_values['exp'])
         result_values['link'] = link
         return ParseResultDTO(**result_values)

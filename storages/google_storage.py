@@ -9,26 +9,17 @@ import apiclient
 from oauth2client.service_account import ServiceAccountCredentials
 
 import settings
+from storages.fields_compare import FieldCompare
 from urls_crowler.dto import ParseResultDTO
 
 
 class GoogleStorage:
-    columns = [
-        'Компания',
-        'Должность',
-        'Поднаправление',
-        'Требуемый опыт',
-        'Стек',
-        'ЗП',
-        'Техническое образование',
-        'Опыт управления',
-        'Диапазон ЗП',
-        'Описание',
-        'Формат работы',
-        'Город',
-        'Ссылка',
-    ]
-    sheets = ['Разработка', 'Аналитика', 'ML', 'Product Project']
+    sheets = {
+        'Разработка': FieldCompare.columns_dev,
+        'Аналитика': FieldCompare.columns_an,
+        'ML': FieldCompare.columns_ml,
+        'Product Project': FieldCompare.columns_pr,
+    }
     permissions = [
         'nikita.lakin.topka@gmail.com',
         'looandr02@gmail.com',
@@ -49,12 +40,12 @@ class GoogleStorage:
         self.auth(api_file)
         self.get_settings_spreadsheet()
         self.delete_all()
-        self.create_column_names(self.columns)
+        self.create_column_names()
 
     def delete_all(self):
         self.create_column_names(['' for i in range(15)])
         spreadsheet_data = []
-        for i in range(len(self.sheets)):
+        for i in range(4):
             spreadsheet_data.append(
                 {'deleteDimension': {'range': {'sheetId': i, 'dimension': 'COLUMNS', 'startIndex': 0, 'endIndex': 14}}}
             )
@@ -81,13 +72,13 @@ class GoogleStorage:
 
     def set_spreadsheet(self):
         _sheets = []
-        for i, v in enumerate(self.sheets):
+        for index, name in enumerate(self.sheets.keys()):
             _sheets.append(
                 {
                     'properties': {
                         'sheetType': 'GRID',
-                        'sheetId': i,
-                        'title': v,
+                        'sheetId': index,
+                        'title': name,
                     }
                 }
             )
@@ -139,13 +130,17 @@ class GoogleStorage:
             time.sleep(30 + n)
             self.send_data(sending_data, n + 1)
 
-    def create_column_names(self, columns):
+    def create_column_names(self, columns=None):
         sending_data = []
-        for i in self.sheets:
+        for sheet_name in self.sheets.keys():
+            if not columns:
+                _columns = self.sheets[sheet_name]
+            else:
+                _columns = columns
             sending_data.append(
                 {
-                    'range': f'{i}!A1',
-                    'values': [columns],
+                    'range': f'{sheet_name}!A1',
+                    'values': [_columns],
                 }
             )
         self.send_data(sending_data)
@@ -170,38 +165,25 @@ class GoogleStorage:
             'Product Project': [],
         }
         count = 0
-        for i in data:
-            if i.profession is None or i.profession == '':
+        for page_data in data:
+            if page_data.profession is None or page_data.profession == '':
                 continue
             count += 1
-            sheet_name = cls.get_sheet_name(i.direction)
-            sheets_data[sheet_name].append(
-                [
-                    i.employer,
-                    i.title,
-                    i.profession,
-                    i.exp,
-                    i.skills,
-                    i.salary,
-                    i.tech_flag,
-                    i.manager_flag,
-                    i.salary_range,
-                    i.desc,
-                    i.work_format,
-                    i.city,
-                    i.link,
-                ]
-            )
+            sheet_name = cls.get_sheet_name(page_data.direction)
+            _data = []
+            for column in cls.sheets[sheet_name]:
+                _data.append(FieldCompare.field_compare(column, page_data))
+            sheets_data[sheet_name].append(_data)
         return sheets_data, count
 
     def save_many_vacancies(self, data: list[ParseResultDTO]):
         sheets_data, count = self.extract_dataframe(data)
         sending_data = []
-        for i in self.sheets:
+        for sheet_name in self.sheets.keys():
             sending_data.append(
                 {
-                    'range': f'{i}!A2',
-                    'values': sheets_data[i],
+                    'range': f'{sheet_name}!A2',
+                    'values': sheets_data[sheet_name],
                 }
             )
         self.send_data(sending_data)

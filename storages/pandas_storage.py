@@ -1,62 +1,41 @@
 import pandas as pd
 
+from storages.fields_compare import FieldCompare
 from urls_crowler.dto import ParseResultDTO
 
 
 class PandasXLSXStorage:
-    DATA_COLUMNS = [
-        'Компания',
-        'Должность',
-        'Направление',
-        'Поднаправление',
-        'Требуемый опыт',
-        'Стек',
-        'ЗП',
-        'Техническое образование',
-        'Опыт управления',
-        'Диапазон ЗП',
-        'Описание',
-        'Формат работы',
-        'Город',
-        'Ссылка',
-    ]
-
     def __init__(self, file_name: str):
         self.__file_name = file_name
         self.__file_data = self.__initialize_file()
 
     @classmethod
-    def extract_dataframe(cls, page_data: ParseResultDTO):
-        dataframe = pd.DataFrame(
-            [
-                [
-                    page_data.employer,
-                    page_data.title,
-                    page_data.direction,
-                    page_data.profession,
-                    page_data.exp,
-                    page_data.skills,
-                    page_data.salary,
-                    page_data.tech_flag,
-                    page_data.manager_flag,
-                    page_data.salary_range,
-                    page_data.desc,
-                    page_data.work_format,
-                    page_data.city,
-                    page_data.link,
-                ]
-            ],
-            columns=cls.DATA_COLUMNS,
-        )
+    def _get_columns(cls, sheet_name: str):
+        if sheet_name == 'Разработка':
+            return FieldCompare.columns_dev
+        elif sheet_name == 'Аналитика':
+            return FieldCompare.columns_an
+        elif sheet_name == 'ML':
+            return FieldCompare.columns_ml
+        elif sheet_name in ('Product Management', 'Project  Management'):
+            return FieldCompare.columns_pr
+        else:
+            return FieldCompare.columns_dev
 
+    @classmethod
+    def extract_dataframe(cls, columns: list, page_data: ParseResultDTO):
+        data = []
+        for column in columns:
+            data.append(FieldCompare.field_compare(column, page_data))
+        dataframe = pd.DataFrame([data], columns=columns)
         return dataframe
 
     def __initialize_file(self):
         sheets = {
-            'Разработка': pd.DataFrame(columns=self.DATA_COLUMNS),
-            'Аналитика': pd.DataFrame(columns=self.DATA_COLUMNS),
-            'ML': pd.DataFrame(columns=self.DATA_COLUMNS),
-            'Product Project': pd.DataFrame(columns=self.DATA_COLUMNS),
+            'Разработка': pd.DataFrame(columns=FieldCompare.columns_dev),
+            'Аналитика': pd.DataFrame(columns=FieldCompare.columns_an),
+            'ML': pd.DataFrame(columns=FieldCompare.columns_ml),
+            'Product Project': pd.DataFrame(columns=FieldCompare.columns_pr),
         }
 
         with pd.ExcelWriter(self.__file_name, engine='xlsxwriter') as writer:
@@ -64,7 +43,7 @@ class PandasXLSXStorage:
                 dataframe.to_excel(writer, sheet_name=sheet_name, index=False)
                 worksheet = writer.sheets[sheet_name]
 
-                for i, col in enumerate(self.DATA_COLUMNS):
+                for i, col in enumerate(self._get_columns(sheet_name)):
                     worksheet.set_column(i, i, len(col) + 2)
 
                 worksheet.freeze_panes = 'K1'
@@ -77,7 +56,7 @@ class PandasXLSXStorage:
                 continue
             sheet_name = self._get_sheet_name(page_data)
             self.__file_data[sheet_name] = pd.concat(
-                [self.__file_data[sheet_name], self.extract_dataframe(page_data)], ignore_index=True
+                [self.__file_data[sheet_name], self.extract_dataframe(self._get_columns(sheet_name), page_data)], ignore_index=True
             )
 
     def commit(self):
@@ -93,7 +72,7 @@ class PandasXLSXStorage:
             return 'Аналитика'
         elif page_data.direction == 'ML':
             return 'ML'
-        elif page_data.direction in ('Product Management', 'Project  Management'):
+        elif page_data.direction in ('Product Management', 'Project Management'):
             return 'Product Project'
         else:
             return 'Разработка'
