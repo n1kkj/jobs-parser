@@ -151,7 +151,7 @@ class GoogleStorage:
             return 'Аналитика'
         elif direction == 'ML':
             return 'ML'
-        elif direction in ('Product Management', 'Project  Management'):
+        elif direction == 'Product Project':
             return 'Product Project'
         else:
             return 'Разработка'

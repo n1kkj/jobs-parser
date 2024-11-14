@@ -17,7 +17,7 @@ class PandasXLSXStorage:
             return FieldCompare.columns_an
         elif sheet_name == 'ML':
             return FieldCompare.columns_ml
-        elif sheet_name in ('Product Management', 'Project  Management'):
+        elif sheet_name == 'Product Project':
             return FieldCompare.columns_pr
         else:
             return FieldCompare.columns_dev
@@ -72,7 +72,7 @@ class PandasXLSXStorage:
             return 'Аналитика'
         elif page_data.direction == 'ML':
             return 'ML'
-        elif page_data.direction in ('Product Management', 'Project Management'):
+        elif page_data.direction == 'Product Project':
             return 'Product Project'
         else:
             return 'Разработка'
