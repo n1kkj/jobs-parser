@@ -68,6 +68,5 @@ class FieldCompare:
             'Город': page_data.city,
             'Ссылка': page_data.link,
             'Грэйд': page_data.grade,
-            'График': page_data.schedule
         }
         return field_compare[column]
