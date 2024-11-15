@@ -7,4 +7,6 @@ from .vseti_parser import VsetiParser
 from .aich_parser import AichParser
 from .choici_parser import ChoiciParser
 from .remocate_parser import RemocateParser
-from .superjob import SuperJobParser
+from .superjob_parser import SuperJobParser
+from .twogis_parser import TwoGisParser
+from .croc_parser import CrocParser

@@ -13,6 +13,7 @@ class BaseUrlCrowler:
     main_ulr = None
     data_get_function = None
     vacancies_prefix = None
+    add_after_url_key = None
     links_params = {}
     extra_kwargs = {}
 
@@ -91,7 +92,8 @@ class BaseJSONUrlCrowler(BaseUrlCrowler):
     @classmethod
     def get_links(cls, *args, **kwargs) -> list:
         data = super().get_data(*args, **kwargs)
+        after = cls.add_after_url_key if cls.add_after_url_key else ''
         vacancies_urls = [
-            f'{cls.vacancies_prefix}{x[cls.url_key]}' for x in dpath.util.get(data, cls.json_vacancies_path)
+            f'{cls.vacancies_prefix}{x[cls.url_key]}{after}' for x in dpath.util.get(data, cls.json_vacancies_path)
         ]
         return vacancies_urls

@@ -50,6 +50,7 @@ skills_dict = {
     'frontend': 'Разработка/Frontend, Разработка/Frontend, Разработка/Frontend',
     'react': 'Разработка/Frontend, Разработка/Frontend, Разработка/Frontend',
     'vue': 'Разработка/Frontend, Разработка/Frontend, Разработка/Frontend',
+    'vue.js': 'Разработка/Frontend, Разработка/Frontend, Разработка/Frontend',
     'typescript': 'Разработка/Frontend, Разработка/Frontend, Разработка/Frontend',
     'angular': 'Разработка/Frontend, Разработка/Frontend, Разработка/Frontend',
     'html': 'Разработка/Frontend, Разработка/Frontend, Разработка/Frontend',

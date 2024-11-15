@@ -10,6 +10,8 @@ from .html_parsers import (
     ChoiciParser,
     RemocateParser,
     SuperJobParser,
+    TwoGisParser,
+    CrocParser,
 )
 from .json_parsers import (
     HhParser,
@@ -18,4 +20,7 @@ from .json_parsers import (
     SberParser,
     YandexParser,
     HabrParser,
+    KasperskyParser,
+    GazpromParser,
+    AlfaParser,
 )

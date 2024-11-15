@@ -4,3 +4,6 @@ from .ozon_crowler import OzonCrowler
 from .sber_crowler import SberCrowler
 from .yandex_crowler import YandexCrowler
 from .habr_crowler import HabrCrowler
+from .kaspersky_crowler import KasperskyCrowler
+from .gasprom_crowler import GazpromCrowler
+from .alfa_crowler import AlfaCrowler

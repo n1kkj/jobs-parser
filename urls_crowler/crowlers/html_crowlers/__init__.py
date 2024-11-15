@@ -7,4 +7,12 @@ from .vseti_crowler import VsetiCrowler
 from .aich_crowler import AichCrowler
 from .choici_crowler import ChoiciCrowler
 from .remocate_crowler import RemocateCrowler
-from .superjob import SuperJobCrowler
+from .superjob_crowler import SuperJobCrowler
+from .twogis_crowler import (
+    TwoGisDEVCrowler,
+    TwoGisDEVOPSCrowler,
+    TwoGisPROJECTCrowler,
+    TwoGisANCrowler,
+    TwoGisLEADCrowler
+)
+from .croc_crowler import CrocCrowler

@@ -42,6 +42,7 @@ job_titles = (
     'бэк енд',
     'бэк-енд',
     'front-end',
+    'frontend',
     'back-end',
     'team-lead',
     'team lead',

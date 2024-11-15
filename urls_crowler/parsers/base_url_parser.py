@@ -401,6 +401,7 @@ class BaseJSONUrlParser(BaseUrlParser):
 
                     if cls.use_soup_desc and key == 'desc':
                         res_value = BeautifulSoup(res_value, 'html.parser').text
+                        res_value = res_value[:400]
                     if key == 'salary':
                         res_value = cls.format_salary(res_value)
                         result_values['salary_range'] = cls.determine_salary_range(res_value)
@@ -521,6 +522,7 @@ class BaseHTMLUrlParser(BaseUrlParser):
                             res_value = res_value.find_all(v[0], class_=v[1])[index]
                         res_value = res_value.text if res_value else res_value
                         res_value = str(res_value).replace('\xa0', ' ')
+                        res_value = res_value[:450]
                     except Exception:
                         res_value = ''
 

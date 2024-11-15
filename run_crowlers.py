@@ -21,6 +21,15 @@ from urls_crowler.crowlers import (
     RemocateCrowler,
     HabrCrowler,
     SuperJobCrowler,
+    KasperskyCrowler,
+    TwoGisDEVCrowler,
+    TwoGisDEVOPSCrowler,
+    TwoGisPROJECTCrowler,
+    TwoGisANCrowler,
+    TwoGisLEADCrowler,
+    GazpromCrowler,
+    CrocCrowler,
+    AlfaCrowler,
 )
 from redis_cache import RedisCache
 from storages.pandas_storage import PandasXLSXStorage
@@ -39,6 +48,15 @@ CROWLERS = [
     ChoiciCrowler,
     HabrCrowler,
     SuperJobCrowler,
+    KasperskyCrowler,
+    TwoGisDEVCrowler,
+    TwoGisDEVOPSCrowler,
+    TwoGisPROJECTCrowler,
+    TwoGisANCrowler,
+    TwoGisLEADCrowler,
+    GazpromCrowler,
+    CrocCrowler,
+    AlfaCrowler,
 ]
 
 
@@ -72,6 +90,7 @@ def run_crowlers_threading(chat_id: int):
 
         def target_function():
             data, _ = crowler.run_crowl(redis_cache, chat_id)
+            log.warning(f'Закончил обработку {crowler.__name__.replace("Crowler", "")}')
             all_data.extend(data)
 
         thread = threading.Thread(target=target_function)

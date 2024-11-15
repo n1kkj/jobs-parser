@@ -123,6 +123,23 @@ class GetDataClass:
             return ''
 
     @staticmethod
+    def get_html_data_by_pages(url, *args, **kwargs):
+        html_content = ''
+
+        page_param = kwargs['page_param']
+
+        for page in range(1, 10):
+            try:
+                response = requests.get(f'{url}&{page_param}{page}')
+                response.raise_for_status()
+
+                html_content += response.text
+            except Exception:
+                continue
+
+        return html_content
+
+    @staticmethod
     def get_json_data_by_pages(url, *args, **kwargs):
         vacancies = []
         data = {}
