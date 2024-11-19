@@ -11,7 +11,7 @@ class OzonCrowler(BaseJSONUrlCrowler):
     url_key = 'hhId'
     links_params = {'limit': int, 'page': int, 'level': str}
 
-    extra_kwargs = {'total_pages_path': 'meta/totalPages', 'vacancies_path': 'items', 'vacancy_path': url_key}
+    extra_kwargs = {'total_pages_path': 'meta/totalPages', 'vacancies_path': 'items', 'vacancy_path': url_key, 'page_param': 'page'}
 
     link_parser = OzonParser
 

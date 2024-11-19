@@ -16,6 +16,10 @@ from .html_crowlers import (
     TwoGisANCrowler,
     TwoGisLEADCrowler,
     CrocCrowler,
+    VKCrowler,
+    TBankCrowler,
+    YadroCrowler,
+    MegafonCrowler,
 )
 from .json_crowlers import (
     HhCrowler,
@@ -27,4 +31,6 @@ from .json_crowlers import (
     KasperskyCrowler,
     GazpromCrowler,
     AlfaCrowler,
+    DomrfCrowler,
+    RosatomCrowler,
 )

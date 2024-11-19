@@ -7,3 +7,5 @@ from .habr_crowler import HabrCrowler
 from .kaspersky_crowler import KasperskyCrowler
 from .gasprom_crowler import GazpromCrowler
 from .alfa_crowler import AlfaCrowler
+from .domrf_crowler import DomrfCrowler
+from .rosatom_crowler import RosatomCrowler

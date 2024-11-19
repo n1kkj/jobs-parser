@@ -13,7 +13,7 @@ class HabrCrowler(BaseJSONUrlCrowler):
     json_vacancies_path = 'vacancies'
     links_params = {}
     url_key = 'id'
-    extra_kwargs = {'total_pages_path': 'meta/totalPages', 'vacancies_path': 'list', 'vacancy_path': url_key}
+    extra_kwargs = {'total_pages_path': 'meta/totalPages', 'vacancies_path': 'list', 'vacancy_path': url_key, 'page_param': 'page'}
 
     link_parser = HabrParser
 

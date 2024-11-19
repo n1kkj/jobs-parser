@@ -3,6 +3,7 @@ import time
 
 import dpath.util
 import requests
+from openpyxl.styles.builtins import warning
 from selenium import webdriver
 from selenium.webdriver import ChromeOptions
 from selenium.webdriver.chrome.service import Service
@@ -93,6 +94,48 @@ class GetDataClass:
                 continue
 
     @classmethod
+    def tbank_get_html_data_by_clicking(cls, url, *args, **kwargs):
+        finished = False
+        count = 1
+        button_count = 1
+        html_content = ''
+        while not finished:
+            if count > 100:
+                break
+            count += 1
+            try:
+                driver = cls.get_chrome_driver()
+                driver.get(url)
+                html_content = driver.page_source
+                button_xpath_start = kwargs['button_xpath_start']
+                button_xpath_end = kwargs['button_xpath_end']
+
+                button_xpath = button_xpath_start + str(button_count) + button_xpath_end
+
+                WebDriverWait(driver, 2).until(EC.element_to_be_clickable((By.XPATH, button_xpath)))
+                button = driver.find_element(By.XPATH, button_xpath)
+                while button.is_displayed():
+                    try:
+                        driver.execute_script('arguments[0].click();', button)
+                        time.sleep(2)
+                        button_count += 1
+                        button_xpath = button_xpath_start + str(button_count) + button_xpath_end
+                        button = driver.find_element(By.XPATH, button_xpath)
+                        WebDriverWait(driver, 2).until(EC.element_to_be_clickable((By.XPATH, button_xpath)))
+                    except Exception:
+                        break
+
+                time.sleep(1)
+                html_content = driver.page_source
+
+                driver.quit()
+                finished = True
+                return html_content
+            except Exception:
+                continue
+        return html_content
+
+    @classmethod
     def get_html_data_by_scrolling(cls, url, *args, **kwargs):
         try:
             driver = cls.get_chrome_driver()
@@ -127,10 +170,11 @@ class GetDataClass:
         html_content = ''
 
         page_param = kwargs['page_param']
+        page_url_prefix = kwargs['page_url_prefix']
 
         for page in range(1, 10):
             try:
-                response = requests.get(f'{url}&{page_param}{page}')
+                response = requests.get(f'{url}{page_url_prefix}{page_param}{page}')
                 response.raise_for_status()
 
                 html_content += response.text
@@ -144,15 +188,27 @@ class GetDataClass:
         vacancies = []
         data = {}
 
-        total_pages_path = kwargs['total_pages_path']
-        vacancies_path = kwargs['vacancies_path']
-        vacancy_path = kwargs['vacancy_path']
+        total_pages_path = kwargs.get('total_pages_path')
+        vacancies_left_path = kwargs.get('vacancies_left_path')
+        vacancies_per_page = kwargs.get('vacancies_per_page')
+        vacancies_path = kwargs.get('vacancies_path')
+        vacancy_path = kwargs.get('vacancy_path')
+        use_post_method = kwargs.get('use_post_method')
+        page_param = kwargs.get('page_param')
 
-        response = requests.get(url)
-        total_pages = dpath.util.get(response.json(), total_pages_path)
+        if use_post_method:
+            response = requests.post(url)
+        else:
+            response = requests.get(url)
+        response.raise_for_status()
+        total_pages = 0
+        if total_pages_path:
+            total_pages = dpath.util.get(response.json(), total_pages_path)
+        elif vacancies_left_path:
+            total_pages = int(dpath.util.get(response.json(), vacancies_left_path) // vacancies_per_page) + 1
 
         for page in range(total_pages):
-            response = requests.get(f'{url}&page={page}')
+            response = requests.get(f'{url}&{page_param}={page}')
 
             _next_vacancies = response.json()[vacancies_path]
             next_vacancies = []

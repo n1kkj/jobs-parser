@@ -12,6 +12,10 @@ from .html_parsers import (
     SuperJobParser,
     TwoGisParser,
     CrocParser,
+    VKParser,
+    TBankParser,
+    YadroParser,
+    MegafonParser,
 )
 from .json_parsers import (
     HhParser,
@@ -23,4 +27,6 @@ from .json_parsers import (
     KasperskyParser,
     GazpromParser,
     AlfaParser,
+    DomrfParser,
+    RosatomParser,
 )

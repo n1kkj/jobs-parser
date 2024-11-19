@@ -7,3 +7,5 @@ from .habr_parser import HabrParser
 from .kaspersky_parser import KasperskyParser
 from .gazprom_parser import GazpromParser
 from .alfa_parser import AlfaParser
+from .domrf_parser import DomrfParser
+from .rosatom_parser import RosatomParser

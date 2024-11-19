@@ -1,17 +1,17 @@
 from urls_crowler.crowlers.base_url_crowler import BaseHTMLUrlCrowler
-from urls_crowler.parsers import CrocParser
+from urls_crowler.parsers import MegafonParser
 from urls_crowler.utils.get_data_class import GetDataClass
 
 
-class CrocCrowler(BaseHTMLUrlCrowler):
-    main_ulr = 'https://careers.croc.ru/vacancies/?sections=7%2C19%2C15%2C17%2C13'
-    vacancies_prefix = 'https://careers.croc.ru/'
+class MegafonCrowler(BaseHTMLUrlCrowler):
+    main_ulr = 'https://job.megafon.ru/vacancy/all/it-reshenia'
+    vacancies_prefix = 'https://job.megafon.ru'
     data_get_function = GetDataClass.get_html_data_by_pages
-    html_link_class = 'size-normal size-md-smaller'
+    html_link_class = 'tile__link'
 
-    extra_kwargs = {'page_param': 'num=page-', 'page_url_prefix': '&'}
+    extra_kwargs = {'page_param': 'page=', 'page_url_prefix': '?'}
 
-    link_parser = CrocParser
+    link_parser = MegafonParser
 
     @classmethod
     def run_crowl(cls, redis_cache, chat_id, *args, **kwargs):

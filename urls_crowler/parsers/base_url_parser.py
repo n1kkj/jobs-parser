@@ -1,6 +1,8 @@
 import json
 import logging
 import re
+import struct
+import unicodedata
 from typing import List
 import chardet
 
@@ -12,6 +14,10 @@ from urls_crowler.dto import ParseResultDTO, FixedValuesDTO
 from urls_crowler.utils import skills_dict, ExpCases
 from urls_crowler.utils.JOBS_TITLES import job_titles, banned_job_titles
 from urls_crowler.utils.get_data_class import GetDataClass
+
+
+log = logging.getLogger('UrlParser')
+log.setLevel('INFO')
 
 
 class BaseUrlParser:
@@ -40,6 +46,7 @@ class BaseUrlParser:
     url_key = None
 
     use_soup_desc = False
+    use_utf_8 = False
 
     data_get_function = None
 
@@ -113,7 +120,7 @@ class BaseUrlParser:
             return ''
 
     @staticmethod
-    def decode_text(text: str) -> str:
+    def decode_text_latin(text: str) -> str:
         """
         Декодирует текст из latin_1 в ascii если необходимо
         """
@@ -251,7 +258,7 @@ class BaseUrlParser:
         return str(prev_exp)
 
     @staticmethod
-    def specify_profession(skills):
+    def specify_profession(skills) -> [str, str]:
         """
         По скилам определяет профессию и направление
         """
@@ -271,7 +278,7 @@ class BaseUrlParser:
                 direction for direction, count in direction_counts.items() if count == max_count
             ]
             return most_frequent_directions[0].split('/')
-        return '/'.split('/')
+        return 'Разработка', 'backend'
 
     @classmethod
     def get_keys(cls) -> dict:
@@ -373,7 +380,7 @@ class BaseJSONUrlParser(BaseUrlParser):
     def _parse_link(cls, vacancy, result_values, keys, fixed_keys, fixed, link) -> dict:
         vacancy_text = json.dumps(vacancy)
         if 'vseti' in link:
-            vacancy_text = cls.decode_text(vacancy_text)
+            vacancy_text = cls.decode_text_latin(vacancy_text)
         skills = cls.find_skills(vacancy_text)
         result_values['skills'] = ', '.join(skills)
         result_values['tech_flag'] = cls.tech_true(vacancy_text)
@@ -397,7 +404,7 @@ class BaseJSONUrlParser(BaseUrlParser):
                         res_value = ''
 
                     if 'vseti' in link:
-                        res_value = cls.decode_text(res_value)
+                        res_value = cls.decode_text_latin(res_value)
 
                     if cls.use_soup_desc and key == 'desc':
                         res_value = BeautifulSoup(res_value, 'html.parser').text
@@ -494,7 +501,7 @@ class BaseHTMLUrlParser(BaseUrlParser):
         soup_text = soup.text
 
         if 'vseti' in link:
-            soup_text = cls.decode_text(soup_text)
+            soup_text = cls.decode_text_latin(soup_text)
 
         skills = cls.find_skills(soup_text)
         result_values['skills'] = ', '.join(skills)
@@ -527,7 +534,7 @@ class BaseHTMLUrlParser(BaseUrlParser):
                         res_value = ''
 
                     if 'vseti' in link:
-                        res_value = cls.decode_text(res_value)
+                        res_value = cls.decode_text_latin(res_value)
 
                     if key == 'salary':
                         res_value = cls.format_salary(res_value)

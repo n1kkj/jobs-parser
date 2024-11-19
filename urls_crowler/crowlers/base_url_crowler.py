@@ -68,7 +68,10 @@ class BaseHTMLUrlCrowler(BaseUrlCrowler):
     def get_links(cls, *args, **kwargs) -> list:
         data = super().get_data(*args, **kwargs)
         soup = BeautifulSoup(data, 'html.parser')
-        vacancies_urls = [f'{cls.vacancies_prefix}{x["href"]}' for x in soup.find_all('a', class_=cls.html_link_class)]
+        after = cls.add_after_url_key if cls.add_after_url_key else ''
+        vacancies_urls = [
+            f'{cls.vacancies_prefix}{x["href"]}{after}' for x in soup.find_all('a', class_=cls.html_link_class)
+        ]
         return vacancies_urls
 
 

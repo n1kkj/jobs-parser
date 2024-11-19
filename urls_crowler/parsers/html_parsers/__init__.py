@@ -10,3 +10,7 @@ from .remocate_parser import RemocateParser
 from .superjob_parser import SuperJobParser
 from .twogis_parser import TwoGisParser
 from .croc_parser import CrocParser
+from .vk_parser import VKParser
+from .tbank_parser import TBankParser
+from .yadro_parser import YadroParser
+from .megafon_parser import MegafonParser

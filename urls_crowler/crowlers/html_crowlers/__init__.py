@@ -16,3 +16,7 @@ from .twogis_crowler import (
     TwoGisLEADCrowler
 )
 from .croc_crowler import CrocCrowler
+from .vk_crowler import VKCrowler
+from .tbank_crowler import TBankCrowler
+from .yadro_crowler import YadroCrowler
+from .megafon_crowler import MegafonCrowler

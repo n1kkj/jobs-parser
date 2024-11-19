@@ -12,12 +12,12 @@ from urls_crowler.crowlers import (
     OzonCrowler,
     HhCrowler,
     CareerspaceCrowler,
-    # ChangellengeCrowler, Not working rn
-    # ITFutCrowler, Always changing key
+    # ChangellengeCrowler, # Not working rn
+    # ITFutCrowler, # Always changing key
     VsetiCrowler,
-    # AichCrowler, Some strange 'wized' stuff
+    # AichCrowler, # Some strange 'wized' stuff
     ChoiciCrowler,
-    # MtsCrowler,  Breaking if caught that it`s a machine
+    # MtsCrowler,  # Breaking if caught that it`s a machine
     RemocateCrowler,
     HabrCrowler,
     SuperJobCrowler,
@@ -30,33 +30,44 @@ from urls_crowler.crowlers import (
     GazpromCrowler,
     CrocCrowler,
     AlfaCrowler,
+    VKCrowler,
+    # TBankCrowler, # Cannot get decoding
+    YadroCrowler,
+    DomrfCrowler,
+    MegafonCrowler,
+    RosatomCrowler,
 )
 from redis_cache import RedisCache
 from storages.pandas_storage import PandasXLSXStorage
 from urls_crowler.dto import ResultMessageDTO
 
 CROWLERS = [
-    AvitoCrowler,
-    SberDevCrowler,
-    CareerspaceCrowler,
-    SberCrowler,
-    YandexCrowler,
-    OzonCrowler,
-    HhCrowler,
-    VsetiCrowler,
-    RemocateCrowler,
-    ChoiciCrowler,
-    HabrCrowler,
-    SuperJobCrowler,
-    KasperskyCrowler,
-    TwoGisDEVCrowler,
-    TwoGisDEVOPSCrowler,
-    TwoGisPROJECTCrowler,
-    TwoGisANCrowler,
-    TwoGisLEADCrowler,
-    GazpromCrowler,
-    CrocCrowler,
-    AlfaCrowler,
+    # AvitoCrowler,
+    # SberDevCrowler,
+    # CareerspaceCrowler,
+    # SberCrowler,
+    # YandexCrowler,
+    # OzonCrowler,
+    # HhCrowler,
+    # VsetiCrowler,
+    # RemocateCrowler,
+    # ChoiciCrowler,
+    # HabrCrowler,
+    # SuperJobCrowler,
+    # KasperskyCrowler,
+    # TwoGisDEVCrowler,
+    # TwoGisDEVOPSCrowler,
+    # TwoGisPROJECTCrowler,
+    # TwoGisANCrowler,
+    # TwoGisLEADCrowler,
+    # GazpromCrowler,
+    # CrocCrowler,
+    # AlfaCrowler,
+    # VKCrowler,
+    # YadroCrowler,
+    # DomrfCrowler,
+    # MegafonCrowler,
+    RosatomCrowler,
 ]
 
 
@@ -128,15 +139,46 @@ def run_crowlers_threading(chat_id: int):
     return result_message
 
 
-def main(chat_id):
-    result_message = run_crowlers_threading(chat_id)
-    return result_message
+def run_delete_current(chat_id):
+    log = logging.getLogger('crowlers')
+    log.setLevel('INFO')
+    log.warning('Произвожу подготовку')
+    redis_cache = RedisCache()
+
+    all_data = []
+    threads = []
+    log.warning('Начал работу')
+
+    for crowler in CROWLERS:
+        def target_function():
+            data, _ = crowler.run_crowl(redis_cache, chat_id)
+            log.warning(f'Закончил обработку {crowler.__name__.replace("Crowler", "")}')
+            all_data.extend(data)
+
+        thread = threading.Thread(target=target_function)
+        threads.append(thread)
+        thread.start()
+
+    for thread in threads:
+        thread.join()
+
+    log.warning('Стираю найденные ссылки')
+    links = [i.link for i in all_data]
+
+    for link in links:
+        redis_cache.delete(link)
+
+    redis_cache.disconnect()
 
 
 def run_parser_for_bot(chat_id):
-    result_message = main(chat_id)
+    result_message = run_crowlers_threading(chat_id)
     return result_message
+
+def run_delete_current_for_bot(chat_id):
+    run_delete_current(chat_id)
 
 
 if __name__ == '__main__':
-    main(1334928287)
+    run_delete_current_for_bot(1334928287)
+    # run_parser_for_bot(1334928287)
