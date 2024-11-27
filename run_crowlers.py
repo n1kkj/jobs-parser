@@ -1,3 +1,4 @@
+import asyncio
 import logging
 import threading
 from datetime import datetime
@@ -36,149 +37,203 @@ from urls_crowler.crowlers import (
     DomrfCrowler,
     MegafonCrowler,
     RosatomCrowler,
+    TGCrowler,
 )
 from redis_cache import RedisCache
 from storages.pandas_storage import PandasXLSXStorage
 from urls_crowler.dto import ResultMessageDTO
 
 CROWLERS = [
-    # AvitoCrowler,
-    # SberDevCrowler,
-    # CareerspaceCrowler,
-    # SberCrowler,
-    # YandexCrowler,
-    # OzonCrowler,
-    # HhCrowler,
-    # VsetiCrowler,
-    # RemocateCrowler,
-    # ChoiciCrowler,
-    # HabrCrowler,
-    # SuperJobCrowler,
-    # KasperskyCrowler,
-    # TwoGisDEVCrowler,
-    # TwoGisDEVOPSCrowler,
-    # TwoGisPROJECTCrowler,
-    # TwoGisANCrowler,
-    # TwoGisLEADCrowler,
-    # GazpromCrowler,
-    # CrocCrowler,
-    # AlfaCrowler,
-    # VKCrowler,
-    # YadroCrowler,
-    # DomrfCrowler,
-    # MegafonCrowler,
+    AvitoCrowler,
+    SberDevCrowler,
+    CareerspaceCrowler,
+    SberCrowler,
+    YandexCrowler,
+    OzonCrowler,
+    HhCrowler,
+    VsetiCrowler,
+    RemocateCrowler,
+    ChoiciCrowler,
+    HabrCrowler,
+    SuperJobCrowler,
+    KasperskyCrowler,
+    TwoGisDEVCrowler,
+    TwoGisDEVOPSCrowler,
+    TwoGisPROJECTCrowler,
+    TwoGisANCrowler,
+    TwoGisLEADCrowler,
+    GazpromCrowler,
+    CrocCrowler,
+    AlfaCrowler,
+    VKCrowler,
+    YadroCrowler,
+    DomrfCrowler,
+    MegafonCrowler,
     RosatomCrowler,
 ]
 
-
-def main_add_permissions(email: str):
-    google_storage = GoogleStorage(settings.GOOGLE_API_KEY)
-    google_storage.add_permissions([email])
+log = logging.getLogger('crowlers')
+log.setLevel('INFO')
 
 
-def run_crowlers_threading(chat_id: int):
-    log = logging.getLogger('crowlers')
-    log.setLevel('INFO')
-    log.warning('Произвожу подготовку')
-    redis_cache = RedisCache()
+class CrowlersService:
+    @staticmethod
+    def main_add_permissions(email: str):
+        google_storage = GoogleStorage(settings.GOOGLE_API_KEY)
+        google_storage.add_permissions([email])
 
-    if settings.DELETE_ALL:
-        log.warning('Стираю весь кэш')
+    @staticmethod
+    def save_result(pandas_xlsx_storage, google_storage, all_data):
+        pandas_xlsx_storage.store_many(all_data)
+        pandas_xlsx_storage.commit()
+        # new_data_len = google_storage.save_many_vacancies(all_data)
+        # google_link = google_storage.get_spreadsheet_link()
+        new_data_len, google_link = len(all_data), 'http'
+        return new_data_len, google_link
 
-        all_redis_links = redis_cache.get_all_keys()
-        for redis_link in all_redis_links:
-            if redis_link.startswith('http'):
-                redis_cache.delete(redis_link)
+    @staticmethod
+    def get_result_message(start_time, new_data_len, google_link):
+        end_time = datetime.now() - start_time
 
-    start_time = datetime.now()
-    pandas_xlsx_storage = PandasXLSXStorage(settings.FILE_NAME)
-    google_storage = GoogleStorage(settings.GOOGLE_API_KEY)
-    all_data = []
-    threads = []
-    log.warning('Начал работу')
+        result_message = ResultMessageDTO(
+            all_links_count=new_data_len,
+            time_spent=str(end_time).split('.')[0],
+            av_speed=str(new_data_len / end_time.total_seconds()).split('.')[0],
+            google_link=google_link,
+        )
 
-    for crowler in CROWLERS:
+        log.warning(
+            'Закончил обработку ссылок, надеюсь вы обрадуетесь результату, жду вас вновь!\n'
+            'Приберёг статистику для вас)\n'
+        )
+        log.warning(f'Всего вакансий: {result_message.all_links_count}')
+        log.warning(f'Всего времени: {result_message.time_spent}')
+        log.warning(f'Скорость: {result_message.av_speed} вакансий/сек')
 
-        def target_function():
-            data, _ = crowler.run_crowl(redis_cache, chat_id)
-            log.warning(f'Закончил обработку {crowler.__name__.replace("Crowler", "")}')
-            all_data.extend(data)
+        return result_message
 
-        thread = threading.Thread(target=target_function)
-        threads.append(thread)
-        thread.start()
+    @classmethod
+    def run_crowlers_threading(cls, chat_id: int):
+        log.warning('Произвожу подготовку')
+        redis_cache = RedisCache()
 
-    for thread in threads:
-        thread.join()
+        if settings.DELETE_ALL:
+            log.warning('Стираю весь кэш')
 
-    log.warning('Сохраняю в файл и в гугл табличку')
-    pandas_xlsx_storage.store_many(all_data)
-    pandas_xlsx_storage.commit()
-    new_data_len = google_storage.save_many_vacancies(all_data)
-    google_link = google_storage.get_spreadsheet_link()
+            all_redis_links = redis_cache.get_all_keys()
+            for redis_link in all_redis_links:
+                if redis_link.startswith('http'):
+                    redis_cache.delete(redis_link)
 
-    redis_cache.disconnect()
+        start_time = datetime.now()
+        pandas_xlsx_storage = PandasXLSXStorage(settings.FILE_NAME)
+        google_storage = GoogleStorage(settings.GOOGLE_API_KEY)
+        all_data = []
+        threads = []
+        log.warning('Начал работу')
 
-    end_time = datetime.now() - start_time
+        for crowler in CROWLERS:
 
-    result_message = ResultMessageDTO(
-        all_links_count=new_data_len,
-        time_spent=str(end_time).split('.')[0],
-        av_speed=str(new_data_len / end_time.total_seconds()).split('.')[0],
-        google_link=google_link,
-    )
+            def target_function():
+                data, _ = crowler.run_crowl(redis_cache, chat_id)
+                log.warning(f'Закончил обработку {crowler.__name__.replace("Crowler", "")}')
+                all_data.extend(data)
 
-    log.warning(
-        'Закончил обработку ссылок, надеюсь вы обрадуетесь результату, жду вас вновь!\n'
-        'Приберёг статистику для вас)\n'
-    )
-    log.warning(f'Всего вакансий: {result_message.all_links_count}')
-    log.warning(f'Всего времени: {result_message.time_spent}')
-    log.warning(f'Скорость: {result_message.av_speed} вакансий/сек')
+            thread = threading.Thread(target=target_function)
+            threads.append(thread)
+            thread.start()
 
-    return result_message
+        for thread in threads:
+            thread.join()
 
+        log.warning('Сохраняю в файл и в гугл табличку')
+        new_data_len, google_link = cls.save_result(pandas_xlsx_storage, google_storage, all_data)
+        redis_cache.disconnect()
+        result_message = cls.get_result_message(start_time, new_data_len, google_link)
 
-def run_delete_current(chat_id):
-    log = logging.getLogger('crowlers')
-    log.setLevel('INFO')
-    log.warning('Произвожу подготовку')
-    redis_cache = RedisCache()
+        return result_message
 
-    all_data = []
-    threads = []
-    log.warning('Начал работу')
+    @staticmethod
+    def run_delete_current(chat_id):
+        log = logging.getLogger('crowlers')
+        log.setLevel('INFO')
+        log.warning('Произвожу подготовку')
+        redis_cache = RedisCache()
 
-    for crowler in CROWLERS:
-        def target_function():
-            data, _ = crowler.run_crowl(redis_cache, chat_id)
-            log.warning(f'Закончил обработку {crowler.__name__.replace("Crowler", "")}')
-            all_data.extend(data)
+        all_data = []
+        threads = []
+        log.warning('Начал работу')
 
-        thread = threading.Thread(target=target_function)
-        threads.append(thread)
-        thread.start()
+        for crowler in CROWLERS:
 
-    for thread in threads:
-        thread.join()
+            def target_function():
+                data, _ = crowler.run_crowl(redis_cache, chat_id)
+                log.warning(f'Закончил обработку {crowler.__name__.replace("Crowler", "")}')
+                all_data.extend(data)
 
-    log.warning('Стираю найденные ссылки')
-    links = [i.link for i in all_data]
+            thread = threading.Thread(target=target_function)
+            threads.append(thread)
+            thread.start()
 
-    for link in links:
-        redis_cache.delete(link)
+        for thread in threads:
+            thread.join()
 
-    redis_cache.disconnect()
+        log.warning('Стираю найденные ссылки')
+        links = [i.link for i in all_data]
 
+        for link in links:
+            redis_cache.delete(link)
 
-def run_parser_for_bot(chat_id):
-    result_message = run_crowlers_threading(chat_id)
-    return result_message
+        redis_cache.disconnect()
 
-def run_delete_current_for_bot(chat_id):
-    run_delete_current(chat_id)
+    @classmethod
+    def run_tg_crowler(cls, chat_id):
+        log.warning('Произвожу подготовку')
+        redis_cache = RedisCache()
+        start_time = datetime.now()
+        pandas_xlsx_storage = PandasXLSXStorage(settings.FILE_NAME)
+        # google_storage = GoogleStorage(settings.GOOGLE_API_KEY)
+        google_storage = None
+
+        all_data = []
+        log.warning('Начал работу')
+
+        async def target_function():
+            service = TGCrowler(api_id=settings.API_ID, api_hash=settings.API_HASH)
+            data, _ = await service.run_crowl(redis_cache, chat_id)
+            log.warning(f'Закончил обработку TG')
+
+        asyncio.run(target_function())
+
+        log.warning('Стираю найденные ссылки')
+        links = [i.link for i in all_data]
+
+        for link in links:
+            redis_cache.delete(link)
+
+        log.warning('Сохраняю в файл и в гугл табличку')
+        new_data_len, google_link = cls.save_result(pandas_xlsx_storage, google_storage, all_data)
+        redis_cache.disconnect()
+        result_message = cls.get_result_message(start_time, new_data_len, google_link)
+
+        return result_message
+
+    @classmethod
+    def run_parser_for_bot(cls, chat_id):
+        result_message = cls.run_crowlers_threading(chat_id)
+        return result_message
+
+    @classmethod
+    def run_delete_current_for_bot(cls, chat_id):
+        cls.run_delete_current(chat_id)
+
+    @classmethod
+    def run_tg_for_bot(cls, chat_id):
+        return cls.run_tg_crowler(chat_id)
 
 
 if __name__ == '__main__':
-    run_delete_current_for_bot(1334928287)
-    # run_parser_for_bot(1334928287)
+    # CrowlersService.run_delete_current_for_bot(1334928287)
+    # CrowlersService.run_parser_for_bot(1334928287)
+    result_message = CrowlersService.run_tg_for_bot(1334928287)
+    print(result_message)

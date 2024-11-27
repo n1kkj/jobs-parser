@@ -13,7 +13,7 @@ from .twogis_crowler import (
     TwoGisDEVOPSCrowler,
     TwoGisPROJECTCrowler,
     TwoGisANCrowler,
-    TwoGisLEADCrowler
+    TwoGisLEADCrowler,
 )
 from .croc_crowler import CrocCrowler
 from .vk_crowler import VKCrowler

@@ -18,7 +18,12 @@ class HhCrowler(BaseJSONUrlCrowler):
     url_key = 'id'
     links_params = {'area': str, 'professional_role': list, 'page': int, 'per_page': int}
 
-    extra_kwargs = {'total_pages_path': 'pages', 'vacancies_path': 'items', 'vacancy_path': url_key, 'page_param': 'page'}
+    extra_kwargs = {
+        'total_pages_path': 'pages',
+        'vacancies_path': 'items',
+        'vacancy_path': url_key,
+        'page_param': 'page',
+    }
 
     link_parser = HhParser
 

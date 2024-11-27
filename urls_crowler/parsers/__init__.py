@@ -30,3 +30,4 @@ from .json_parsers import (
     DomrfParser,
     RosatomParser,
 )
+from .tg_parser import TGParser

@@ -56,7 +56,8 @@ class PandasXLSXStorage:
                 continue
             sheet_name = self._get_sheet_name(page_data)
             self.__file_data[sheet_name] = pd.concat(
-                [self.__file_data[sheet_name], self.extract_dataframe(self._get_columns(sheet_name), page_data)], ignore_index=True
+                [self.__file_data[sheet_name], self.extract_dataframe(self._get_columns(sheet_name), page_data)],
+                ignore_index=True,
             )
 
     def commit(self):

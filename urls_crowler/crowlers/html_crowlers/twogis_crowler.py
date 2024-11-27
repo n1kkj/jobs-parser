@@ -33,4 +33,3 @@ class TwoGisANCrowler(TwoGisBaseCrowler):
 
 class TwoGisLEADCrowler(TwoGisBaseCrowler):
     main_ulr = 'https://job.2gis.ru/team-management/'
-

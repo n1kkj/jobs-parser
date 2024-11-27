@@ -20,38 +20,7 @@ log = logging.getLogger('UrlParser')
 log.setLevel('INFO')
 
 
-class BaseUrlParser:
-    """
-    Base URL parser class
-    """
-
-    title_key = None
-    desc_key = None
-    salary_key = None
-    exp_key = None
-    city_key = None
-    employer_key = None
-    work_format_key = None
-
-    fixed_title = None
-    fixed_desc = None
-    fixed_salary = None
-    fixed_exp = None
-    fixed_city = None
-    fixed_employer = None
-    fixed_work_format = None
-
-    vacancies_list_key = None
-    vacancies_prefix = None
-    url_key = None
-
-    use_soup_desc = False
-    use_utf_8 = False
-
-    data_get_function = None
-
-    extra_kwargs = {}
-    result_dto = ParseResultDTO
+class BaseParser:
     manager_flags = (
         'опыт работы руководителем',
         'опыт управления',
@@ -76,73 +45,46 @@ class BaseUrlParser:
         (400_000, 1_000_000),
     ]
 
-    @staticmethod
-    def tuple_to_str(t):
-        """
-        Форматирует tuple в строку
-        """
-        return f'{t[0]} - {t[1]}'
+    title_key = None
+    desc_key = None
+    salary_key = None
+    exp_key = None
+    city_key = None
+    employer_key = None
+    work_format_key = None
 
     @classmethod
-    def determine_salary_range(cls, salary):
-        """
-        Определяет зарплатную вилку по зарплате
-        """
-        if not (salary and salary.isdigit()):
-            return salary
-        salary = int(salary)
-        for s_range in cls.salary_range:
-            if s_range[0] <= salary <= s_range[1]:
-                return cls.tuple_to_str(s_range)
-        return str(salary)
+    def tech_true(cls, text) -> bool:
+        for flag in cls.tech_flags:
+            if flag in text.lower():
+                return True
+        return False
 
     @classmethod
-    def determine_grade(cls, salary: int|str, exp: str):
-        """
-        Сопоставляет опыт с соответствующим грейдом
-        """
-        _grades = ['intern', 'junior', 'middle', 'senior', 'lead']
-        if salary and type(salary) is str and salary.lower() in _grades:
-            return salary
-        if type(exp) is str and (exp.lower() in _grades):
-            return exp
-        if type(exp) is str and (exp == 'Не найден'):
-            return 'junior'
-        if exp in ('0', '1'):
-            return 'junior'
-        elif exp in ('2', '3'):
-            return 'middle'
-        elif exp in ('4', '5', '6'):
-            return 'senior'
-        elif exp in ('7', '8', '9', '10'):
-            return 'lead'
-        else:
-            return ''
+    def manager_true(cls, text) -> bool:
+        for flag in cls.manager_flags:
+            if flag in text.lower():
+                return True
+        return False
 
     @staticmethod
-    def decode_text_latin(text: str) -> str:
-        """
-        Декодирует текст из latin_1 в ascii если необходимо
-        """
-        detected_encoding = chardet.detect(text.encode())['encoding']
-
-        if detected_encoding == 'ascii':
-            return text
-
-        try:
-            decoded_text = text.encode('latin_1').decode()
-            return decoded_text
-        except Exception:
-            return text
-
-    @staticmethod
-    def format_json(text: str):
+    def format_json(text: str) -> str:
         """Оставляет в тексте только русские слова через запятую из json"""
-        words = re.findall(r'\b[А-Яа-я]+\b', text)
+        words = re.findall(r'\b[А-Яа-яa-zA-Z]+\b', text)
         return ', '.join(words)
 
     @staticmethod
-    def find_skills(text):
+    def find_title(text) -> list:
+        """
+        Находит название профессии из списко в тексте
+        """
+        pattern = r'\b(' + '|'.join(re.escape(job) for job in job_titles) + r')\b'
+        jobs = re.findall(pattern, text, re.IGNORECASE)
+        jobs = [job.lower() for job in jobs]
+        return list(set(jobs))
+
+    @staticmethod
+    def find_skills(text) -> list:
         """
         Находит скилы из списко в тексте
         """
@@ -185,7 +127,7 @@ class BaseUrlParser:
         return raw_salary
 
     @staticmethod
-    def format_exp(text: str, exp: str):
+    def format_exp(text: str, exp: str) -> int | str:
         """
         Форматирует опыт, обрабатывает случаи без опыта и стандартными словами
         """
@@ -280,6 +222,49 @@ class BaseUrlParser:
             return most_frequent_directions[0].split('/')
         return 'Разработка', 'backend'
 
+    @staticmethod
+    def tuple_to_str(t) -> str:
+        """
+        Форматирует tuple в строку
+        """
+        return f'{t[0]} - {t[1]}'
+
+    @classmethod
+    def determine_salary_range(cls, salary) -> str:
+        """
+        Определяет зарплатную вилку по зарплате
+        """
+        if not (salary and salary.isdigit()):
+            return salary
+        salary = int(salary)
+        for s_range in cls.salary_range:
+            if s_range[0] <= salary <= s_range[1]:
+                return cls.tuple_to_str(s_range)
+        return str(salary)
+
+    @classmethod
+    def determine_grade(cls, salary: int | str, exp: str) -> str:
+        """
+        Сопоставляет опыт с соответствующим грейдом
+        """
+        _grades = ['intern', 'junior', 'middle', 'senior', 'lead']
+        if salary and type(salary) is str and salary.lower() in _grades:
+            return salary
+        if type(exp) is str and (exp.lower() in _grades):
+            return exp
+        if type(exp) is str and (exp == 'Не найден'):
+            return 'junior'
+        if exp in ('0', '1'):
+            return 'junior'
+        elif exp in ('2', '3'):
+            return 'middle'
+        elif exp in ('4', '5', '6'):
+            return 'senior'
+        elif exp in ('7', '8', '9', '10'):
+            return 'lead'
+        else:
+            return ''
+
     @classmethod
     def get_keys(cls) -> dict:
         return {
@@ -291,6 +276,48 @@ class BaseUrlParser:
             'employer': cls.employer_key,
             'work_format': cls.work_format_key,
         }
+
+
+class BaseUrlParser(BaseParser):
+    """
+    Base URL parser class
+    """
+
+    fixed_title = None
+    fixed_desc = None
+    fixed_salary = None
+    fixed_exp = None
+    fixed_city = None
+    fixed_employer = None
+    fixed_work_format = None
+
+    vacancies_list_key = None
+    vacancies_prefix = None
+    url_key = None
+
+    use_soup_desc = False
+    use_utf_8 = False
+
+    data_get_function = None
+
+    extra_kwargs = {}
+    result_dto = ParseResultDTO
+
+    @staticmethod
+    def decode_text_latin(text: str) -> str:
+        """
+        Декодирует текст из latin_1 в ascii если необходимо
+        """
+        detected_encoding = chardet.detect(text.encode())['encoding']
+
+        if detected_encoding == 'ascii':
+            return text
+
+        try:
+            decoded_text = text.encode('latin_1').decode()
+            return decoded_text
+        except Exception:
+            return text
 
     @classmethod
     def get_fixed(cls) -> dict:
@@ -309,20 +336,6 @@ class BaseUrlParser:
                 prepare_fixed[key] = value
         fixed = FixedValuesDTO(**prepare_fixed)
         return fixed.model_dump(exclude_unset=True)
-
-    @classmethod
-    def tech_true(cls, text):
-        for flag in cls.tech_flags:
-            if flag in text.lower():
-                return True
-        return False
-
-    @classmethod
-    def manager_true(cls, text):
-        for flag in cls.manager_flags:
-            if flag in text.lower():
-                return True
-        return False
 
     @classmethod
     def parse_all_links(cls, all_links, redis_cache, chat_id) -> (List[ParseResultDTO], List):

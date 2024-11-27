@@ -7,15 +7,16 @@ import telebot
 from starlette.applications import Starlette
 
 import settings
-from run_crowlers import run_parser_for_bot, main_add_permissions
+from run_crowlers import CrowlersService
 
 bot = telebot.TeleBot(settings.BOT_TOKEN)
 
 
 class YOParserBot:
-    def __init__(self):
+    def __init__(self, run_tg=False):
         self.last_message_id = None
         self.in_process = False
+        self.run_tg = run_tg
 
         self.status_messages = [
             'Бот не будет реагировать ни на какие сообщения пока обрабатывает вакансии.',
@@ -99,8 +100,11 @@ class YOParserBot:
             logging.error(f'Error while sending message: {e}')
             return
 
-        def run_parser_and_send_result():
-            result_message = run_parser_for_bot(chat_id)
+        async def run_parser_and_send_result():
+            if self.run_tg:
+                result_message = await CrowlersService.run_tg_for_bot(chat_id)
+            else:
+                result_message = CrowlersService.run_parser_for_bot(chat_id)
             self.set_progress(False)
             bot.send_document(chat_id, open(settings.FILE_NAME, 'rb'))
             bot.send_message(chat_id, self.make_message_from_data(result_message))
@@ -155,7 +159,7 @@ def add_permissions(update):
             bot.send_message(chat_id, 'Чую неладное, это точно email? Вызови команду снова')
             return
         try:
-            main_add_permissions(email)
+            CrowlersService.main_add_permissions(email)
             bot.send_message(chat_id, f'Разрешения для почты {email} добавлены!')
         except Exception as e:
             bot.send_message(chat_id, f'Возникла ошибка: {e}')
@@ -163,6 +167,15 @@ def add_permissions(update):
 
 @bot.message_handler(commands=['run_with_delete'])
 def run_with_delete(update):
+    chat_id = update.from_user.id
+    if chat_id not in users_running:
+        yo_instance = YOParserBot()
+        users_running.append(chat_id)
+        yo_instance.start_processing(chat_id, delete_all=True)
+
+
+@bot.message_handler(commands=['run_with_tg'])
+def run_with_tg(update):
     chat_id = update.from_user.id
     if chat_id not in users_running:
         yo_instance = YOParserBot()

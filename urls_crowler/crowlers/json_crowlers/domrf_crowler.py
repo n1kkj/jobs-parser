@@ -10,7 +10,13 @@ class DomrfCrowler(BaseJSONUrlCrowler):
     json_vacancies_path = 'vacancies'
     links_params = {}
     url_key = 'id'
-    extra_kwargs = {'vacancies_left_path': 'meta/left', 'vacancies_path': 'data', 'vacancy_path': url_key, 'vacancies_per_page': 10, 'page_param': 'page'}
+    extra_kwargs = {
+        'vacancies_left_path': 'meta/left',
+        'vacancies_path': 'data',
+        'vacancy_path': url_key,
+        'vacancies_per_page': 10,
+        'page_param': 'page',
+    }
 
     link_parser = DomrfParser
 

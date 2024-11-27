@@ -13,7 +13,6 @@ class RosatomCrowler(BaseHTMLUrlCrowler):
 
     link_parser = RosatomParser
 
-
     @classmethod
     def run_crowl(cls, redis_cache, chat_id, *args, **kwargs):
         results, all_links = cls.run_parse_all_links(redis_cache, chat_id, *args, **kwargs)

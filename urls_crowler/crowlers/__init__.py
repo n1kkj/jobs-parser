@@ -34,3 +34,4 @@ from .json_crowlers import (
     DomrfCrowler,
     RosatomCrowler,
 )
+from .tg_crowler import TGCrowler
