@@ -1,7 +1,7 @@
-import logging
 import re
 from typing import List, Optional
 
+import settings
 from urls_crowler.dto import ParseResultDTO
 from urls_crowler.parsers.base_url_parser import BaseParser
 
@@ -9,7 +9,7 @@ from urls_crowler.parsers.base_url_parser import BaseParser
 class TGParser(BaseParser):
     @staticmethod
     def get_salary(text: str) -> Optional[str]:
-        salary_pattern = r'З\\/П\s*от\s*\d+\s*до\s*\d+\s*(руб\\.|р\\.|р.)'
+        salary_pattern = r'З\\/П\s*от\s*\d+\s*до\s*\d+\s*(руб\\.|р\\.|р\\.|₽.)'
         return re.findall(salary_pattern, text)[0] if re.findall(salary_pattern, text) else None
 
     @classmethod
@@ -17,37 +17,27 @@ class TGParser(BaseParser):
         results = []
         all_links = []
         keys = cls.get_keys()
-        logging.warning(type(json_data))
 
         for channel in json_data:
-            logging.warning(json_data[channel])
             for message in json_data[channel]:
-                logging.warning(type(message))
-                logging.warning(message)
+                link = message.get('message_link', None)
+                all_links.append(link)
                 message_text = message.get('caption', None)
-                parse_result = cls.parse_message(message_text, '', keys)
-                if parse_result.profession != '':
-                    results.append(parse_result)
-
-        # for message in json_data:
-        #     link = message.get('message_link', None)
-        #     all_links.append(link)
-        #     message_text = message.get('caption', None)
-        #     cached_data = redis_cache.get(link)
-        #     if not cached_data:
-        #         parse_result = cls.parse_message(message_text, link, keys)
-        #         if parse_result.profession != '':
-        #             results.append(parse_result)
-        #             parse_result.users.append(chat_id)
-        #             parse_result.users = list(set(parse_result.users))
-        #             redis_cache.set(link, parse_result.model_dump_json())
-        #     else:
-        #         parse_result = ParseResultDTO.model_validate_json(cached_data)
-        #         if settings.INCLUDE_PREVIOUS >= (chat_id in parse_result.users):
-        #             results.append(parse_result)
-        #             parse_result.users.append(chat_id)
-        #             parse_result.users = list(set(parse_result.users))
-        #             redis_cache.set(link, parse_result.model_dump_json())
+                cached_data = redis_cache.get(link)
+                if not cached_data:
+                    parse_result = cls.parse_message(message_text, link, keys)
+                    if parse_result.profession != '':
+                        results.append(parse_result)
+                        parse_result.users.append(chat_id)
+                        parse_result.users = list(set(parse_result.users))
+                        redis_cache.set(link, parse_result.model_dump_json())
+                else:
+                    parse_result = ParseResultDTO.model_validate_json(cached_data)
+                    if settings.INCLUDE_PREVIOUS >= (chat_id in parse_result.users):
+                        results.append(parse_result)
+                        parse_result.users.append(chat_id)
+                        parse_result.users = list(set(parse_result.users))
+                        redis_cache.set(link, parse_result.model_dump_json())
 
         return results, all_links
 

@@ -53,45 +53,44 @@ class TGCrowler:
     async def __parse_content(self, donor_id: int, limit=50, data=None) -> dict:
         if data is None:
             data = {}
-        messages = self.client.get_chat_history(chat_id=donor_id, limit=limit)
-        messages = [message async for message in messages][::-1]
-        if str(donor_id) not in data.keys():
-            data[str(donor_id)] = []
+        try:
+            messages = self.client.get_chat_history(chat_id=donor_id, limit=limit)
+            messages = [message async for message in messages][::-1]
+            if str(donor_id) not in data.keys():
+                data[str(donor_id)] = []
+            with open('dates.json', 'r+') as dates_json:
+                dates = json.load(dates_json)
 
-        with open('dates.json', 'r+') as dates_json:
-            dates = json.load(dates_json)
-
-            for message in messages:
-                if int(datetime.datetime.strptime(str(message.date), '%Y-%m-%d %H:%M:%S').timestamp()) <= int(
-                    dates[str(donor_id)]['date']
-                ):
-                    continue
-
-                if message.caption_entities is not None:
-                    links = [
-                        msg.url
-                        for msg in message.caption_entities
-                        if msg.type == MessageEntityType.TEXT_LINK and 't.me' not in msg.url
-                    ]
-
-                else:
-                    links = []
-
-                if message.caption is None:
-                    if message.text is not None:
-                        txt = message.text
-                    else:
+                for message in messages:
+                    if int(datetime.datetime.strptime(str(message.date), '%Y-%m-%d %H:%M:%S').timestamp()) <= \
+                            int(dates[str(donor_id)]['date']):
                         continue
-                else:
-                    txt = message.caption
-                data[str(donor_id)].append({'caption': txt, 'links': links})
 
-                dates[str(donor_id)]['date'] = int(
-                    datetime.datetime.strptime(str(message.date), '%Y-%m-%d %H:%M:%S').timestamp()
-                )
+                    if message.caption_entities is not None:
+                        links = [msg.url for msg in message.caption_entities if
+                                 msg.type == MessageEntityType.TEXT_LINK and 't.me' not in msg.url]
 
-            dates_json.seek(0)
-            json.dump(dates, dates_json)
-            dates_json.truncate()
+                    else:
+                        links = []
+
+                    if message.caption is None:
+                        if message.text is not None:
+                            txt = message.text
+                        else:
+                            continue
+                    else:
+                        txt = message.caption
+
+                    data[str(donor_id)].append({'caption': txt, 'links': links,
+                                                'message_link': f"https://t.me/{message.chat.username}/{message.id}"})
+
+                    dates[str(donor_id)]['date'] = int(
+                        datetime.datetime.strptime(str(message.date), '%Y-%m-%d %H:%M:%S').timestamp())
+
+                dates_json.seek(0)
+                json.dump(dates, dates_json)
+                dates_json.truncate()
+        except Exception as e:
+            logging.warning(e)
 
         return data

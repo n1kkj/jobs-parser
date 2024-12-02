@@ -86,9 +86,8 @@ class CrowlersService:
     def save_result(pandas_xlsx_storage, google_storage, all_data):
         pandas_xlsx_storage.store_many(all_data)
         pandas_xlsx_storage.commit()
-        # new_data_len = google_storage.save_many_vacancies(all_data)
-        # google_link = google_storage.get_spreadsheet_link()
-        new_data_len, google_link = len(all_data), 'http'
+        new_data_len = google_storage.save_many_vacancies(all_data)
+        google_link = google_storage.get_spreadsheet_link()
         return new_data_len, google_link
 
     @staticmethod
@@ -192,8 +191,7 @@ class CrowlersService:
         redis_cache = RedisCache()
         start_time = datetime.now()
         pandas_xlsx_storage = PandasXLSXStorage(settings.FILE_NAME)
-        # google_storage = GoogleStorage(settings.GOOGLE_API_KEY)
-        google_storage = None
+        google_storage = GoogleStorage(settings.GOOGLE_API_KEY, is_tg=True)
 
         all_data = []
         log.warning('Начал работу')
@@ -201,6 +199,7 @@ class CrowlersService:
         async def target_function():
             service = TGCrowler(api_id=settings.API_ID, api_hash=settings.API_HASH)
             data, _ = await service.run_crowl(redis_cache, chat_id)
+            all_data.extend(data)
             log.warning(f'Закончил обработку TG')
 
         asyncio.run(target_function())

@@ -29,13 +29,14 @@ class GoogleStorage:
         'c.abdrazakov@youroffer.ru',
     ]
 
-    def __init__(self, api_file):
+    def __init__(self, api_file, is_tg=False):
         self.sheet_service = None
 
         self.credentials = None
         self.httpAuth = None
         self.service = None
         self.spreadsheet_id = None
+        self.is_tg = is_tg
 
         self.auth(api_file)
         self.get_settings_spreadsheet()
@@ -98,6 +99,8 @@ class GoogleStorage:
         self.spreadsheet_id = settings.GOOGLE_SPREADSHEET_ID
         if not settings.INCLUDE_PREVIOUS:
             self.spreadsheet_id = settings.GOOGLE_SPREADSHEET_ID_VACANCIES
+        if self.is_tg:
+            self.spreadsheet_id = settings.GOOGLE_SPREADSHEET_ID_TG
 
     def add_permissions(self, permissions):
         self.service = apiclient.discovery.build('drive', 'v3', http=self.httpAuth)

@@ -178,7 +178,7 @@ def run_with_delete(update):
 def run_with_tg(update):
     chat_id = update.from_user.id
     if chat_id not in users_running:
-        yo_instance = YOParserBot()
+        yo_instance = YOParserBot(run_tg=True)
         users_running.append(chat_id)
         yo_instance.start_processing(chat_id, delete_all=True)
 
