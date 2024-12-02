@@ -1,3 +1,4 @@
+import asyncio
 import logging
 import re
 import threading
@@ -109,10 +110,9 @@ class YOParserBot:
             bot.send_document(chat_id, open(settings.FILE_NAME, 'rb'))
             bot.send_message(chat_id, self.make_message_from_data(result_message))
 
-        parser_thread = threading.Thread(target=run_parser_and_send_result)
+        asyncio.run(run_parser_and_send_result())
         settings.INCLUDE_PREVIOUS = include_previous
         settings.DELETE_ALL = delete_all
-        parser_thread.start()
 
         while self.get_progress():
             time.sleep(3)
@@ -122,8 +122,6 @@ class YOParserBot:
         users_running.remove(chat_id)
         settings.INCLUDE_PREVIOUS = False
         settings.DELETE_ALL = False
-
-        parser_thread.join()
 
 
 users_running = []
