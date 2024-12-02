@@ -18,6 +18,7 @@ class YOParserBot:
         self.last_message_id = None
         self.in_process = False
         self.run_tg = run_tg
+        self.asyncio_loop = None
 
         self.status_messages = [
             'Бот не будет реагировать ни на какие сообщения пока обрабатывает вакансии.',
@@ -110,7 +111,7 @@ class YOParserBot:
             bot.send_document(chat_id, open(settings.FILE_NAME, 'rb'))
             bot.send_message(chat_id, self.make_message_from_data(result_message))
 
-        asyncio.run(run_parser_and_send_result())
+        self.asyncio_loop.call_soon_threadsafe(run_parser_and_send_result)
         settings.INCLUDE_PREVIOUS = include_previous
         settings.DELETE_ALL = delete_all
 
@@ -178,7 +179,8 @@ def run_with_tg(update):
     if chat_id not in users_running:
         yo_instance = YOParserBot(run_tg=True)
         users_running.append(chat_id)
-        yo_instance.start_processing(chat_id, delete_all=True)
+        yo_instance.asyncio_loop = asyncio.new_event_loop()
+        yo_instance.asyncio_loop.run_until_complete(yo_instance.start_processing(chat_id, delete_all=True))
 
 
 def _run_bot():
