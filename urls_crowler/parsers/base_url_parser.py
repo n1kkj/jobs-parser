@@ -173,17 +173,20 @@ class BaseParser:
         match = re.search(r'опыт|experience', text, re.IGNORECASE)
 
         # Если нашли, то находим цифру в этом предложении
-        if match:
-            sentence = text[match.start() : text.find(r'[\.\,\;\-\:]', match.start(), re.IGNORECASE)]
-            found_exp = re.search(r'\s\d+(\s|-)', sentence)
-            if found_exp:
-                found_str = found_exp.group(0)
-                found_str = found_str.replace('-', '')
-                found_exp = int(found_str)
-                if found_exp > 6:
+        try:
+            if match:
+                sentence = text[match.start() : text.find(r'[\.\,\;\-\:]', match.start(), re.IGNORECASE)]
+                found_exp = re.search(r'\s\d+(\s|-)', sentence)
+                if found_exp:
+                    found_str = found_exp.group(0)
+                    found_str = found_str.replace('-', '')
+                    found_exp = int(found_str)
+                    if found_exp > 6:
+                        found_exp = -2
+                else:
                     found_exp = -2
-            else:
-                found_exp = -2
+        except Exception as e:
+            logging.warning(e)
         # Если найденный опыт больше предыдущего, то возвращаем новый
         if found_exp > prev_exp:
             return str(found_exp)
