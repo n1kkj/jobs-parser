@@ -102,18 +102,22 @@ class YOParserBot:
             logging.error(f'Error while sending message: {e}')
             return
 
-        async def run_parser_and_send_result():
-            if self.run_tg:
-                result_message = await CrowlersService.run_tg_for_bot(chat_id)
-            else:
-                result_message = CrowlersService.run_parser_for_bot(chat_id)
+        if self.run_tg:
+            result_message = asyncio.run(CrowlersService.run_tg_for_bot(chat_id))
+            bot.send_document(chat_id, open(settings.FILE_NAME, 'rb'))
+            bot.send_message(chat_id, self.make_message_from_data(result_message))
+            return
+
+        def run_parser_and_send_result():
+            result_message = CrowlersService.run_parser_for_bot(chat_id)
             self.set_progress(False)
             bot.send_document(chat_id, open(settings.FILE_NAME, 'rb'))
             bot.send_message(chat_id, self.make_message_from_data(result_message))
 
-        self.asyncio_loop.call_soon_threadsafe(run_parser_and_send_result)
+        parser_thread = threading.Thread(target=run_parser_and_send_result)
         settings.INCLUDE_PREVIOUS = include_previous
         settings.DELETE_ALL = delete_all
+        parser_thread.start()
 
         while self.get_progress():
             time.sleep(3)
@@ -123,6 +127,8 @@ class YOParserBot:
         users_running.remove(chat_id)
         settings.INCLUDE_PREVIOUS = False
         settings.DELETE_ALL = False
+
+        parser_thread.join()
 
 
 users_running = []
@@ -179,8 +185,7 @@ def run_with_tg(update):
     if chat_id not in users_running:
         yo_instance = YOParserBot(run_tg=True)
         users_running.append(chat_id)
-        yo_instance.asyncio_loop = asyncio.new_event_loop()
-        yo_instance.asyncio_loop.run_until_complete(yo_instance.start_processing(chat_id, delete_all=True))
+        yo_instance.start_processing(chat_id)
 
 
 def _run_bot():

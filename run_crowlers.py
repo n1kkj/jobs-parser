@@ -186,7 +186,7 @@ class CrowlersService:
         redis_cache.disconnect()
 
     @classmethod
-    def run_tg_crowler(cls, chat_id):
+    async def run_tg_crowler(cls, chat_id):
         log.warning('Произвожу подготовку')
         redis_cache = RedisCache()
         start_time = datetime.now()
@@ -196,13 +196,10 @@ class CrowlersService:
         all_data = []
         log.warning('Начал работу')
 
-        async def target_function():
-            service = TGCrowler(api_id=settings.API_ID, api_hash=settings.API_HASH)
-            data, _ = await service.run_crowl(redis_cache, chat_id)
-            all_data.extend(data)
-            log.warning(f'Закончил обработку TG')
-
-        asyncio.run(target_function())
+        service = TGCrowler(api_id=settings.API_ID, api_hash=settings.API_HASH)
+        data, _ = await service.run_crowl(redis_cache, chat_id)
+        all_data.extend(data)
+        log.warning(f'Закончил обработку TG')
 
         log.warning('Стираю найденные ссылки')
         links = [i.link for i in all_data]
@@ -227,8 +224,8 @@ class CrowlersService:
         cls.run_delete_current(chat_id)
 
     @classmethod
-    def run_tg_for_bot(cls, chat_id):
-        return cls.run_tg_crowler(chat_id)
+    async def run_tg_for_bot(cls, chat_id):
+        return await cls.run_tg_crowler(chat_id)
 
 
 if __name__ == '__main__':
