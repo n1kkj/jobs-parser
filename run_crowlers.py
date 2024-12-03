@@ -201,11 +201,12 @@ class CrowlersService:
         all_data.extend(data)
         log.warning(f'Закончил обработку TG')
 
-        log.warning('Стираю найденные ссылки')
-        links = [i.link for i in all_data]
-
-        for link in links:
-            redis_cache.delete(link)
+        log.warning('Добавляю прошлые ссылки')
+        all_redis_links = redis_cache.get_all_keys()
+        for redis_link in all_redis_links:
+            if redis_link.startswith('https://t.me/'):
+                data = redis_cache.get(redis_link)
+                all_data.append(data)
 
         log.warning('Сохраняю в файл и в гугл табличку')
         new_data_len, google_link = cls.save_result(pandas_xlsx_storage, google_storage, all_data)

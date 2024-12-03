@@ -104,6 +104,7 @@ class YOParserBot:
 
         if self.run_tg:
             result_message = asyncio.run(CrowlersService.run_tg_for_bot(chat_id))
+            self.set_progress(False)
             bot.send_document(chat_id, open(settings.FILE_NAME, 'rb'))
             bot.send_message(chat_id, self.make_message_from_data(result_message))
             return
