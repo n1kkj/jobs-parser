@@ -20,12 +20,12 @@ class ChooseBtn(CallbackData, prefix = 'any'):
 code_bot = Bot(token=settings.CODE_BOT_TOKEN)
 
 
-async def set_commands(_bot: Bot):
+async def set_commands():
     commands = [
         BotCommand(command='/start', description='Информация о боте'),
         BotCommand(command='/check', description='Узнать статус работы бота')
     ]
-    await _bot.set_my_commands(commands=commands)
+    await code_bot.set_my_commands(commands=commands)
 
 
 class BotManager:
