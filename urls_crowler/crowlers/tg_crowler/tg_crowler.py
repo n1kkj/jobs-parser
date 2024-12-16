@@ -1,3 +1,4 @@
+import asyncio
 import logging
 
 from pyrogram import Client
@@ -12,12 +13,42 @@ log = logging.getLogger('ClientTelegramMaster')
 
 
 class TGCrowler:
-    def __init__(self, api_id, api_hash):
-        self.client = Client(name='Session', api_id=api_id, api_hash=api_hash)
+    def __init__(self, api_id, api_hash, phone_number, bot_token):
+        self.client = Client(name='Session', api_id=api_id, api_hash=api_hash, phone_number=phone_number)
+        self.phone_number = phone_number
+        self.bot_token = bot_token
         self.parser = TGParser
 
     async def start_session(self):
-        await self.client.start()
+
+        if not (await self.client.connect()):
+            phone_hash = (await self.client.send_code(phone_number=self.phone_number)).phone_code_hash
+            while not self.client.is_initialized:
+
+                code = ''
+                while code == '':
+                    try:
+                        with open('bot_manager/auth_code.json', 'r+') as code_json:
+                            code = json.load(code_json)['code']
+
+                    except Exception as e:
+                        print(str(e))
+                        await asyncio.sleep(5)
+                try:
+                    if code != 'error':
+                        await self.client.sign_in(phone_number=self.phone_number, phone_code_hash=phone_hash,
+                                                  phone_code=code)
+
+                        return
+                except Exception as e:
+                    print(str(e))
+                    with open('bot_manager/auth_code.json', 'w') as code_json:
+                        code_json.seek(0)
+                        json.dump({'code': 'error'}, code_json)
+                        code_json.truncate()
+                    await asyncio.sleep(27)
+                await asyncio.sleep(3)
+            await self.client.start()
 
     async def stop_session(self):
         await self.client.stop()

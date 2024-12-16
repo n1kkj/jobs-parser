@@ -196,7 +196,12 @@ class CrowlersService:
         all_data = []
         log.warning('Начал работу')
 
-        service = TGCrowler(api_id=settings.API_ID, api_hash=settings.API_HASH)
+        service = TGCrowler(
+            api_id=settings.API_ID,
+            api_hash=settings.API_HASH,
+            phone_number='79939098119',
+            bot_token=settings.CODE_BOT_TOKEN,
+        )
         data, _ = await service.run_crowl(redis_cache, chat_id)
         all_data.extend(data)
         log.warning(f'Закончил обработку TG')
