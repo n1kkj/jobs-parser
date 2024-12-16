@@ -41,7 +41,7 @@ class BotManager:
     @staticmethod
     @dp.message(Command(commands='check'))
     async def process_check_status(message: Message):
-        with open('auth_code.json', 'r') as code_json:
+        with open('auth_code.json', 'x+') as code_json:
             data = json.load(code_json)
 
             if data['code'] == 'error':
