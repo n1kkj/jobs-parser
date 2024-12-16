@@ -41,7 +41,7 @@ from urls_crowler.crowlers import (
 )
 from redis_cache import RedisCache
 from storages.pandas_storage import PandasXLSXStorage
-from urls_crowler.dto import ResultMessageDTO
+from urls_crowler.dto import ResultMessageDTO, ParseResultDTO
 
 CROWLERS = [
     AvitoCrowler,
@@ -210,8 +210,9 @@ class CrowlersService:
         all_redis_links = redis_cache.get_all_keys()
         for redis_link in all_redis_links:
             if redis_link.startswith('https://t.me/'):
-                data = redis_cache.get(redis_link)
-                all_data.append(data)
+                cached_data = redis_cache.get(redis_link)
+                parse_result = ParseResultDTO.model_validate_json(cached_data)
+                all_data.append(parse_result)
 
         log.warning('Сохраняю в файл и в гугл табличку')
         new_data_len, google_link = cls.save_result(pandas_xlsx_storage, google_storage, all_data)
