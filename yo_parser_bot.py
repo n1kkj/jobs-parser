@@ -1,10 +1,12 @@
 import asyncio
+import json
 import logging
 import re
 import threading
 import uvicorn
 import telebot
 from starlette.applications import Starlette
+from telebot import types
 
 import settings
 from run_crowlers import CrowlersService
@@ -174,6 +176,49 @@ def run_with_tg(update):
         yo_instance = YOParserBot(run_tg=True)
         users_running.append(chat_id)
         yo_instance.start_processing(chat_id)
+
+
+@bot.message_handler(commands=['check'])
+def process_check_status(message):
+    with open('auth_code.json', 'r') as code_json:
+        data = json.load(code_json)
+
+        if data.get('code') == 'error':
+            bot.send_message(message.chat.id, 'Статус авторизации: error')
+        else:
+            bot.send_message(message.chat.id, 'Ошибок при авторизации не обнаружено')
+
+
+@bot.message_handler(func=lambda msg: 'code:' in msg.text)
+def process_get_code(message):
+    global code
+    code = message.text.split(':')[1].strip()
+
+    markup = types.InlineKeyboardMarkup()
+    yes_button = types.InlineKeyboardButton(text='Да', callback_data='confirm_code_true')
+    no_button = types.InlineKeyboardButton(text='Нет', callback_data='confirm_code_false')
+    markup.add(yes_button, no_button)
+
+    bot.send_message(message.chat.id, f'{message.text}\n\nПравильно ли вы ввели код?', reply_markup=markup)
+
+
+@bot.callback_query_handler(func=lambda call: call.data in ['confirm_code_true', 'confirm_code_false'])
+def process_send_code(call):
+    global code
+    bot.delete_message(call.message.chat.id, call.message.message_id)
+
+    if call.data == 'confirm_code_true':
+        with open('auth_code.json', 'r+') as code_json:
+            try:
+                data = json.load(code_json)
+            except json.JSONDecodeError:
+                data = {}
+            data['code'] = code
+            code_json.seek(0)
+            json.dump(data, code_json)
+            code_json.truncate()
+    else:
+        bot.send_message(call.message.chat.id, 'Введите код снова')
 
 
 def _run_bot():
