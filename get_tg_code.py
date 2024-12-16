@@ -1,3 +1,5 @@
+import threading
+
 from aiogram import Bot, Dispatcher
 from aiogram.types import Message, InlineKeyboardButton, InlineKeyboardMarkup, CallbackQuery
 from aiogram.types import BotCommand
@@ -6,6 +8,7 @@ import json
 
 
 from aiogram.filters.callback_data import CallbackData
+from starlette.applications import Starlette
 
 import settings
 
@@ -77,7 +80,16 @@ class BotManager:
             await callback.message.answer(text='Введите код снова')
 
 
-if __name__ == '__main__':
+def _run_bot():
     manager = BotManager()
     manager.dp.startup.register(set_commands)
     manager.dp.run_polling(code_bot)
+
+
+def run_bot():
+    thread = threading.Thread(target=_run_bot)
+    thread.daemon = True
+    thread.start()
+
+
+code_app = Starlette(routes=[], on_startup=[run_bot], on_shutdown=[])

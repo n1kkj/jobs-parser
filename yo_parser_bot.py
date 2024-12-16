@@ -7,7 +7,6 @@ import telebot
 from starlette.applications import Starlette
 
 import settings
-from get_tg_code import BotManager, set_commands, code_bot
 from run_crowlers import CrowlersService
 
 bot = telebot.TeleBot(settings.BOT_TOKEN)
@@ -181,27 +180,17 @@ def _run_bot():
     bot.infinity_polling(timeout=25, long_polling_timeout=15)
 
 
-def _run_code_bot():
-    manager = BotManager()
-    manager.dp.startup.register(set_commands)
-    manager.dp.run_polling(code_bot)
-
-
-def run_bots():
-    main_bot_thread = threading.Thread(target=_run_bot)
-    code_bot_thread = threading.Thread(target=_run_code_bot)
-    main_bot_thread.daemon = True
-    code_bot_thread.daemon = True
-
-    main_bot_thread.start()
-    code_bot_thread.start()
+def run_bot():
+    thread = threading.Thread(target=_run_bot)
+    thread.daemon = True
+    thread.start()
 
 
 def stop_bot():
     bot.stop_polling()
 
 
-app = Starlette(routes=[], on_startup=[run_bots], on_shutdown=[stop_bot])
+app = Starlette(routes=[], on_startup=[run_bot], on_shutdown=[stop_bot])
 
 
 if __name__ == '__main__':
