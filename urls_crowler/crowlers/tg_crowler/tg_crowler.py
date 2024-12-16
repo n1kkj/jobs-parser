@@ -28,7 +28,7 @@ class TGCrowler:
                 code = ''
                 while code == '':
                     try:
-                        with open('bot_manager/auth_code.json', 'r+') as code_json:
+                        with open('auth_code.json', 'r+') as code_json:
                             code = json.load(code_json)['code']
 
                     except Exception as e:
@@ -42,7 +42,7 @@ class TGCrowler:
                         return
                 except Exception as e:
                     print(str(e))
-                    with open('bot_manager/auth_code.json', 'w') as code_json:
+                    with open('auth_code.json', 'w') as code_json:
                         code_json.seek(0)
                         json.dump({'code': 'error'}, code_json)
                         code_json.truncate()
