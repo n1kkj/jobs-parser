@@ -93,3 +93,6 @@ def run_bot():
 
 
 code_app = Starlette(routes=[], on_startup=[run_bot], on_shutdown=[])
+
+if __name__ == '__main__':
+    _run_bot()
