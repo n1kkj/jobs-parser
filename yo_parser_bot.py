@@ -2,12 +2,12 @@ import asyncio
 import logging
 import re
 import threading
-import time
 import uvicorn
 import telebot
 from starlette.applications import Starlette
 
 import settings
+from get_tg_code import BotManager, set_commands, code_bot
 from run_crowlers import CrowlersService
 
 bot = telebot.TeleBot(settings.BOT_TOKEN)
@@ -63,14 +63,6 @@ class YOParserBot:
         self.finish_message = 'Закончил обработку вакансий, надеюсь ты обрадуешься результату, жду тебя снова!'
         self.current_message_index = 0
 
-    def update_status(self, chat_id):
-        self.current_message_index = (self.current_message_index + 1) % len(self.status_messages)
-        message_text = self.status_messages[self.current_message_index]
-        try:
-            bot.edit_message_text(chat_id=chat_id, message_id=self.last_message_id, text=message_text)
-        except Exception:
-            return
-
     def finish_status(self, chat_id):
         self.current_message_index = (self.current_message_index + 1) % len(self.status_messages)
         try:
@@ -119,10 +111,6 @@ class YOParserBot:
         settings.INCLUDE_PREVIOUS = include_previous
         settings.DELETE_ALL = delete_all
         parser_thread.start()
-
-        while self.get_progress():
-            time.sleep(3)
-            self.update_status(chat_id)
 
         self.finish_status(chat_id)
         users_running.remove(chat_id)
@@ -193,17 +181,27 @@ def _run_bot():
     bot.infinity_polling(timeout=25, long_polling_timeout=15)
 
 
-def run_bot():
-    thread = threading.Thread(target=_run_bot)
-    thread.daemon = True
-    thread.start()
+def _run_code_bot():
+    manager = BotManager()
+    manager.dp.startup.register(set_commands)
+    manager.dp.run_polling(code_bot)
+
+
+def run_bots():
+    main_bot_thread = threading.Thread(target=_run_bot)
+    code_bot_thread = threading.Thread(target=_run_code_bot)
+    main_bot_thread.daemon = True
+    code_bot_thread.daemon = True
+
+    main_bot_thread.start()
+    code_bot_thread.start()
 
 
 def stop_bot():
     bot.stop_polling()
 
 
-app = Starlette(routes=[], on_startup=[run_bot], on_shutdown=[stop_bot])
+app = Starlette(routes=[], on_startup=[run_bots], on_shutdown=[stop_bot])
 
 
 if __name__ == '__main__':
