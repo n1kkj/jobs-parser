@@ -423,8 +423,11 @@ class BaseJSONUrlParser(BaseUrlParser):
                         res_value = cls.decode_text_latin(res_value)
 
                     if cls.use_soup_desc and key == 'desc':
-                        res_value = BeautifulSoup(res_value, 'html.parser').text
-                        res_value = res_value[:400]
+                        try:
+                            res_value = BeautifulSoup(res_value, 'html.parser').text
+                            res_value = res_value[:400]
+                        except Exception:
+                            res_value = ''
                     if key == 'salary':
                         res_value = cls.format_salary(res_value)
                         result_values['salary_range'] = cls.determine_salary_range(res_value)
@@ -513,8 +516,12 @@ class BaseHTMLUrlParser(BaseUrlParser):
         fixed_keys = fixed.keys()
         result_values = {}
 
-        soup = BeautifulSoup(data, 'html.parser')
-        soup_text = soup.text
+        try:
+            soup = BeautifulSoup(data, 'html.parser')
+            soup_text = soup.text
+        except Exception:
+            soup = ''
+            soup_text = ''
 
         if 'vseti' in link:
             soup_text = cls.decode_text_latin(soup_text)
