@@ -65,9 +65,9 @@ class YOParserBot:
         self.current_message_index = 0
 
     def finish_status(self, chat_id):
-        self.current_message_index = (self.current_message_index + 1) % len(self.status_messages)
+        # self.current_message_index = (self.current_message_index + 1) % len(self.status_messages)
         try:
-            bot.edit_message_text(chat_id=chat_id, message_id=self.last_message_id, text=self.finish_message)
+            bot.send_message(chat_id=chat_id, text=self.finish_message)
         except Exception:
             return
 
@@ -113,7 +113,6 @@ class YOParserBot:
         settings.DELETE_ALL = delete_all
         parser_thread.start()
 
-        self.finish_status(chat_id)
         users_running.remove(chat_id)
         settings.INCLUDE_PREVIOUS = False
         settings.DELETE_ALL = False
