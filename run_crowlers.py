@@ -134,9 +134,12 @@ class CrowlersService:
         for crowler in CROWLERS:
 
             def target_function():
-                data, _ = crowler.run_crowl(redis_cache, chat_id)
-                log.warning(f'Закончил обработку {crowler.__name__.replace("Crowler", "")}')
-                all_data.extend(data)
+                try:
+                    data, _ = crowler.run_crowl(redis_cache, chat_id)
+                    log.warning(f'Закончил обработку {crowler.__name__.replace("Crowler", "")}')
+                    all_data.extend(data)
+                except Exception:
+                    ...
 
             thread = threading.Thread(target=target_function)
             threads.append(thread)
