@@ -25,7 +25,10 @@ class TGParser(BaseParser):
                 message_text = message.get('caption', None)
                 cached_data = redis_cache.get(link)
                 if not cached_data:
-                    parse_result = cls.parse_message(message_text, link, keys)
+                    try:
+                        parse_result = cls.parse_message(message_text, link, keys)
+                    except Exception:
+                        parse_result = ParseResultDTO()
                     if parse_result.profession != '':
                         results.append(parse_result)
                         parse_result.users.append(chat_id)
