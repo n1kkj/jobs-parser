@@ -93,6 +93,10 @@ class YOParserBot:
             self.last_message_id = bot.send_message(chat_id, self.status_messages[0]).message_id
         except Exception as e:
             logging.error(f'Error while sending message: {e}')
+            try:
+                users_running.remove(chat_id)
+            except Exception:
+                return
             return
 
         if self.run_tg:
@@ -100,6 +104,10 @@ class YOParserBot:
             self.set_progress(False)
             bot.send_document(chat_id, open(settings.FILE_NAME, 'rb'))
             bot.send_message(chat_id, self.make_message_from_data(result_message))
+            try:
+                users_running.remove(chat_id)
+            except Exception:
+                return
             return
 
         def run_parser_and_send_result():
@@ -113,7 +121,11 @@ class YOParserBot:
         settings.DELETE_ALL = delete_all
         parser_thread.start()
 
-        users_running.remove(chat_id)
+        try:
+            users_running.remove(chat_id)
+        except Exception:
+            return
+
         settings.INCLUDE_PREVIOUS = False
         settings.DELETE_ALL = False
 
