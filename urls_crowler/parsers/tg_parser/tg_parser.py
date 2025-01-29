@@ -4,6 +4,7 @@ from typing import List, Optional
 import settings
 from urls_crowler.dto import ParseResultDTO
 from urls_crowler.parsers.base_url_parser import BaseParser
+from urls_crowler.utils.JOBS_TITLES import banned_words
 
 
 class TGParser(BaseParser):
@@ -51,7 +52,11 @@ class TGParser(BaseParser):
         skills = cls.find_skills(text)
         titles = cls.find_title(text)
         result_values['skills'] = ', '.join(skills)
-        result_values['title'] = ', '.join(titles)
+        result_values['title'] = ' '.join(titles)
+
+        for title in banned_words:
+            if title in text:
+                return ParseResultDTO()
 
         result_values['desc'] = text[:40]
 

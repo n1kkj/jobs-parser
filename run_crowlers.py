@@ -193,7 +193,7 @@ class CrowlersService:
         log.warning('Произвожу подготовку')
         redis_cache = RedisCache()
         start_time = datetime.now()
-        pandas_xlsx_storage = PandasXLSXStorage(settings.FILE_NAME)
+        pandas_xlsx_storage = PandasXLSXStorage(settings.FILE_NAME, is_tg=True)
         google_storage = GoogleStorage(settings.GOOGLE_API_KEY, is_tg=True)
 
         all_data = []

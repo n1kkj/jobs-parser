@@ -20,6 +20,12 @@ class GoogleStorage:
         'ML': FieldCompare.columns_ml,
         'Product Project': FieldCompare.columns_pr,
     }
+    tg_sheets = {
+        'Разработка': FieldCompare.columns_tg,
+        'Аналитика': FieldCompare.columns_tg,
+        'ML': FieldCompare.columns_tg,
+        'Product Project': FieldCompare.columns_tg,
+    }
     permissions = [
         'nikita.lakin.topka@gmail.com',
         'looandr02@gmail.com',
@@ -135,9 +141,12 @@ class GoogleStorage:
 
     def create_column_names(self, columns=None):
         sending_data = []
+        sheets = self.sheets
+        if self.is_tg:
+            sheets = self.tg_sheets
         for sheet_name in self.sheets.keys():
             if not columns:
-                _columns = self.sheets[sheet_name]
+                _columns = sheets[sheet_name]
             else:
                 _columns = columns
             sending_data.append(
@@ -159,8 +168,7 @@ class GoogleStorage:
         else:
             return 'Разработка'
 
-    @classmethod
-    def extract_dataframe(cls, data: list[ParseResultDTO]):
+    def extract_dataframe(self, data: list[ParseResultDTO]):
         sheets_data = {
             'Разработка': [],
             'Аналитика': [],
@@ -168,13 +176,16 @@ class GoogleStorage:
             'Product Project': [],
         }
         count = 0
+        sheets = self.sheets
+        if self.is_tg:
+            sheets = self.tg_sheets
         for page_data in data:
             if page_data.profession is None or page_data.profession == '':
                 continue
             count += 1
-            sheet_name = cls.get_sheet_name(page_data.direction)
+            sheet_name = self.get_sheet_name(page_data.direction)
             _data = []
-            for column in cls.sheets[sheet_name]:
+            for column in sheets[sheet_name]:
                 _data.append(FieldCompare.field_compare(column, page_data))
             sheets_data[sheet_name].append(_data)
         return sheets_data, count

@@ -52,6 +52,13 @@ class FieldCompare:
         'ЗП',
         'Ссылка',
     ]
+    columns_tg = [
+        'Должность',
+        'Поднаправление',
+        'Требуемый опыт',
+        'Стек',
+        'Ссылка',
+    ]
 
     @staticmethod
     def field_compare(column: str, page_data: ParseResultDTO):
