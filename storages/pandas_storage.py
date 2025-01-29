@@ -5,12 +5,15 @@ from urls_crowler.dto import ParseResultDTO
 
 
 class PandasXLSXStorage:
-    def __init__(self, file_name: str):
+    def __init__(self, file_name: str, is_tg: bool=False):
         self.__file_name = file_name
         self.__file_data = self.__initialize_file()
+        self.is_tg = is_tg
 
     @classmethod
-    def _get_columns(cls, sheet_name: str):
+    def _get_columns(cls, sheet_name: str, is_tg):
+        if is_tg:
+            return FieldCompare.columns_tg
         if sheet_name == 'Разработка':
             return FieldCompare.columns_dev
         elif sheet_name == 'Аналитика':
@@ -37,13 +40,20 @@ class PandasXLSXStorage:
             'ML': pd.DataFrame(columns=FieldCompare.columns_ml),
             'Product Project': pd.DataFrame(columns=FieldCompare.columns_pr),
         }
+        if self.is_tg:
+            sheets = {
+                'Разработка': pd.DataFrame(columns=FieldCompare.columns_tg),
+                'Аналитика': pd.DataFrame(columns=FieldCompare.columns_tg),
+                'ML': pd.DataFrame(columns=FieldCompare.columns_tg),
+                'Product Project': pd.DataFrame(columns=FieldCompare.columns_tg),
+            }
 
         with pd.ExcelWriter(self.__file_name, engine='xlsxwriter') as writer:
             for sheet_name, dataframe in sheets.items():
                 dataframe.to_excel(writer, sheet_name=sheet_name, index=False)
                 worksheet = writer.sheets[sheet_name]
 
-                for i, col in enumerate(self._get_columns(sheet_name)):
+                for i, col in enumerate(self._get_columns(sheet_name, self.is_tg)):
                     worksheet.set_column(i, i, len(col) + 2)
 
                 worksheet.freeze_panes = 'K1'
@@ -56,7 +66,7 @@ class PandasXLSXStorage:
                 continue
             sheet_name = self._get_sheet_name(page_data)
             self.__file_data[sheet_name] = pd.concat(
-                [self.__file_data[sheet_name], self.extract_dataframe(self._get_columns(sheet_name), page_data)],
+                [self.__file_data[sheet_name], self.extract_dataframe(self._get_columns(sheet_name, self.is_tg), page_data)],
                 ignore_index=True,
             )
 
