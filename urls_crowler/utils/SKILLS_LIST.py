@@ -139,6 +139,6 @@ skills_dict = {
     '#pm': 'Product Project/Project, Product Project/Project, Product Project/Project, Product Project/Project, Product Project/Project',
     '#project': 'Product Project/Project, Product Project/Project, Product Project/Project, Product Project/Project, Product Project/Project',
     'проджект': 'Product Project/Project, Product Project/Project, Product Project/Project, Product Project/Project, Product Project/Project',
-    'продукта': 'Product Project/Project, Product Project/Project, Product Project/Project, Product Project/Project, Product Project/Project',
+    'владелец': 'Product Project/Project, Product Project/Project, Product Project/Project, Product Project/Project, Product Project/Project',
     'delivery': 'Product Project/Project, Product Project/Project, Product Project/Project, Product Project/Project, Product Project/Project',
 }
