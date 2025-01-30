@@ -24,19 +24,6 @@ class GoogleStorage:
     ]
 
     def __init__(self, api_file, is_tg=False):
-        self.sheet_service = None
-
-        self.credentials = None
-        self.httpAuth = None
-        self.service = None
-        self.spreadsheet_id = None
-        self.is_tg = is_tg
-
-        self.auth(api_file)
-        self.get_settings_spreadsheet()
-        self.delete_all()
-        self.create_column_names()
-
         self.sheets = {
             'Разработка': FieldCompare.columns_dev,
             'Аналитика': FieldCompare.columns_an,
@@ -51,6 +38,18 @@ class GoogleStorage:
                 'ML': FieldCompare.columns_tg,
                 'Product Project': FieldCompare.columns_tg,
             }
+        self.sheet_service = None
+
+        self.credentials = None
+        self.httpAuth = None
+        self.service = None
+        self.spreadsheet_id = None
+        self.is_tg = is_tg
+
+        self.auth(api_file)
+        self.get_settings_spreadsheet()
+        self.delete_all()
+        self.create_column_names()
 
     def delete_all(self):
         self.create_column_names(['' for i in range(15)])
