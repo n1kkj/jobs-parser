@@ -7,8 +7,8 @@ from urls_crowler.dto import ParseResultDTO
 class PandasXLSXStorage:
     def __init__(self, file_name: str, is_tg: bool=False):
         self.__file_name = file_name
-        self.__file_data = self.__initialize_file()
         self.is_tg = is_tg
+        self.__file_data = self.__initialize_file()
 
     @classmethod
     def _get_columns(cls, sheet_name: str, is_tg):
