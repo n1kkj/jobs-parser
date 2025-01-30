@@ -48,6 +48,7 @@ class TGParser(BaseParser):
     @classmethod
     def parse_message(cls, text: str, link: str, keys: dict) -> ParseResultDTO:
         result_values = {}
+        text = text.lower()
 
         skills = cls.find_skills(text)
         titles = cls.find_title(text)
@@ -55,7 +56,7 @@ class TGParser(BaseParser):
         result_values['title'] = ' '.join(titles)
 
         for title in banned_words:
-            if title in text:
+            if title.lower() in text:
                 return ParseResultDTO()
 
         result_values['desc'] = text[:40]
