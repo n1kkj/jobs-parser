@@ -15,11 +15,11 @@ bot = telebot.TeleBot(settings.BOT_TOKEN)
 
 
 class YOParserBot:
-    def __init__(self, run_tg=False):
+    def __init__(self):
         self.last_message_id = None
         self.in_process = False
-        self.run_tg = run_tg
         self.asyncio_loop = None
+        self.users_running = []
 
         self.status_messages = [
             'Бот не будет реагировать ни на какие сообщения пока обрабатывает вакансии.',
@@ -86,28 +86,22 @@ class YOParserBot:
             f'Гугл сссылка: {result_message.google_link}'
         )
 
-    def start_processing(self, chat_id, include_previous=False, delete_all=False):
+    def start_processing(self, chat_id, include_previous=False, delete_all=False, run_tg=False):
         self.set_progress(True)
         try:
             bot.send_message(chat_id, self.start_message)
             self.last_message_id = bot.send_message(chat_id, self.status_messages[0]).message_id
         except Exception as e:
             logging.error(f'Error while sending message: {e}')
-            try:
-                users_running.remove(chat_id)
-            except Exception:
-                return
+            self.users_running = []
             return
 
-        if self.run_tg:
+        if run_tg:
             result_message = asyncio.run(CrowlersService.run_tg_for_bot(chat_id))
             self.set_progress(False)
             bot.send_document(chat_id, open(settings.FILE_NAME, 'rb'))
             bot.send_message(chat_id, self.make_message_from_data(result_message))
-            try:
-                users_running.remove(chat_id)
-            except Exception:
-                return
+            self.users_running = []
             return
 
         def run_parser_and_send_result():
@@ -121,10 +115,7 @@ class YOParserBot:
         settings.DELETE_ALL = delete_all
         parser_thread.start()
 
-        try:
-            users_running.remove(chat_id)
-        except Exception:
-            return
+        self.users_running = []
 
         settings.INCLUDE_PREVIOUS = False
         settings.DELETE_ALL = False
@@ -132,24 +123,22 @@ class YOParserBot:
         parser_thread.join()
 
 
-users_running = []
+yo_instance = YOParserBot()
 
 
 @bot.message_handler(commands=['vacancies'])
 def vacancies(update):
     chat_id = update.from_user.id
-    if chat_id not in users_running:
-        yo_instance = YOParserBot()
-        users_running.append(chat_id)
+    if chat_id not in yo_instance.users_running:
+        yo_instance.users_running.append(chat_id)
         yo_instance.start_processing(chat_id)
 
 
 @bot.message_handler(commands=['all_vacancies'])
 def all_vacancies(update):
     chat_id = update.from_user.id
-    if chat_id not in users_running:
-        yo_instance = YOParserBot()
-        users_running.append(chat_id)
+    if chat_id not in yo_instance.users_running:
+        yo_instance.users_running.append(chat_id)
         yo_instance.start_processing(chat_id, include_previous=True)
 
 
@@ -174,19 +163,17 @@ def add_permissions(update):
 @bot.message_handler(commands=['run_with_delete'])
 def run_with_delete(update):
     chat_id = update.from_user.id
-    if chat_id not in users_running:
-        yo_instance = YOParserBot()
-        users_running.append(chat_id)
+    if chat_id not in yo_instance.users_running:
+        yo_instance.users_running.append(chat_id)
         yo_instance.start_processing(chat_id, delete_all=True)
 
 
 @bot.message_handler(commands=['run_with_tg'])
 def run_with_tg(update):
     chat_id = update.from_user.id
-    if chat_id not in users_running:
-        yo_instance = YOParserBot(run_tg=True)
-        users_running.append(chat_id)
-        yo_instance.start_processing(chat_id)
+    if chat_id not in yo_instance.users_running:
+        yo_instance.users_running.append(chat_id)
+        yo_instance.start_processing(chat_id, run_tg=True)
 
 
 @bot.message_handler(commands=['check'])
