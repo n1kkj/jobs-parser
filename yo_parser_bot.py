@@ -19,7 +19,6 @@ class YOParserBot:
         self.last_message_id = None
         self.in_process = False
         self.asyncio_loop = None
-        self.users_running = []
 
         self.status_messages = [
             'Бот не будет реагировать ни на какие сообщения пока обрабатывает вакансии.',
@@ -65,7 +64,6 @@ class YOParserBot:
         self.current_message_index = 0
 
     def finish_status(self, chat_id):
-        # self.current_message_index = (self.current_message_index + 1) % len(self.status_messages)
         try:
             bot.send_message(chat_id=chat_id, text=self.finish_message)
         except Exception:
@@ -93,7 +91,6 @@ class YOParserBot:
             self.last_message_id = bot.send_message(chat_id, self.status_messages[0]).message_id
         except Exception as e:
             logging.error(f'Error while sending message: {e}')
-            self.users_running = []
             return
 
         if run_tg:
@@ -101,7 +98,6 @@ class YOParserBot:
             self.set_progress(False)
             bot.send_document(chat_id, open(settings.FILE_NAME, 'rb'))
             bot.send_message(chat_id, self.make_message_from_data(result_message))
-            self.users_running = []
             return
 
         def run_parser_and_send_result():
@@ -115,8 +111,6 @@ class YOParserBot:
         settings.DELETE_ALL = delete_all
         parser_thread.start()
 
-        self.users_running = []
-
         settings.INCLUDE_PREVIOUS = False
         settings.DELETE_ALL = False
 
@@ -129,17 +123,13 @@ yo_instance = YOParserBot()
 @bot.message_handler(commands=['vacancies'])
 def vacancies(update):
     chat_id = update.from_user.id
-    if chat_id not in yo_instance.users_running:
-        yo_instance.users_running.append(chat_id)
-        yo_instance.start_processing(chat_id)
+    yo_instance.start_processing(chat_id)
 
 
 @bot.message_handler(commands=['all_vacancies'])
 def all_vacancies(update):
     chat_id = update.from_user.id
-    if chat_id not in yo_instance.users_running:
-        yo_instance.users_running.append(chat_id)
-        yo_instance.start_processing(chat_id, include_previous=True)
+    yo_instance.start_processing(chat_id, include_previous=True)
 
 
 @bot.message_handler(commands=['add_permissions'])
@@ -163,17 +153,13 @@ def add_permissions(update):
 @bot.message_handler(commands=['run_with_delete'])
 def run_with_delete(update):
     chat_id = update.from_user.id
-    if chat_id not in yo_instance.users_running:
-        yo_instance.users_running.append(chat_id)
-        yo_instance.start_processing(chat_id, delete_all=True)
+    yo_instance.start_processing(chat_id, delete_all=True)
 
 
 @bot.message_handler(commands=['run_with_tg'])
 def run_with_tg(update):
     chat_id = update.from_user.id
-    if chat_id not in yo_instance.users_running:
-        yo_instance.users_running.append(chat_id)
-        yo_instance.start_processing(chat_id, run_tg=True)
+    yo_instance.start_processing(chat_id, run_tg=True)
 
 
 @bot.message_handler(commands=['check'])
